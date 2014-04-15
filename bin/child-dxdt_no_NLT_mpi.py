@@ -1,4 +1,4 @@
-#!	/home/ressick/local/bin/Python-2.7.3/python
+#!python_alias
 from mpi4py import MPI
 import numpy as np
 from network_flow import __dxmdt_no_NLT_mpi
