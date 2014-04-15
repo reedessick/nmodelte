@@ -1,5 +1,4 @@
-#!/usr/local/bin/python
-
+#!python_alias
 usage="""
 python nmode_l.py [--options] outfilename1 outfilename2
 

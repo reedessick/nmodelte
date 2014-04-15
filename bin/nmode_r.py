@@ -1,5 +1,4 @@
-#!/usr/local/bin/python
-
+#!python_alias
 usage="""an executable to remove modes from a network based on integration data. "r" is for "remove" """
 
 import sys, glob

@@ -1,5 +1,4 @@
-#!/usr/local/bin/python
-
+#!python_alias
 usage="""written to convert between variables and take ffts. "c" is for "conver" """
 
 import nmode_utils as nm_u

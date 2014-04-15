@@ -1,5 +1,4 @@
-#!/usr/local/bin/python
-
+#!python_alias
 usage="""an executable to compute and report summary/state information about a network using integration data. "s" is for "summary" """
 
 import sys

@@ -1,5 +1,4 @@
-#!/usr/local/bin/python
-
+#!python_alias
 usage="""an executable to generate integration data. "f" is for "fast integration" """
 
 import gc

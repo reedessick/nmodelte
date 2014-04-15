@@ -1,5 +1,4 @@
-#!/usr/local/bin/python
-
+#!python_alias
 usage="""an executable to load, interpret and plot integration data. "p" is for "plotting" """
 
 import numpy as np

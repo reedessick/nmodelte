@@ -1,5 +1,4 @@
-#!/usr/local/bin/python
-
+#!python_alias
 usage = "written to generate a large table with all pertinant ste data in it"
 
 from optparse import OptionParser
