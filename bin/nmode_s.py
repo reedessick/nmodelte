@@ -1,5 +1,4 @@
-#!/usr/local/bin/python
-
+#!	/home/ressick/local/bin/Python-2.7.3/python
 usage="""an executable to compute and report summary/state information about a network using integration data. "s" is for "summary" """
 
 import sys

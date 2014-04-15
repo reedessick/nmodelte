@@ -1,5 +1,4 @@
-#!/usr/local/bin/python
-
+#!	/home/ressick/local/bin/Python-2.7.3/python
 usage="""written to convert between variables and take ffts. "c" is for "conver" """
 
 import nmode_utils as nm_u

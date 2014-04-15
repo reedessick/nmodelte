@@ -1,5 +1,4 @@
-#!/usr/local/bin/python
-
+#!	/home/ressick/local/bin/Python-2.7.3/python
 usage="""an executable to grow networks by adding daughters. "b" is for "building" """
 
 import sys, glob, copy

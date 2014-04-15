@@ -1,5 +1,4 @@
-#!/usr/local/bin/python
-
+#!	/home/ressick/local/bin/Python-2.7.3/python
 usage="""an executable to load, interpret and plot integration data. "p" is for "plotting" """
 
 import numpy as np
