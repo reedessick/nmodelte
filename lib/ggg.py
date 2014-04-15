@@ -173,7 +173,107 @@ def all_possible_partners(mode1, mode2, min_w, max_w, alpha, c, wo):
   return modes
 
 ##################################################
-def collective_instability(triple, O, Nmin=0, Nmax=10000, alpha=4e-3, c=2e-10, wo=1e-5, k_hat=5e4, Eo=1e-16, verbose=False, min_l=False, max_l=False, min_n=False, max_n=False, min_absw=False, max_absw=False):
+def multiple_collective_instabilities(parent, O, Eo, maxp=1, Nmin=0, Nmax=10000, alpha=4e-3, c=2e-10, wo=1e-5, k_hat=5e4, verbose=False, min_l=False, max_l=False, min_n=False, max_n=False, min_absw=False, max_absw=False):
+  """
+  systematically searches for all allowed collectively unstable modes coupled to parent
+  """
+  if verbose:
+    import time
+
+  n,l,m,w,_ = parent.get_nlmwy()
+  P = 2*np.pi/w
+  sgnO = abs(O)/O
+
+  ### look for all allowed l1,m1,l2,m2 combinations
+  if verbose: 
+    print "looking for all allowed l1,m1,l2,m2 combinations"
+  starting_triples = []
+  l1 = min_l
+  while l1 <= max_l:
+    l2 = max(l1, abs(l-l1)) # start no lower than l1 to avoid redundant work
+    if (l+l1+l2)%2:
+      l2 += 1
+    max_l2 = min(max_l, l+l1)
+    while l2 <= max_l2:
+      m1 = max(-l1, -(m+l2)) 
+      max_m1 = min(l1, l2-m)
+      while m1 <= max_m1:
+        m2 = -(m+m1)
+        k = compute_kabc(l, m, l1, m1, l2, m2, k_hat=k_hat, P=P) # compute coupling
+
+        ### we approximate the detuning as perfect, in which case the 3mode Ethr is minimized when w1 = w2 = O/2
+        n1 = int(math.floor(abs(alpha*l1/O)))
+        n2 = int(math.ceil(abs(alpha*l2/O)))
+        if n1**3 * n2**3 < (n1+1)**3 * (n2-1)**3: # check whether we've got the floor/ceil correct
+          n1 += 1
+          n2 -= 1
+
+        d1 = gmodes.gmode(n1, l1, m1, alpha=alpha, c=c, wo=wo) # set up daughter modes
+        d1.w *= -sgnO
+        d2 = gmodes.gmode(n2, l2, m2, alpha=alpha, c=c, wo=wo)
+        d2.w *= -sgnO
+
+        starting_triples.append( (parent, d1, d2, k) ) # add starting point to list
+
+        m1 += 1
+      l2 += 2 # increment by 2 because l+l1+l2 must be event
+    l1 += 1
+
+  starting_triples.sort(key=lambda l: l[1].n + l[2].n) # sort by the sum of the daughter n's, which should capture the rough size of the parameter space searched?
+  if verbose:
+    print "\tfound %d starting points"%len(starting_triples)
+    tos = []
+  triples = []
+  Nmodes = 0
+  procs = []
+  for triple in starting_triples:
+    con1, con2 = mp.Pipe()
+    args = (triple, O, Nmin, Nmax, alpha, c, wo, k_hat, Eo, False, min_l, max_l, min_n, max_n, min_absw, max_absw, con2)
+    if verbose:
+      print "launching search for collective instability around\nparent\t: %s\ndaughter\t: %s\ndaughter\t: %s" % (triple[0].to_str_nlmwy(), triple[1].to_str_nlmwy(), triple[2].to_str_nlmwy())
+      tos.append( time.time() )
+
+    p = mp.Process(target=collective_instability, args=args)
+    procs.append((p, args, con1))
+    p.start()
+
+    if len(procs) >= maxp: # wait
+      p, p_args, con1 = procs.pop(0)
+      if verbose:
+        triple=p_args[0]
+        print "waiting for collective instability around\nparent\t: %s\ndaughter\t: %s\ndaughter\t: %s" % (triple[0].to_str_nlmwy(), triple[1].to_str_nlmwy(), triple[2].to_str_nlmwy())
+        to = tos.pop(0)
+
+      p.join()
+      if p.exitcode < 0:
+        sys.exit("\njob Failed! with status "+p.exitcode() )
+
+      new_triples, new_Nmodes = con1.recv()
+      triples += new_triples
+      Nmodes += new_Nmodes
+      if verbose: 
+        print "\tdone: %f seconds"%to
+
+  for p, p_args, con1 in procs: # wait for the rest of the jobs
+    if verbose:
+      triple=p_args[0]
+      print "waiting for collective instability around\nparent\t: %s\ndaughter\t: %s\ndaughter\t: %s" % (triple[0].to_str_nlmwy(), triple[1].to_str_nlmwy(), triple[2].to_str_nlmwy())
+      to = tos.pop(0)
+
+    p.join()
+    if p.exitcode < 0:
+      sys.exit("\njob Failed! with status "+p.exitcode() )
+
+    new_triples, new_Nmodes = con1.recv()
+    triples += new_triples
+    Nmodes += new_Nmodes
+    if verbose:
+      print "\tdone: %f seconds"%to
+
+  return triples, Nmodes
+
+##################################################
+def single_collective_instability(triple, O, Nmin=0, Nmax=10000, alpha=4e-3, c=2e-10, wo=1e-5, k_hat=5e4, Eo=1e-16, verbose=False, min_l=False, max_l=False, min_n=False, max_n=False, min_absw=False, max_absw=False, connection=None):
   """
   looks for and returns a list of triples that constitute a collectively unstable set of modes. We use as an approximate metric
     N**2 * Eo >= Ethr \\forall pairs with k_o12 != 0.0
@@ -384,7 +484,11 @@ def collective_instability(triple, O, Nmin=0, Nmax=10000, alpha=4e-3, c=2e-10, w
 #  print Nboarder1
 #  print Nboarder2
 
-  return triples, Nmodes
+  if connection:
+    connection.send( (triples, Nmodes) )
+    return True
+  else:
+    return triples, Nmodes
 
 #########################
 def __collective_metric( pk ):
