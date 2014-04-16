@@ -3,6 +3,7 @@ usage="""an executable to grow networks by adding daughters. "b" is for "buildin
 
 import sys, glob, copy
 import nmode_utils as nm_u
+import nmode_state as nm_s
 import prune_network as pn
 import numpy as np
 import mode_selection as ms
@@ -21,6 +22,8 @@ from optparse import *
 parser = OptionParser(usage=usage)
 
 parser.add_option("-v", "--verbose", default=False, action="store_true")
+
+parser.add_option("-F", "--outfilename", default=False, type="string", help="an integration output file used to compute Eo for collective daughter modes")
 
 parser.add_option("-l", "--logfilename", default=False, type="string", help="the log file containing a network you wish to manipulate.")
 parser.add_option("-L", "--new-logfilename", default=False, type="string", help="the log file into which the new network will be written. This should be a base on which the number of daughter modes will be added.")
@@ -71,6 +74,13 @@ if not opts.daughter_selection:
 
 num_pairs = sorted([int(l) for l in opts.num_pairs.split()])
 
+if opts.daughter_selection == "collective":
+  if not opts.outfilename:
+    opts.outfilename = raw_input("outfilename = ")
+  if len(num_pairs) > 1:
+    raise ValueError, "collective instabilities currently only support a single num-pair arguement."
+  num_pairs = num_pairs[:1]  
+
 ####################################################################################################
 #
 #
@@ -101,6 +111,12 @@ modes = pn.within_bandwidth_analytic(min_w, max_w, system)
 #modes = pn.within_bandwidth_maxPSD(freq, fq, min_w, max_w, system.network, Oorb=Oorb) # frequencies in "freq" are stored as f/forb
 #modes = pn.within_bandwidth_lorentzian(freq, fq, min_w, max_w, system.network, Oorb=Oorb)
 
+if opts.daughter_selection == "collective":
+  if opts.verbose: print "reading in integration data from %s and computing energies" % opts.outfilename
+#  E = [np.max(e) for e in nm_s.compute_E(nm_u.load_out(opts.outfilename)[1], Eo=1.0)]
+#  E = [np.min(e) for e in nm_s.compute_E(nm_u.load_out(opts.outfilename)[1], Eo=1.0)]
+  E = [np.mean(e) for e in nm_s.compute_E(nm_u.load_out(opts.outfilename)[1], Eo=1.0)]
+  
 new_systems = [copy.deepcopy(system) for npairs in num_pairs]
 
 # iterate over new parents
@@ -115,9 +131,13 @@ for n_m, (O, mode) in enumerate(modes):
   max_w = opts.daughter_max_frac_w*absO
 
   if opts.daughter_selection == "collective":
-    my_triples, Nmodes = ggg.multiple_collective_instabilities(mode, O, Eo, maxp=opts.maxp, Nmin=0, Nmax=10000, alpha=opts.alpha, c=opts.c, wo=wo, k_hat=opts.k_hat, verbose=opts.verbose, min_l=opts.daughter_min_l, max_l=opts.daughter_max_l, min_absw=min_w, max_absw=max_w)
+    modeNo = system.network.modeNoD[mode.get_nlms()]
+    ### identify mode number in current network
+    my_triples, Nmodes = ggg.multiple_collective_instabilities(mode, O, E[modeNo], maxp=opts.maxp, Nmin=0, Nmax=num_pairs[0], alpha=opts.alpha, c=opts.c, wo=wo, k_hat=opts.k_hat, verbose=opts.verbose, min_l=opts.daughter_min_l, max_l=opts.daughter_max_l, min_absw=min_w, max_absw=max_w)
     if opts.verbose: 
-      print "found %d Nmodes and %d triples" % (Nmodes, len(my_triples))
+      print "found %d triples" % (len(my_triples))
+    ### add triples to the network
+    new_systems[0].network.add_couplings(my_triples, opts.verbose)
 
   else: # 3mode selection criteria
     # parameters are set, we now call ggg.compute_pairs()
@@ -135,6 +155,9 @@ for n_m, (O, mode) in enumerate(modes):
       for ind, npairs in enumerate(num_pairs):
         if opts.verbose: print "grabbing %d triples" % npairs
         my_triples = my_coupling_list.to_triples(npairs, min_n=False, max_n=False, min_l=opts.daughter_min_l, max_l=opts.daughter_max_l, min_w=min_w, max_w=max_w, parent_forcing=opts.parent_forcing, daughter_forcing=opts.daughter_forcing, Mprim=Mprim, Mcomp=Mcomp, Porb=Porb, eccentricity=eccentricity)
+        ### add triples to the network
+        new_systems[ind].network.add_couplings(my_triples, opts.verbose)
+
 
     else:
       my_coupling_list = ggg.ggg_coupling_list(opts.alpha, opts.c, wo, opts.k_hat, parent_mode=mode).load_unsorted_mode_lists(opts.daughter_selection, useful_filenames, num_pairs=max(num_pairs), min_n=False, max_n=False, min_l=opts.daughter_min_l, max_l=opts.daughter_max_l, min_w=min_w, max_w=max_w).to_unique_couplings()
@@ -142,9 +165,8 @@ for n_m, (O, mode) in enumerate(modes):
       for ind, npairs in enumerate(num_pairs):
         if opts.verbose: print "grabbing %d triples" % npairs
         my_triples = my_coupling_list.to_triples(npairs, parent_forcing=opts.parent_forcing, daughter_forcing=opts.daughter_forcing, Mprim=Mprim, Mcomp=Mcomp, Porb=Porb, eccentricity=eccentricity)
-
-  ### add triples to the network
-  new_systems[ind].network.add_couplings(my_triples, opts.verbose)
+        ### add triples to the network
+        new_systems[ind].network.add_couplings(my_triples, opts.verbose)
 
 # write new network to disk
 for ind, npairs in enumerate(num_pairs):
