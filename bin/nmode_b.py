@@ -113,9 +113,9 @@ modes = pn.within_bandwidth_analytic(min_w, max_w, system)
 
 if opts.daughter_selection == "collective":
   if opts.verbose: print "reading in integration data from %s and computing energies" % opts.outfilename
-#  E = [np.max(e) for e in nm_s.compute_E(nm_u.load_out(opts.outfilename)[1], Eo=1.0)]
-#  E = [np.min(e) for e in nm_s.compute_E(nm_u.load_out(opts.outfilename)[1], Eo=1.0)]
-  E = [np.mean(e) for e in nm_s.compute_E(nm_u.load_out(opts.outfilename)[1], Eo=1.0)]
+#  E = [np.max(a)**2 for a in nm_s.compute_A(nm_u.load_out(opts.outfilename)[1], Eo=1.0)]
+#  E = [np.min(a)**2 for a in nm_s.compute_A(nm_u.load_out(opts.outfilename)[1], Eo=1.0)]
+  E = [np.mean(a)**2 for a in nm_s.compute_A(nm_u.load_out(opts.outfilename)[1], Eo=1.0)] # growth rate depends on amplitude, so that's what we should average (not energy)
   
 new_systems = [copy.deepcopy(system) for npairs in num_pairs]
 
@@ -133,7 +133,7 @@ for n_m, (O, mode) in enumerate(modes):
   if opts.daughter_selection == "collective":
     modeNo = system.network.modeNoD[mode.get_nlms()]
     ### identify mode number in current network
-    my_triples, Nmodes = ggg.multiple_collective_instabilities(mode, O, E[modeNo], maxp=opts.maxp, Nmin=0, Nmax=num_pairs[0], alpha=opts.alpha, c=opts.c, wo=wo, k_hat=opts.k_hat, verbose=opts.verbose, min_l=opts.daughter_min_l, max_l=opts.daughter_max_l, min_absw=min_w, max_absw=max_w)
+    my_triples = ggg.multiple_collective_instabilities(mode, O, E[modeNo], maxp=opts.maxp, Nmin=0, Nmax=num_pairs[0], alpha=opts.alpha, c=opts.c, wo=wo, k_hat=opts.k_hat, verbose=opts.verbose, min_l=opts.daughter_min_l, max_l=opts.daughter_max_l, min_absw=min_w, max_absw=max_w)
     if opts.verbose: 
       print "found %d triples" % (len(my_triples))
     ### add triples to the network

@@ -125,7 +125,7 @@ def compute_kabc(la, ma, lb, mb, lc, mc, k_hat=5e4, P=10*86400):
 
 #########################
 def compute_T(la,ma,lb,mb,lc,mc):
-  return float( (2*la+1)*(2*lb+2)*(2*lc+1) / (4*np.pi) )**0.5 * sympy.N( sympy_phys_wigner.wigner_3j(la,lb,lc,ma,mb,mc) * sympy_phys_wigner.wigner_3j(la,lb,lc,0,0,0) )
+  return float( ( (2*la+1)*(2*lb+2)*(2*lc+1) / (4*np.pi) )**0.5 * sympy.N( sympy_phys_wigner.wigner_3j(la,lb,lc,ma,mb,mc) * sympy_phys_wigner.wigner_3j(la,lb,lc,0,0,0) ) )
 
 ##################################################
 def renormalize_kabc(kabc, Pold, Pnew):
@@ -233,7 +233,7 @@ def multiple_collective_instabilities(parent, O, Eo, maxp=1, Nmin=0, Nmax=10000,
     print "\tfound %d starting points"%len(starting_triples)
     tos = []
   triples = []
-  Nmodes = 0
+#  Nmodes = 0
   procs = []
   for triple_ind, triple in enumerate(starting_triples):
     con1, con2 = mp.Pipe()
@@ -244,43 +244,49 @@ def multiple_collective_instabilities(parent, O, Eo, maxp=1, Nmin=0, Nmax=10000,
       tos.append( time.time() )
 
     p = mp.Process(target=single_collective_instability, args=args)
-    procs.append((p, args, con1))
     p.start()
+    con2.close() # this way the process is the only thing that can write to con2
+    procs.append((p, args, con1))
 
-    if len(procs) >= maxp: # wait
-      p, p_args, con1 = procs.pop(0)
+    while len(procs) >= maxp: # wait
+      for ind, (p, _, _) in enumerate(procs):
+        if not p.is_alive():
+          break
+      else:
+        continue
+      p, p_args, con1 = procs.pop(ind)
       if verbose:
-        triple=p_args[0]
-        print "waiting for collective instability around\n\tparent\t\t: %s\n\tdaughter\t: %s\n\tdaughter\t: %s" % (triple[0].to_str_nlmwy(), triple[1].to_str_nlmwy(), triple[2].to_str_nlmwy())
-        to = tos.pop(0)
+        triple = p_args[0]
+        print "receiving from collective instability around\n\tparent\t\t: %s\n\tdaughter\t: %s\n\tdaughter\t: %s" % (triple[0].to_str_nlmwy(), triple[1].to_str_nlmwy(), triple[2].to_str_nlmwy())
 
-      p.join()
       if p.exitcode < 0:
         sys.exit("\njob Failed! with status "+p.exitcode() )
 
-      new_triples, new_Nmodes = con1.recv()
+      new_triples, _ = con1.recv()
       triples += new_triples
-      Nmodes += new_Nmodes
-      if verbose: 
-        print "done: %f seconds\n\tfound %d triples" % (time.time()-to, len(new_triples))
+      if verbose:
+        print "done: %f seconds\n\tfound %d triples" % (time.time()-tos.pop(ind), len(new_triples))
 
-  for p, p_args, con1 in procs: # wait for the rest of the jobs
+  while len(procs):
+    for ind, (p, _, _) in enumerate(procs):
+      if not p.is_alive():
+        break
+    else:
+      continue
+    p, p_args, con1 = procs.pop(ind)
     if verbose:
       triple=p_args[0]
-      print "waiting for collective instability around\n\tparent\t\t: %s\n\tdaughter\t: %s\n\tdaughter\t: %s" % (triple[0].to_str_nlmwy(), triple[1].to_str_nlmwy(), triple[2].to_str_nlmwy())
-      to = tos.pop(0)
+      print "receiving from collective instability around\n\tparent\t\t: %s\n\tdaughter\t: %s\n\tdaughter\t: %s" % (triple[0].to_str_nlmwy(), triple[1].to_str_nlmwy(), triple[2].to_str_nlmwy())
 
-    p.join()
     if p.exitcode < 0:
       sys.exit("\njob Failed! with status "+p.exitcode() )
 
-    new_triples, new_Nmodes = con1.recv()
+    new_triples, _ = con1.recv()
     triples += new_triples
-    Nmodes += new_Nmodes
     if verbose:
-      print "done: %f seconds\n\tfound %d triples" % (time.time()-to, len(new_triples))
+      print "done: %f seconds\n\tfound %d triples" % (time.time()-tos.pop(ind), len(new_triples))
 
-  return triples, Nmodes
+  return triples
 
 ##################################################
 def single_collective_instability(triple, O, Nmin=0, Nmax=10000, alpha=4e-3, c=2e-10, wo=1e-5, k_hat=5e4, Eo=1e-16, verbose=False, min_l=False, max_l=False, min_n=False, max_n=False, min_absw=False, max_absw=False, connection=None):
@@ -1944,28 +1950,56 @@ def compute_pairs(metric, parent_mode, O, catalog_dir, min_l=1, max_l=100, min_w
       tos.append(time.time())
 
     p = mp.Process(target=metricD[metric], args=args)
-    procs.append((p, args))
     p.start()
+    procs.append((p, args))
 
-    if len(procs) >= maxp: # wait
-      p, p_args = procs.pop(0)
-      if verbose: print "WAITING for\n\tmetric=%s\n\targs=" % (metric), p_args[0].get_nlmwy(), p_args[1:]
+    while len(procs) >= maxp: # wait
+      for ind, (p, _) in enumerate(procs):
+        if not p.is_alive():
+          break
+      else:
+        continue
+      p, p_args = procs.pop(ind)
+      if verbose:
+        print "RECEIVING from\n\tmetric=%s\n\targs=" % (metric), p_args[0].get_nlmwy(), p_args[1:]
+        print "done: %f seconds" % (time.time()-tos.pop(ind))
 
-      p.join()
       if p.exitcode < 0:
-        sys.exit("\njob Failed!\n\tmetric=%s\n\targs=" % (metric), p_args[0].get_nlmwy(), p_args[1:], "\nexited with status "+p.exitcode() )
+        sys.exit("\njob Failed! with status "+p.exitcode() )
 
-      if verbose: 
-        print "\tdone: %f seconds" % (time.time()-tos.pop(0))
+  while len(procs):
+    for ind, (p, _, _) in enumerate(procs):
+      if not p.is_alive():
+        break
+    else:
+      continue
+    p, p_args = procs.pop(ind)
+    if verbose:
+      print "RECEIVING from\n\tmetric=%s\n\targs=" % (metric), p_args[0].get_nlmwy(), p_args[1:]
+      print "done: %f seconds" % (time.time()-tos.pop(ind))
 
-  for p, p_args in procs: # wait for the rest of the jobs
-    if verbose: print "WAITING for\n\tmetric=%s\n\targs=" % (metric), p_args[0].get_nlmwy(), p_args[1:]
-
-    p.join()
     if p.exitcode < 0:
-      sys.exit("\njob Failed!\n\tmetric=%s\n\targs=" % (metric), p_args[0].get_nlmwy(), p_args[1:], "\nexited with status "+p.exitcode() )
+      sys.exit("\njob Failed! with status "+p.exitcode() )
 
-    if verbose: print "\tdone: %f seconds" % (time.time()-tos.pop(0))
+#    if len(procs) >= maxp: # wait
+#      p, p_args = procs.pop(0)
+#      if verbose: print "WAITING for\n\tmetric=%s\n\targs=" % (metric), p_args[0].get_nlmwy(), p_args[1:]
+#
+#      p.join()
+#      if p.exitcode < 0:
+#        sys.exit("\njob Failed!\n\tmetric=%s\n\targs=" % (metric), p_args[0].get_nlmwy(), p_args[1:], "\nexited with status "+p.exitcode() )
+#
+#      if verbose: 
+#        print "\tdone: %f seconds" % (time.time()-tos.pop(0))
+#
+#  for p, p_args in procs: # wait for the rest of the jobs
+#    if verbose: print "WAITING for\n\tmetric=%s\n\targs=" % (metric), p_args[0].get_nlmwy(), p_args[1:]
+#
+#    p.join()
+#    if p.exitcode < 0:
+#      sys.exit("\njob Failed!\n\tmetric=%s\n\targs=" % (metric), p_args[0].get_nlmwy(), p_args[1:], "\nexited with status "+p.exitcode() )
+#
+#    if verbose: print "\tdone: %f seconds" % (time.time()-tos.pop(0))
 
   if max_num_pairs >= 0: # max_num_pairs is a non-negative number ==> we attempt to downsample the new_filename
     from clean_catalogs import clean
