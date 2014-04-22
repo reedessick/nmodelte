@@ -3,6 +3,7 @@ usage="""an executable to grow networks by adding daughters. "b" is for "buildin
 
 import sys, glob, copy
 import nmode_utils as nm_u
+import nmode_state as nm_s
 import prune_network as pn
 import numpy as np
 import mode_selection as ms
@@ -22,6 +23,8 @@ parser = OptionParser(usage=usage)
 
 parser.add_option("-v", "--verbose", default=False, action="store_true")
 
+parser.add_option("-F", "--outfilename", default=False, type="string", help="an integration output file used to compute Eo for collective daughter modes")
+
 parser.add_option("-l", "--logfilename", default=False, type="string", help="the log file containing a network you wish to manipulate.")
 parser.add_option("-L", "--new-logfilename", default=False, type="string", help="the log file into which the new network will be written. This should be a base on which the number of daughter modes will be added.")
 
@@ -39,7 +42,7 @@ parser.add_option("", "--k-hat", default=5e4, type="float", help="k_hat for 3mod
 parser.add_option("", "--daughter-min-frac-Oorb", default=-2.0, type="float", help="the minimum fraction of the orbital frequency above which we define \"new parents\"")
 parser.add_option("", "--daughter-max-frac-Oorb", default= 2.0, type="float", help="the maximum fraction fo the orbital frequency below which we define \"new parents\"")
 
-parser.add_option("", "--daughter-selection", default=False, type="string", help="the daughter selection method used: [Ethr, heuristic, min_Ethr, min_heuristic]")
+parser.add_option("", "--daughter-selection", default=False, type="string", help="the daughter selection method used: [Ethr, heuristic, min_Ethr, min_heuristic, collective]")
 parser.add_option("", "--num-pairs", default="1", type="string", help="the number of couplings to add to a network. For multiple values, supply a space-delimited string")
 parser.add_option("", "--daughter-min-l", default=1, type="int", help="the minimum angular momentum quantum number for daughter modes.")
 parser.add_option("", "--daughter-max-l", default=4, type="int", help="the maximum angular momentum quantum number for daughter modes.")
@@ -71,6 +74,13 @@ if not opts.daughter_selection:
 
 num_pairs = sorted([int(l) for l in opts.num_pairs.split()])
 
+if opts.daughter_selection == "collective":
+  if not opts.outfilename:
+    opts.outfilename = raw_input("outfilename = ")
+  if len(num_pairs) > 1:
+    raise ValueError, "collective instabilities currently only support a single num-pair arguement."
+  num_pairs = num_pairs[:1]  
+
 ####################################################################################################
 #
 #
@@ -101,6 +111,12 @@ modes = pn.within_bandwidth_analytic(min_w, max_w, system)
 #modes = pn.within_bandwidth_maxPSD(freq, fq, min_w, max_w, system.network, Oorb=Oorb) # frequencies in "freq" are stored as f/forb
 #modes = pn.within_bandwidth_lorentzian(freq, fq, min_w, max_w, system.network, Oorb=Oorb)
 
+if opts.daughter_selection == "collective":
+  if opts.verbose: print "reading in integration data from %s and computing energies" % opts.outfilename
+#  E = [np.max(a)**2 for a in nm_s.compute_A(nm_u.load_out(opts.outfilename)[1], Eo=1.0)]
+#  E = [np.min(a)**2 for a in nm_s.compute_A(nm_u.load_out(opts.outfilename)[1], Eo=1.0)]
+  E = [np.mean(a)**2 for a in nm_s.compute_A(nm_u.load_out(opts.outfilename)[1], Eo=1.0)] # growth rate depends on amplitude, so that's what we should average (not energy)
+  
 new_systems = [copy.deepcopy(system) for npairs in num_pairs]
 
 # iterate over new parents
@@ -114,34 +130,43 @@ for n_m, (O, mode) in enumerate(modes):
   min_w = opts.daughter_min_frac_w*absO
   max_w = opts.daughter_max_frac_w*absO
 
-  # parameters are set, we now call ggg.compute_pairs()
-  useful_filenames = ggg.compute_pairs(opts.daughter_selection, mode, O, opts.catalog_dir, min_l=opts.daughter_min_l, max_l=opts.daughter_max_l, min_w=min_w, max_w=max_w, alpha=opts.alpha, c=opts.c, wo=wo, k_hat=opts.k_hat, Emax=opts.Emax, maxp=opts.maxp, verbose=opts.verbose, max_num_pairs=opts.max_num_pairs)
+  if opts.daughter_selection == "collective":
+    modeNo = system.network.modeNoD[mode.get_nlms()]
+    ### identify mode number in current network
+    my_triples = ggg.multiple_collective_instabilities(mode, O, E[modeNo], maxp=opts.maxp, Nmin=0, Nmax=num_pairs[0], alpha=opts.alpha, c=opts.c, wo=wo, k_hat=opts.k_hat, verbose=opts.verbose, min_l=opts.daughter_min_l, max_l=opts.daughter_max_l, min_absw=min_w, max_absw=max_w)
+    if opts.verbose: 
+      print "found %d triples" % (len(my_triples))
+    ### add triples to the network
+    new_systems[0].network.add_couplings(my_triples, opts.verbose)
 
-  # read in data from the useful_filenames
-  if opts.verbose: 
-    print "reading in %d couplings from:" % max(num_pairs)
-    for filename in useful_filenames:
-      print "\t%s" % filename
+  else: # 3mode selection criteria
+    # parameters are set, we now call ggg.compute_pairs()
+    useful_filenames = ggg.compute_pairs(opts.daughter_selection, mode, O, opts.catalog_dir, min_l=opts.daughter_min_l, max_l=opts.daughter_max_l, min_w=min_w, max_w=max_w, alpha=opts.alpha, c=opts.c, wo=wo, k_hat=opts.k_hat, Emax=opts.Emax, maxp=opts.maxp, verbose=opts.verbose, max_num_pairs=opts.max_num_pairs)
+
+    # read in data from the useful_filenames
+    if opts.verbose: 
+      print "reading in %d couplings from:" % max(num_pairs)
+      for filename in useful_filenames:
+        print "\t%s" % filename
   
-  if "min_" == opts.daughter_selection[0:4]:
-    my_coupling_list = ggg.ggg_minima_coupling_list(opts.alpha, opts.c, wo, opts.k_hat, parent_mode=mode).load_unsorted_mode_lists(opts.daughter_selection, useful_filenames, min_n=False, max_n=False, min_l=opts.daughter_min_l, max_l=opts.daughter_max_l, min_w=min_w, max_w=max_w).to_unique_couplings()
+    if "min_" == opts.daughter_selection[0:4]:
+      my_coupling_list = ggg.ggg_minima_coupling_list(opts.alpha, opts.c, wo, opts.k_hat, parent_mode=mode).load_unsorted_mode_lists(opts.daughter_selection, useful_filenames, min_n=False, max_n=False, min_l=opts.daughter_min_l, max_l=opts.daughter_max_l, min_w=min_w, max_w=max_w).to_unique_couplings()
 
-    for ind, npairs in enumerate(num_pairs):
-      if opts.verbose: print "grabbing %d triples" % npairs
+      for ind, npairs in enumerate(num_pairs):
+        if opts.verbose: print "grabbing %d triples" % npairs
+        my_triples = my_coupling_list.to_triples(npairs, min_n=False, max_n=False, min_l=opts.daughter_min_l, max_l=opts.daughter_max_l, min_w=min_w, max_w=max_w, parent_forcing=opts.parent_forcing, daughter_forcing=opts.daughter_forcing, Mprim=Mprim, Mcomp=Mcomp, Porb=Porb, eccentricity=eccentricity)
+        ### add triples to the network
+        new_systems[ind].network.add_couplings(my_triples, opts.verbose)
 
-      my_triples = my_coupling_list.to_triples(npairs, min_n=False, max_n=False, min_l=opts.daughter_min_l, max_l=opts.daughter_max_l, min_w=min_w, max_w=max_w, parent_forcing=opts.parent_forcing, daughter_forcing=opts.daughter_forcing, Mprim=Mprim, Mcomp=Mcomp, Porb=Porb, eccentricity=eccentricity)
-      ### add triples to the network
-      new_systems[ind].network.add_couplings(my_triples, opts.verbose)
 
-  else:
-    my_coupling_list = ggg.ggg_coupling_list(opts.alpha, opts.c, wo, opts.k_hat, parent_mode=mode).load_unsorted_mode_lists(opts.daughter_selection, useful_filenames, num_pairs=max(num_pairs), min_n=False, max_n=False, min_l=opts.daughter_min_l, max_l=opts.daughter_max_l, min_w=min_w, max_w=max_w).to_unique_couplings()
+    else:
+      my_coupling_list = ggg.ggg_coupling_list(opts.alpha, opts.c, wo, opts.k_hat, parent_mode=mode).load_unsorted_mode_lists(opts.daughter_selection, useful_filenames, num_pairs=max(num_pairs), min_n=False, max_n=False, min_l=opts.daughter_min_l, max_l=opts.daughter_max_l, min_w=min_w, max_w=max_w).to_unique_couplings()
 
-    for ind, npairs in enumerate(num_pairs):
-      if opts.verbose: print "grabbing %d triples" % npairs
-
-      my_triples = my_coupling_list.to_triples(npairs, parent_forcing=opts.parent_forcing, daughter_forcing=opts.daughter_forcing, Mprim=Mprim, Mcomp=Mcomp, Porb=Porb, eccentricity=eccentricity)
-      ### add triples to the network
-      new_systems[ind].network.add_couplings(my_triples, opts.verbose)
+      for ind, npairs in enumerate(num_pairs):
+        if opts.verbose: print "grabbing %d triples" % npairs
+        my_triples = my_coupling_list.to_triples(npairs, parent_forcing=opts.parent_forcing, daughter_forcing=opts.daughter_forcing, Mprim=Mprim, Mcomp=Mcomp, Porb=Porb, eccentricity=eccentricity)
+        ### add triples to the network
+        new_systems[ind].network.add_couplings(my_triples, opts.verbose)
 
 # write new network to disk
 for ind, npairs in enumerate(num_pairs):
@@ -153,7 +178,5 @@ for ind, npairs in enumerate(num_pairs):
 
   if opts.verbose: print "writing newtork to %s" % new_logfilename
   nm_u.write_log(new_logfilename, new_systems[ind])
-
-
 
 

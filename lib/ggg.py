@@ -125,7 +125,7 @@ def compute_kabc(la, ma, lb, mb, lc, mc, k_hat=5e4, P=10*86400):
 
 #########################
 def compute_T(la,ma,lb,mb,lc,mc):
-  return float( (2*la+1)*(2*lb+2)*(2*lc+1) / (4*np.pi) )**0.5 * sympy.N( sympy_phys_wigner.wigner_3j(la,lb,lc,ma,mb,mc) * sympy_phys_wigner.wigner_3j(la,lb,lc,0,0,0) )
+  return float( ( (2*la+1)*(2*lb+2)*(2*lc+1) / (4*np.pi) )**0.5 * sympy.N( sympy_phys_wigner.wigner_3j(la,lb,lc,ma,mb,mc) * sympy_phys_wigner.wigner_3j(la,lb,lc,0,0,0) ) )
 
 ##################################################
 def renormalize_kabc(kabc, Pold, Pnew):
@@ -173,7 +173,123 @@ def all_possible_partners(mode1, mode2, min_w, max_w, alpha, c, wo):
   return modes
 
 ##################################################
-def collective_instability(triple, O, Nmin=0, Nmax=10000, alpha=4e-3, c=2e-10, wo=1e-5, k_hat=5e4, Eo=1e-16, verbose=False, min_l=False, max_l=False, min_n=False, max_n=False, min_absw=False, max_absw=False):
+def multiple_collective_instabilities(parent, O, Eo, maxp=1, Nmin=0, Nmax=10000, alpha=4e-3, c=2e-10, wo=1e-5, k_hat=5e4, verbose=False, min_l=False, max_l=False, min_n=False, max_n=False, min_absw=False, max_absw=False):
+  """
+  systematically searches for all allowed collectively unstable modes coupled to parent
+  """
+  if verbose:
+    import time
+
+  n,l,m,w,_ = parent.get_nlmwy()
+  P = 2*np.pi/w
+  sgnO = abs(O)/O
+
+  ### look for all allowed l1,m1,l2,m2 combinations
+  if verbose: 
+    print "looking for all allowed l1,m1,l2,m2 combinations"
+  starting_triples = []
+  l1 = min_l
+  while l1 <= max_l:
+    l2 = max(l1, abs(l-l1)) # start no lower than l1 to avoid redundant work
+    if (l+l1+l2)%2:
+      l2 += 1
+    max_l2 = min(max_l, l+l1)
+    while l2 <= max_l2:
+      ### we approximate the detuning as perfect, in which case the 3mode Ethr is minimized when w1 = w2 = O/2
+      n1 = int(math.floor(abs(2*alpha*l1/O)))
+      n2 = int(math.ceil(abs(2*alpha*l2/O)))
+      if n1**3 * n2**3 < (n1+1)**3 * (n2-1)**3: # check whether we've got the floor/ceil correct
+        n1 += 1
+        n2 -= 1
+
+      m1 = max(-l1, -(m+l2)) 
+      if (l1 == l2): # avoid duplicate work
+        if (m == 0):
+          max_m1 = 0
+        elif (m > 0):
+          max_m1 = -1
+        else: # mo < 0
+          max_m1 = min(l1, l2-m)
+          m1 = 1 # avoid duplicate pairs
+      else:
+        max_m1 = min(l1, l2-m)
+      while m1 <= max_m1:
+        m2 = -(m+m1)
+        k = compute_kabc(l, m, l1, m1, l2, m2, k_hat=k_hat, P=P) # compute coupling
+
+        d1 = gm.gmode(n1, l1, m1, alpha=alpha, c=c, wo=wo) # set up daughter modes
+        d1.w *= -sgnO
+        d2 = gm.gmode(n2, l2, m2, alpha=alpha, c=c, wo=wo)
+        d2.w *= -sgnO
+
+        starting_triples.append( (parent, d1, d2, k) ) # add starting point to list
+
+        m1 += 1
+      l2 += 2 # increment by 2 because l+l1+l2 must be event
+    l1 += 1
+
+  starting_triples.sort(key=lambda l: l[1].n + l[2].n) # sort by the sum of the daughter n's, which should capture the rough size of the parameter space searched?
+  if verbose:
+    print "\tfound %d starting points"%len(starting_triples)
+    tos = []
+  triples = []
+#  Nmodes = 0
+  procs = []
+  for triple_ind, triple in enumerate(starting_triples):
+    con1, con2 = mp.Pipe()
+    new_filename = "single_collective_instability-%d.txt" % triple_ind
+    args = (triple, O, Nmin, Nmax, alpha, c, wo, k_hat, Eo, new_filename, min_l, max_l, min_n, max_n, min_absw, max_absw, con2)
+    if verbose:
+      print "launching search for collective instability : %s\n\tNmin\t: %d\n\tNmax\t: %d\n\tparent\t\t: %s\n\tdaughter\t: %s\n\tdaughter\t: %s" % (new_filename, Nmin, Nmax, triple[0].to_str_nlmwy(), triple[1].to_str_nlmwy(), triple[2].to_str_nlmwy())
+      tos.append( time.time() )
+
+    p = mp.Process(target=single_collective_instability, args=args)
+    p.start()
+    con2.close() # this way the process is the only thing that can write to con2
+    procs.append((p, args, con1))
+
+    while len(procs) >= maxp: # wait
+      for ind, (p, _, _) in enumerate(procs):
+        if not p.is_alive():
+          break
+      else:
+        continue
+      p, p_args, con1 = procs.pop(ind)
+      if verbose:
+        triple = p_args[0]
+        print "receiving from collective instability around\n\tparent\t\t: %s\n\tdaughter\t: %s\n\tdaughter\t: %s" % (triple[0].to_str_nlmwy(), triple[1].to_str_nlmwy(), triple[2].to_str_nlmwy())
+
+      if p.exitcode < 0:
+        sys.exit("\njob Failed! with status "+p.exitcode() )
+
+      new_triples, _ = con1.recv()
+      triples += new_triples
+      if verbose:
+        print "done: %f seconds\n\tfound %d triples" % (time.time()-tos.pop(ind), len(new_triples))
+
+  while len(procs):
+    for ind, (p, _, _) in enumerate(procs):
+      if not p.is_alive():
+        break
+    else:
+      continue
+    p, p_args, con1 = procs.pop(ind)
+    if verbose:
+      triple=p_args[0]
+      print "receiving from collective instability around\n\tparent\t\t: %s\n\tdaughter\t: %s\n\tdaughter\t: %s" % (triple[0].to_str_nlmwy(), triple[1].to_str_nlmwy(), triple[2].to_str_nlmwy())
+
+    if p.exitcode < 0:
+      sys.exit("\njob Failed! with status "+p.exitcode() )
+
+    new_triples, _ = con1.recv()
+    triples += new_triples
+    if verbose:
+      print "done: %f seconds\n\tfound %d triples" % (time.time()-tos.pop(ind), len(new_triples))
+
+  return triples
+
+##################################################
+def single_collective_instability(triple, O, Nmin=0, Nmax=10000, alpha=4e-3, c=2e-10, wo=1e-5, k_hat=5e4, Eo=1e-16, verbose=False, min_l=False, max_l=False, min_n=False, max_n=False, min_absw=False, max_absw=False, connection=None):
   """
   looks for and returns a list of triples that constitute a collectively unstable set of modes. We use as an approximate metric
     N**2 * Eo >= Ethr \\forall pairs with k_o12 != 0.0
@@ -181,6 +297,13 @@ def collective_instability(triple, O, Nmin=0, Nmax=10000, alpha=4e-3, c=2e-10, w
 
   returns list of triples compatible with network.add_couplings
   """
+  verbose_file = isinstance(verbose, str)
+  if verbose_file:
+    stdout = open(verbose, "w")
+  else:
+    import sys
+    stdout = sys.stdout
+
   from collections import defaultdict
 
   absO = abs(O)
@@ -190,7 +313,7 @@ def collective_instability(triple, O, Nmin=0, Nmax=10000, alpha=4e-3, c=2e-10, w
   triples = []
 
   # determine which mode in triple is the parent
-  if verbose: print "determining which mode is the parent, setting up included objects, computing initial metric"
+  if verbose: print >> stdout, "determining which mode is the parent, setting up included objects, computing initial metric"
   modes = [(abs(mode.w), mode) for mode in triple[:3]]
   modes.sort(key=lambda l: l[0], reverse=True) # largest w first
   parent, child1, child2 = [mode for _, mode in modes]
@@ -219,28 +342,35 @@ def collective_instability(triple, O, Nmin=0, Nmax=10000, alpha=4e-3, c=2e-10, w
 
   # define boarder sets
   ### boarder around child 1
-  if verbose: print "setting up boarder1"
+  if verbose: print >> stdout, "setting up boarder1"
   boarder1 = defaultdict( set )
   boarder_modes1 = []
   __extend_boarder(child1, boarder1, boarder_modes1, included1, included_nlm2, included_modes2, alpha, c, wo, k_hat, sgnO, absO, nlmo, Ts, min_l=min_l, max_l=max_l, min_n=min_n, max_n=max_n, min_absw=min_absw, max_absw=max_absw) # delegate extension of boarder
 
   ### boarder around child2
-  if verbose: print "setting up boarder2"
+  if verbose: print >> stdout, "setting up boarder2"
   boarder2 = defaultdict( set )
   boarder_modes2 = []
   __extend_boarder(child2, boarder2, boarder_modes2, included2, included_nlm1, included_modes1, alpha, c, wo, k_hat, sgnO, absO, nlmo, Ts, min_l=min_l, max_l=max_l, min_n=min_n, max_n=max_n, min_absw=min_absw, max_absw=max_absw) 
 
-  metric = min(boarder_modes1[0][0], boarder_modes2[0][0])
-  include_first_triple = starting_metric <= Eo
-  if include_first_triple:
-    metric = starting_metric
-    triples.append(triple)
-
   ### iterate and include modes into collectively unstable set
-  if verbose: print "iterating to fill out included"
+  if verbose: print >> stdout, "iterating to fill out included"
   Nmodes = len(included_nlm) # we always start off with 2 modes in the network
   Nboarder1 = len(boarder_modes1)
   Nboarder2 = len(boarder_modes2)
+
+  if (Nboarder1==0) and (Nboarder2==0):
+    metric = np.infty
+  elif Nboarder1==0:
+    metric = boarder_modes2[0][0]
+  elif Nboarder2==0:
+    metric = boarder_modes1[0][0]
+  else:
+    metric = min(boarder_modes1[0][0], boarder_modes2[0][0])
+  include_first_triple = (starting_metric <= Eo)
+  if include_first_triple:
+    metric = starting_metric
+    triples.append(triple)
 
   while (Nmodes < Nmax) and ((Nboarder1 > 0) or (Nboarder2 > 0)): 
     
@@ -306,7 +436,7 @@ def collective_instability(triple, O, Nmin=0, Nmax=10000, alpha=4e-3, c=2e-10, w
     # determine whether we need to add a mode      
     if (judge >= this_metric): # condtions under which we add the mode
 
-      if verbose: print "adding %s" % this_mode.to_str_nlmwy(tuple=True), "\n\tEo = ", judge, " > ", this_metric, " = this_metric"
+      if verbose: print >> stdout, "adding %s" % this_mode.to_str_nlmwy(tuple=True), "\n\tEo = ", judge, " > ", this_metric, " = this_metric"
 
       metric = max(this_metric, metric) # we've included this mode so we update the set's metric
 
@@ -331,16 +461,16 @@ def collective_instability(triple, O, Nmin=0, Nmax=10000, alpha=4e-3, c=2e-10, w
       __extend_boarder(this_mode, this_boarder, this_boarder_modes, this_included, other_included_nlm, other_included_modes, alpha, c, wo, k_hat, sgnO, absO, nlmo, Ts, min_l=min_l, max_l=max_l, min_n=min_n, max_n=max_n, min_absw=min_absw, max_absw=max_absw)
 
     else: # we don't add the mode. So, we extend both boarders in hope of finding more modes
-      if verbose: print "no satisfactory mode found.\nextending boarder1. Nboarder1 = ", Nboarder1
+      if verbose: print >> stdout, "no satisfactory mode found.\nextending boarder1. Nboarder1 = ", Nboarder1
       for ind in range(Nboarder1):
         __extend_boarder(boarder_modes1[ind][1][0], boarder1, boarder_modes1, included1, included_nlm2, included_modes2, alpha, c, wo, k_hat, sgnO, absO, nlmo, Ts, min_l=min_l, max_l=max_l, min_n=min_n, max_n=max_n, min_absw=min_absw, max_absw=max_absw)
-      if verbose: print "extending boarder2. Nboarder2 = ", Nboarder2
+      if verbose: print >> stdout, "extending boarder2. Nboarder2 = ", Nboarder2
       for ind in range(Nboarder2):
         __extend_boarder(boarder_modes2[ind][1][0], boarder2, boarder_modes2, included2, included_nlm1, included_modes1, alpha, c, wo, k_hat, sgnO, absO, nlmo, Ts, min_l=min_l, max_l=max_l, min_n=min_n, max_n=max_n, min_absw=min_absw, max_absw=max_absw)
 
       if (Nboarder1 == len(boarder_modes1)) and (Nboarder2 == len(boarder_modes2)):
         if (Nmodes < Nmin):
-          if verbose: print "adding %s" % this_mode.to_str_nlmwy(tuple=True), "\n\tNmodes = %d < %d = Nmin" % (Nmodes, Nmin)
+          if verbose: print >> stdout, "adding %s" % this_mode.to_str_nlmwy(tuple=True), "\n\tNmodes = %d < %d = Nmin" % (Nmodes, Nmin)
           
           metric = max(this_metric, metric) # we've included this mode so we update the set's metric
 
@@ -365,26 +495,47 @@ def collective_instability(triple, O, Nmin=0, Nmax=10000, alpha=4e-3, c=2e-10, w
           __extend_boarder(this_mode, this_boarder, this_boarder_modes, this_included, other_included_nlm, other_included_modes, alpha, c, wo, k_hat, sgnO, absO, nlmo, Ts, min_l=min_l, max_l=max_l, min_n=min_n, max_n=max_n, min_absw=min_absw, max_absw=max_absw)
 
         else:
-          if verbose: print "no new boarder modes found. exiting loop"
+          if verbose: print >> stdout, "no new boarder modes found. exiting loop"
           break
 
     Nmodes = len(included_nlm)
     Nboarder1 = len(boarder_modes1)
     Nboarder2 = len(boarder_modes2)
 
+    if verbose_file:
+      stdout.flush()
+
   if verbose:
-    print "Nmodes = ", Nmodes, " > ", Nmin, "= Nmin"
+    print >> stdout, "Ntriples = ", len(triples)
+    print >> stdout, "Nmodes = ", Nmodes, " > ", Nmin, "= Nmin"
     if Nmodes >= Nmax:
-      print "Nmodes = ", Nmodes, " >= ", Nmax, "= Nmax"
+      print >> stdout, "Nmodes = ", Nmodes, " >= ", Nmax, "= Nmax"
     elif (Nboarder1 == 0) and (Nboarder2 == 0):
-      print "could not find any more allowed modes: Nboarder1 = Nboarder2 = 0"
+      print >> stdout, "could not find any more allowed modes: Nboarder1 = Nboarder2 = 0"
 
-#  print Nmin, Nmodes, Nmax
-#  print (Nmodes+1)**2 * Eo, metric
-#  print Nboarder1
-#  print Nboarder2
+#  print >> stdout, Nmin, Nmodes, Nmax
+#  print >> stdout, (Nmodes+1)**2 * Eo, metric
+#  print >> stdout, Nboarder1
+#  print >> stdout, Nboarder2
 
-  return triples, Nmodes
+  if connection:
+    if verbose:
+      print >> stdout, "sending triples"
+
+    connection.send( (triples, Nmodes) )
+
+    if verbose: 
+      print >> stdout, "triples sent"
+    if verbose_file:
+      stdout.close()
+
+    return True
+
+  else:
+    if verbose_file:
+      stdout.close()
+
+    return triples, Nmodes
 
 #########################
 def __collective_metric( pk ):
@@ -1799,28 +1950,56 @@ def compute_pairs(metric, parent_mode, O, catalog_dir, min_l=1, max_l=100, min_w
       tos.append(time.time())
 
     p = mp.Process(target=metricD[metric], args=args)
-    procs.append((p, args))
     p.start()
+    procs.append((p, args))
 
-    if len(procs) >= maxp: # wait
-      p, p_args = procs.pop(0)
-      if verbose: print "WAITING for\n\tmetric=%s\n\targs=" % (metric), p_args[0].get_nlmwy(), p_args[1:]
+    while len(procs) >= maxp: # wait
+      for ind, (p, _) in enumerate(procs):
+        if not p.is_alive():
+          break
+      else:
+        continue
+      p, p_args = procs.pop(ind)
+      if verbose:
+        print "RECEIVING from\n\tmetric=%s\n\targs=" % (metric), p_args[0].get_nlmwy(), p_args[1:]
+        print "done: %f seconds" % (time.time()-tos.pop(ind))
 
-      p.join()
       if p.exitcode < 0:
-        sys.exit("\njob Failed!\n\tmetric=%s\n\targs=" % (metric), p_args[0].get_nlmwy(), p_args[1:], "\nexited with status "+p.exitcode() )
+        sys.exit("\njob Failed! with status "+p.exitcode() )
 
-      if verbose: 
-        print "\tdone: %f seconds" % (time.time()-tos.pop(0))
+  while len(procs):
+    for ind, (p, _, _) in enumerate(procs):
+      if not p.is_alive():
+        break
+    else:
+      continue
+    p, p_args = procs.pop(ind)
+    if verbose:
+      print "RECEIVING from\n\tmetric=%s\n\targs=" % (metric), p_args[0].get_nlmwy(), p_args[1:]
+      print "done: %f seconds" % (time.time()-tos.pop(ind))
 
-  for p, p_args in procs: # wait for the rest of the jobs
-    if verbose: print "WAITING for\n\tmetric=%s\n\targs=" % (metric), p_args[0].get_nlmwy(), p_args[1:]
-
-    p.join()
     if p.exitcode < 0:
-      sys.exit("\njob Failed!\n\tmetric=%s\n\targs=" % (metric), p_args[0].get_nlmwy(), p_args[1:], "\nexited with status "+p.exitcode() )
+      sys.exit("\njob Failed! with status "+p.exitcode() )
 
-    if verbose: print "\tdone: %f seconds" % (time.time()-tos.pop(0))
+#    if len(procs) >= maxp: # wait
+#      p, p_args = procs.pop(0)
+#      if verbose: print "WAITING for\n\tmetric=%s\n\targs=" % (metric), p_args[0].get_nlmwy(), p_args[1:]
+#
+#      p.join()
+#      if p.exitcode < 0:
+#        sys.exit("\njob Failed!\n\tmetric=%s\n\targs=" % (metric), p_args[0].get_nlmwy(), p_args[1:], "\nexited with status "+p.exitcode() )
+#
+#      if verbose: 
+#        print "\tdone: %f seconds" % (time.time()-tos.pop(0))
+#
+#  for p, p_args in procs: # wait for the rest of the jobs
+#    if verbose: print "WAITING for\n\tmetric=%s\n\targs=" % (metric), p_args[0].get_nlmwy(), p_args[1:]
+#
+#    p.join()
+#    if p.exitcode < 0:
+#      sys.exit("\njob Failed!\n\tmetric=%s\n\targs=" % (metric), p_args[0].get_nlmwy(), p_args[1:], "\nexited with status "+p.exitcode() )
+#
+#    if verbose: print "\tdone: %f seconds" % (time.time()-tos.pop(0))
 
   if max_num_pairs >= 0: # max_num_pairs is a non-negative number ==> we attempt to downsample the new_filename
     from clean_catalogs import clean
