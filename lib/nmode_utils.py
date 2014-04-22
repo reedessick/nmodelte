@@ -257,7 +257,7 @@ def load_out(filename, tmin=False, tmax=False, downsample=False):
   return t_P, q, N_m
 
 ##################################################
-def load_log(filename):
+def load_log(filename, enforce_float=False):
   """
   loads system from pickled file
   """
@@ -289,6 +289,8 @@ def load_log(filename):
     network.modes.append( mode )
 
   network.K = pickle.load(f)
+  if enforce_float:
+    network.K = [ [(i,j,float(k)) for i,j,k in coup] for coup in network.K ]
   network._update()
 
   f.close()
@@ -298,7 +300,7 @@ def load_log(filename):
   return system
 
 ##################################################
-def write_log(filename, system):
+def write_log(filename, system, enforce_float=False):
   """
   writes system into pickled file
   """
@@ -311,6 +313,8 @@ def write_log(filename, system):
   pickle.dump(system.Rprim, f)
 
   pickle.dump([(m.into_tuple(), m.mode_type) for m in system.network.modes], f)
+  if enforce_float:
+    system.network.K = [ [(i,j,float(k)) for i,j,k in coup] for coup in system.network.K]
   pickle.dump(system.network.K, f)
 
   f.close()

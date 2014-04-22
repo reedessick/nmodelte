@@ -63,6 +63,20 @@ class mode:
     self.n, self.l, self.m, self.w, self.y, self.U = nlmwyU
     return self
 
+  ###
+  def to_str_nlm(self, tuple=False):
+    if tuple:
+      return "(%d, %d, %d)" % self.get_nlm()
+    else:
+      return "%d %d %d" % self.get_nlm()
+
+  ###
+  def to_str_nlms(self, tuple=False):
+    if tuple:
+      return "(%d, %d, %d, %s)" % self.get_nlms()
+    else:
+      return "%d %d %d %d" % self.get_nlms()
+
   ### for dumping to ASCii
   def to_str_nlmwy(self, tuple=False):
     w, wexp = float_to_scientific(self.w)
