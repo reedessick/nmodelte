@@ -1,4 +1,4 @@
-#!	/home/ressick/local/bin/Python-2.7.3/python
+#!python_alias
 usage = "written to generate a large table with all pertinant integration data in it"
 
 from optparse import OptionParser

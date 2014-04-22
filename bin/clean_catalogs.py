@@ -1,4 +1,4 @@
-#!	/home/ressick/local/bin/Python-2.7.3/python
+#!python_alias
 usage = """ written to mitgate the disk footprint of catalog files by re-writing them with only the top X couplings retained. As long as X is a large number (say, X > 10,000) then we will never have to worry about running off the end of the list. this is NOT intended to be used with "minima" lists"""
 
 import os

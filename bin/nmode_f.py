@@ -1,4 +1,4 @@
-#!	/home/ressick/local/bin/Python-2.7.3/python
+#!python_alias
 usage="""an executable to generate integration data. "f" is for "fast integration" """
 
 import gc
