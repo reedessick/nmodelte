@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 pi = np.pi
 infty = np.infty
-from scipy import linalg
+from numpy import linalg
+#from scipy import linalg
 
 import nmode_utils as nm_u
 
