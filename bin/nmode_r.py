@@ -1,4 +1,4 @@
-#!python_alias
+#!	/home/ressick/local/bin/Python-2.7.3/python
 usage="""an executable to remove modes from a network based on integration data. "r" is for "remove" """
 
 import sys, glob

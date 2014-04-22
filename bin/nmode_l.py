@@ -1,4 +1,4 @@
-#!python_alias
+#!	/home/ressick/local/bin/Python-2.7.3/python
 usage="""
 python nmode_l.py [--options] outfilename1 outfilename2
 

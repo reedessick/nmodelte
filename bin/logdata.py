@@ -1,4 +1,4 @@
-#!python_alias
+#!	/home/ressick/local/bin/Python-2.7.3/python
 usage = "written to generate a large table with all pertinant log data in it"
 
 from optparse import OptionParser

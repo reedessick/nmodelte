@@ -1,4 +1,4 @@
-#!python_alias
+#!	/home/ressick/local/bin/Python-2.7.3/python
 usage="""an executable to generate new networks (parent modes). "g" is for "generate" """
 
 import sys, glob
