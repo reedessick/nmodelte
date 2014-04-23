@@ -153,7 +153,6 @@ def threeMode_equilib(triple, freq, network, verbose=False):
 
   this may be inefficient...
   """
-  Amps = []
   o, i, j, k = triple
   wo, yo, Uo = network.wyU[o]
   wi, yi, Ui = network.wyU[i]
@@ -191,7 +190,6 @@ def deprecated_threeMode_equilib(triple, freq, network, verbose=False):
 
   this may be inefficient...
   """
-  Amps = []
   o, i, j, k = triple
   wo, yo, Uo = network.wyU[o]
   wi, yi, Ui = network.wyU[i]
