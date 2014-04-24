@@ -174,13 +174,29 @@ def threeMode_equilib(triple, freq, network, verbose=False):
   yiyj = yi+yj
   didj = O+wi+wj #=di+dj
 
+  ### amplitudes
   Ao2 = (yi*yj + di*dj)/(wi*wj*4*k**2) # = yi*yj/(4*k**2*wi*wj) * ( 1 + (didj/yiyj)**2 )
   AL2 =  ( wo*Uo )**2 / ( do**2 + yo**2 ) 
 
   Ai2 = (yj/-wj) * (yo*yiyj + do*didj) / (4*k**2*wo*yiyj) * ( 1 + ( 1 + (4*k**2*wi*wj*(do**2+yo**2)*yiyj**2)/(yi*yj*(yo*yiyj + do*didj)**2)*(AL2 - Ao2)   )**0.5 )
   Aj2 = (wj*yi)/(wi*yj) * Ai2
 
-  return ((o,i,j), (Ao2**0.5, Ai2**0.5, Aj2**0.5))
+  Ao = Ao2**0.5
+  Ai = Ai2**0.5
+  Aj = Aj2**0.5
+
+  ### phases
+  sin_delta = ( 1 + (didj/yiyj)**2 )**-0.5 # delta = delta_o+delta_i+delta_j
+  cos_delta = ( 1 + (yiyj/didj)**2 )**-0.5
+
+  sin_delta_o = do*Ao/(wo*Uo) - Ai*Aj/(Ao*Uo)*(di*dj/(wi*wj))**0.5
+  cos_delta_o = yo*Ao/(wo*Uo) - Ai*Aj/(Ao*Uo)*(yi*yj/(wi*wj))**0.5
+
+  ### there is a degeneracy between delta_i and delta_j, so we set delta_j = 0
+  sin_delta_i = sin_delta*cos_delta_o - sin_delta_o*cos_delta
+  cos_delta_i = cos_delta*cos_delta_o + sin_delta*sin_delta_o
+
+  return (o,i,j), (Ao, Ai, Aj), ((sin_delta_o, cos_delta_o), (sin_delta_i, cos_delta_i), (0.0, 1.0)), (do, di, dj)
 
 ###
 def deprecated_threeMode_equilib(triple, freq, network, verbose=False):

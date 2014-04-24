@@ -467,23 +467,28 @@ class system:
         mo = network.nlm[modeNo][-1]
         Elin = -np.infty
         O = wo
+        U = 0.0
         for u, k in Uo:
           o = mo*k*self.Oorb
           elin = compute_Elin(o, wo, yo, u)
           if elin > Elin:
             Elin = elin
             O = o
+            U = u
 
-        if wo == O:
-          p = o*t + np.pi*0.5 # phase with zero detuning
-        else:
-          p = o*t + math.atan(yo/(wo-O))# phase with non-zero detuning
+        cd = np.cos((wo-O)*wo*U/((wo-O)**2+yo**2))
+        sd = np.sin(yo*wo*U/((wo-O)**2+yo**2))
 
         if tcurrent == "q":
-          q[2*modeNo:2*modeNo+2] = Elin**0.5 * np.array([math.cos(p), -math.sin(p)])
+          p = o*t
+          cp = np.cos(p)
+          sp = np.sin(p)
+          q[2*modeNo:2*modeNo+2] = Elin**0.5 * np.array([cp*cd + sp*sd, -sp*cd + sd*cp])
         elif tcurrent == "x":
           p = (O-wo)*t
-          q[2*modeNo:2*modeNo+2] = Elin**0.5 * np.array([math.cos(p), -math.sin(p)])
+          cp = np.cos(p)
+          sp = np.sin(p)
+          q[2*modeNo:2*modeNo+2] = Elin**0.5 * np.array([cp*cd + sp*sd, -sp*cd + sd*cp])
         else:
           raise ValueError, "unknown tcurrent = %s"%tcurrent
 
@@ -499,9 +504,6 @@ class system:
     for modes that do not participate in the 3mode equilib, the real and imaginary parts are set to rand*default, with rand chosen separately for the real and imag parts
 
     if there are no couplings between G0-G1, we return the linear equilibrium state 
-
-
-    PHASE INFORMATION IS NOT INCORPORATED YET (t is not used) 
     """
     network = self.network
     gens, coups = network.gens()
@@ -514,7 +516,6 @@ class system:
     freqs = {}
     for modeNo, O in zip(gens[0], self.compute_linear_freqs(gens[0])): # compute linear frequencies and assign them
       freqs[modeNo] = O
-
       
     Ethr = np.infty
     for o,i,j,k in coups[0]: # these are couplings with G0 as parent (o) and G1 as children (i,j)
@@ -527,20 +528,43 @@ class system:
         best_tuple = (o,i,j,k)
 
     ### for best tuple
-    (o,i,j), (Ao, Ai, Aj) = threeMode_equilib(best_tuple, freqs[best_tuple[0]], network) # get amplitudes
+    (o,i,j), (Ao, Ai, Aj), ((so, co), (si, ci), (sj, cj)), (do, di, dj) = threeMode_equilib(best_tuple, freqs[best_tuple[0]], network) # get amplitudes, phases and detunings appropriate for tcurrent == "q"
   
     ### instantiate IC vector
     q = np.random.rand(2*len(network))*default # the vast majority are set to rand*default
     
     ### fill in best triple
     if tcurrent == "q":
-      q[2*o:2*o+2] = Ao*np.array([1,0])
-      q[2*i:2*i+2] = Ai*np.array([1,0])
-      q[2*j:2*j+2] = Aj*np.array([1,0])
+      p = (wo-do)*t
+      cp = np.cos(p)
+      sp = np.sin(p)
+      q[2*o:2*o+2] = Ao*np.array([cp*co + sp*so, -sp*co + cp*so])
+
+      p = (wi-di)*t
+      cp = np.cos(p)
+      sp = np.sin(p)
+      q[2*i:2*i+2] = Ai*np.array([cp*ci + sp*si, -sp*ci + cp*si])
+
+      p = (wj-dj)*t
+      cp = np.cos(p)
+      sp = np.sin(p)
+      q[2*j:2*j+2] = Aj*np.array([cp*cj + sp*sj, -sp*cj + cp*sj])
+
     elif tcurrent == "x":
-      q[2*o:2*o+2] = Ao*np.array([1,0])
-      q[2*i:2*i+2] = Ai*np.array([1,0])
-      q[2*j:2*j+2] = Aj*np.array([1,0])
+      p = do*t
+      cp = np.cos(p)
+      sp = np.sin(p)
+      q[2*o:2*o+2] = Ao*np.array([cp*co - sp*so, sp*co + cp*so])
+
+      p = di*t
+      cp = np.cos(p)
+      sp = np.sin(p)
+      q[2*i:2*i+2] = Ai*np.array([cp*ci - sp*si, sp*ci + cp*si])
+
+      p = dj*t
+      cp = np.cos(p)
+      sp = np.sin(p)
+      q[2*j:2*j+2] = Aj*np.array([cp*cj - sp*sj, sp*cj + cp*sj])
     else:
       raise ValueError, "unknown tcurrent = %s"%tcurrent
 

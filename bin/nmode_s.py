@@ -490,7 +490,7 @@ for modeNo in modes:
       print >> stefile, "\t\t--this mode is not coupled--"
 
     if Amps[modeNo] != "none":
-      (m,i,j), (Am, Ai, Aj) = Amps[modeNo]
+      (m,i,j), (Am, Ai, Aj), _, _ = Amps[modeNo] # we neglect phase information
       _valm, _valmexp = nm_u.float_to_scientific(Am)
       _vali, _valiexp = nm_u.float_to_scientific(Ai)
       _valj, _valjexp = nm_u.float_to_scientific(Aj)
