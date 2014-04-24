@@ -174,10 +174,10 @@ def threeMode_equilib(triple, freq, network, verbose=False):
   yiyj = yi+yj
   didj = O+wi+wj #=di+dj
 
-  Ao2 = ( (yi*yj + di*dj)/(wi*wj) ) / (2*k)**2 # = yi*yj/(4*k**2*wi*wj) * ( 1 + (didj/yiyj)**2 )
+  Ao2 = (yi*yj + di*dj)/(wi*wj*4*k**2) # = yi*yj/(4*k**2*wi*wj) * ( 1 + (didj/yiyj)**2 )
   AL2 =  ( wo*Uo )**2 / ( do**2 + yo**2 ) 
 
-  Ai2 = (yj/-wj) * (yo*yiyj + do*didj) / (4*k**2*wo*yiyj) * ( 1 + ( 1 + (16*k**2*wo**2*wi*wj*(do**2+yo**2)*yiyj**2)/(yi*yj*(yo*yiyj + do*didj)**2)*(AL2 - Ao2)   )**0.5 )
+  Ai2 = (yj/-wj) * (yo*yiyj + do*didj) / (4*k**2*wo*yiyj) * ( 1 + ( 1 + (4*k**2*wi*wj*(do**2+yo**2)*yiyj**2)/(yi*yj*(yo*yiyj + do*didj)**2)*(AL2 - Ao2)   )**0.5 )
   Aj2 = (wj*yi)/(wi*yj) * Ai2
 
   return ((o,i,j), (Ao2**0.5, Ai2**0.5, Aj2**0.5))
