@@ -4,7 +4,6 @@ import math
 import numpy as np
 from nmode_utils import float_to_scientific
 from mode_selection import compute_Ethr, compute_Elin
-from nmode_state import threeMode_equilib
 
 ####################################################################################################
 #
@@ -398,11 +397,11 @@ class system:
 
     freqs = []
     for modeNo in modeNos:
-      wo, yo, Uo = network.wyU[modeNo][-1]
+      wo, yo, Uo = network.wyU[modeNo]
       mo = network.nlm[modeNo][-1]
       Elin = -np.infty
       O = wo
-      for k, u in Uo:
+      for u, k in Uo:
         o = mo*k*self.Oorb # parent oscillates at -m*k*Oorb
         elin = compute_Elin(o, wo, yo, u)
         if elin > Elin:
@@ -459,17 +458,16 @@ class system:
     for modes without linear forcing, we set the real and imaginary parts to rand*default separately.
     for multi-chromatic forcing, we choose the most resonant frequency.
     """
-    raise StandardError, "WRITE system.compute_lin_eq"
-    network = system.network
+    network = self.network
     Nm = len(network)
     q = np.zeros((2*Nm,))
     for modeNo in range(Nm):
-      wo, yo, Uo = network.wyU[modeNo][-1]
+      wo, yo, Uo = network.wyU[modeNo]
       if len(Uo): # it is linearly forced
         mo = network.nlm[modeNo][-1]
         Elin = -np.infty
         O = wo
-        for k, u in Uo:
+        for u, k in Uo:
           o = mo*k*self.Oorb
           elin = compute_Elin(o, wo, yo, u)
           if elin > Elin:
@@ -508,12 +506,15 @@ class system:
     network = self.network
     gens, coups = network.gens()
 
+    if not len(coups[0]): # no couplings from parents to next generation -> only one generation
+      return self.compute_lin_eq(t=t, default=default)
+
+    from nmode_state import threeMode_equilib # we import this here because it avoids conflicts when importing the module as a whole
+
     freqs = {}
     for modeNo, O in zip(gens[0], self.compute_linear_freqs(gens[0])): # compute linear frequencies and assign them
       freqs[modeNo] = O
 
-    if not len(coups[0]): # no couplings from parents to next generation -> only one generation
-      return self.compute_lin_eq(t=t, default=default)
       
     Ethr = np.infty
     for o,i,j,k in coups[0]: # these are couplings with G0 as parent (o) and G1 as children (i,j)
@@ -526,10 +527,10 @@ class system:
         best_tuple = (o,i,j,k)
 
     ### for best tuple
-    (o,i,j), (Ao, Ai, Aj) = threeMode_equilib(best_tuple, system.Oorb, network) # get amplitudes
+    (o,i,j), (Ao, Ai, Aj) = threeMode_equilib(best_tuple, freqs[best_tuple[0]], network) # get amplitudes
   
     ### instantiate IC vector
-    q = np.random.rand((2*len(network),))*default # the vast majority are set to rand*default
+    q = np.random.rand(2*len(network))*default # the vast majority are set to rand*default
     
     ### fill in best triple
     if tcurrent == "q":

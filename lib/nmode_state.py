@@ -164,7 +164,6 @@ def threeMode_equilib(triple, freq, network, verbose=False):
     if verbose: print "mode %d has no linear driving term. Don't know how to compute the equilibrium. skipping..." % o
     return ((o,i,j), (0,0,0))
 
-
   wo = abs(wo) ; wi = -abs(wi) ; wj = -abs(wj) ;
 
   O = abs(freq)
@@ -173,15 +172,15 @@ def threeMode_equilib(triple, freq, network, verbose=False):
   dj = yj/yi * di
 
   yiyj = yi+yj
-  didj = di+dj
+  didj = O+wi+wj #=di+dj
 
-  Ao = ( (yi*yj + di*dj)/(wi*wj) )**0.5 / (2*k)
-  AL2 =  ( wo*Uo )**2 / ( didj**2 + yiyj**2 ) 
+  Ao2 = ( (yi*yj + di*dj)/(wi*wj) ) / (2*k)**2 # = yi*yj/(4*k**2*wi*wj) * ( 1 + (didj/yiyj)**2 )
+  AL2 =  ( wo*Uo )**2 / ( do**2 + yo**2 ) 
 
-  Ai = ( (yj/wj) * (yo*yiyj + do*didj) / (4*k**2*wo*yiyj) * ( 1 + ( 1 + (16*k**2*wo**2*wj*wj*(do**2+yo**2)*yiyj**2)/(yi*yj*(yo*yiyj + do*didj)**2)*(AL**2 - Ao**2)   )**0.5 ) )**0.5
-  Aj = ((wj*yi)/(wi*yj))**0.5 * Ai
+  Ai2 = (yj/-wj) * (yo*yiyj + do*didj) / (4*k**2*wo*yiyj) * ( 1 + ( 1 + (16*k**2*wo**2*wi*wj*(do**2+yo**2)*yiyj**2)/(yi*yj*(yo*yiyj + do*didj)**2)*(AL2 - Ao2)   )**0.5 )
+  Aj2 = (wj*yi)/(wi*yj) * Ai2
 
-  return ((o,i,j), (Ao, Ai, Aj))
+  return ((o,i,j), (Ao2**0.5, Ai2**0.5, Aj2**0.5))
 
 ###
 def deprecated_threeMode_equilib(triple, freq, network, verbose=False):
