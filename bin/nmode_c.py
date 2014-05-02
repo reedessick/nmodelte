@@ -24,8 +24,9 @@ parser.add_option("", "--convert-outfilename", default=False, type="string", hel
 parser.add_option("", "--fft-outfilename", default=False, type="string", help="the output filename for forward fft")
 parser.add_option("", "--amp-fft-outfilename", default=False, type="string", help="the output filename for forward fft of amplitude |x|,|q|")
 
-parser.add_option("-c", "--current", default=False, type="string", help="the current variable: x or q")
-parser.add_option("-C", "--convert", default=False, action="store_true", help="convert x <--> q in the time domain")
+parser.add_option("-c", "--current", default=False, type="string", help="the current variable type")
+parser.add_option("-t", "--target", default=False, type="string", help="the target variable type")
+parser.add_option("-C", "--convert", default=False, action="store_true", help="convert current -> target in the time domain")
 parser.add_option("-l", "--logfilename", default=False, type="string", help="log file to use with nmode_utils.convert()")
 
 parser.add_option("-f", "--fft", default=False, action="store_true", help="perform a forward fft: a --> \\tilde{a}")
@@ -41,6 +42,9 @@ if not opts.input_filename:
 
 if opts.convert and (not opts.current):
   opts.current = raw_input("current = ")
+
+if opts.convert and (not opts.target):
+  opts.target = raw_input("target = ")
 
 if opts.convert and (not opts.logfilename):
   opts.logfilename = raw_input("logfilename = ")
@@ -64,13 +68,13 @@ if opts.convert:
 ####################################################################################################
 #
 #
-#              convert x <--> q
+#              convert current -> target
 #
 #
 ####################################################################################################
 if opts.convert:
   if opts.verbose: print "converting variable types in time domain"
-  converted_t_P, converted_q, converted_current = nm_u.convert(t_P, q, opts.current, network, system.Porb)
+  converted_t_P, converted_q, converted_current = nm_u.convert(t_P, q, opts.current, opts.target, system, system.Porb)
 
   if opts.convert_outfilename:
     if opts.verbose: print "writing converted data to %s" % opts.convert_outfilename

@@ -559,48 +559,115 @@ def wavelet_lowpass(x, wavelet="db6", n=1):
   return ac
 
 ##################################################
-def convert(t_P, q, current, network, Porb):
-  """ converts from x -> q or from q -> depdending on 'current'
+def convert(t_P, q, current, target, system, Porb):
+  """ converts from current -> target
   uses values in network and time steps in t_p
   """
+  if target == current:
+    return t_P, q, target
+
+  network = system.network
   W = [p.w for p in network.modes] # natural frequencies of the modes
   N_m = len(W) # number of modes
 
-  if current == "x": # q = x * e^{-i*W*t)
-    for n in range(N_m):
-      w = W[n] # pull out only once
-      Q = q[n]
-      for ind, t_p in enumerate(t_P):
-        t = t_p*Porb
-        # compute time-dependent values
-        cos_wt = np.cos(w*t)
-        sin_wt = np.sin(w*t)
-        r_q = Q[ind][0]
-        i_q = Q[ind][1]
+  ### compute 3mode frequencies
+  if current == "y" or target == "y":
+    freqs = dict( [(modeNo, freq) for freq, modeNo in system.compute_3mode_freqs()] ) # modeNo:freq
 
-        Q[ind][0] = r_q*cos_wt + i_q*sin_wt
-        Q[ind][1] = i_q*cos_wt - r_q*sin_wt
-    current = "q"
+  if current == "x":
+    if target == "q": # q = x * e^{-i*W*t)
+      for n in range(N_m):
+        w = W[n] # pull out only once
+        Q = q[n]
+        for ind, t_p in enumerate(t_P):
+          t = t_p*Porb
+          # compute time-dependent values
+          cos_wt = np.cos(w*t)
+          sin_wt = np.sin(w*t)
+          r_q, i_q = Q[ind]
 
-  elif current == "q": # x = q * e^{i*W*t}
-    for n in range(N_m):
-      w = W[n]
-      Q = q[n]
-      for ind, t_p in enumerate(t_P):
-        t = t_p*P
-        cos_wt = np.cos(w*t)
-        sin_wt = np.sin(w*t)
-        r_q = Q[ind][0]
-        i_q = Q[ind][1]
+          Q[ind][0] = r_q*cos_wt + i_q*sin_wt
+          Q[ind][1] = i_q*cos_wt - r_q*sin_wt
 
-        Q[ind][0] = r_q*cos_wt - i_q*sin_wt
-        Q[ind][1] = r_q*sin_wt + i_q*cos_wt
-    current = "x"
+    elif target == "y": # y = x * e^{-i*D*t}
+      for n in range(N_m):
+        d = W[n] - freqs[n]
+        Q = q[n]
+        for ind, t_p in enumerate(t_P):
+          t = t_p*Porb
+          cos_dt = np.cos(d*t)
+          sin_dt = np.sin(d*t)
+          r_q, i_q = Q[ind]
 
+          Q[ind][0] = r_q*cos_dt + i_q*sin_dt
+          Q[ind][1] = i_q*cos_dt - r_q*sin_dt
+
+    else:
+      raise ValueError, "target=%s not understood in convert()"%target
+
+  elif current == "q":
+    if target == "x": # x = q * e^{i*W*t}
+      for n in range(N_m):
+        w = W[n]
+        Q = q[n]
+        for ind, t_p in enumerate(t_P):
+          t = t_p*P
+          cos_wt = np.cos(w*t)
+          sin_wt = np.sin(w*t)
+          r_q, i_q = Q[ind]
+
+          Q[ind][0] = r_q*cos_wt - i_q*sin_wt
+          Q[ind][1] = r_q*sin_wt + i_q*cos_wt
+
+    elif target == "y": # y = q * e^{i*(W-D)*t}
+      for n in range(N_m):
+        f = freqs[n]
+        Q = q[n]
+        for ind, t_p in enumerate(t_P):
+          t = t_p*P
+          cos_ft = np.cos(f*t)
+          sin_ft = np.sin(f*t)
+          r_q, i_q = Q[ind]
+
+          Q[ind][0] = r_q*cos_ft - i_q*sin_ft
+          Q[ind][1] = i_q*cos_ft + r_q*sin_ft
+
+    else:
+      raise ValueError, "target=%s not understood in convert()"%target
+
+  elif current == "y":
+    if target == "x": # x = y * e^{i*D*t}
+      for n in range(N_m):
+        d = W[n] - freqs[n]
+        Q = q[n]
+        for ind, t_p in enumerate(t_P):
+          t = t_p*P
+          cos_dt = np.cos(dt)
+          sin_dt = np.sin(dt)
+          r_q, i_q = Q[ind]
+
+          Q[ind][0] = r_q*cos_dt - i_q*sin_dt
+          Q[ind][1] = i_q*cos_dt + r_q*sin_dt
+
+    elif target == "q": # q = y * e^{-i*(W-D)*t}
+      for n in range(N_m):
+        f = freqs[n]
+        Q = q[n]
+        for ind, t_p in enumerate(t_P):
+          t = t_p*P
+          cos_ft = np.cos(f*t)
+          sin_ft = np.sin(f*t)
+          r_q, i_q = Q[ind]
+
+          Q[ind][0] = r_q*cos_ft + i_q*sin_ft
+          Q[ind][1] = i_q*cos_ft - r_q*sin_ft
+
+    else:
+      raise ValueError, "target=%s not understood in convert()"%target
   else:
-    sys.exit(  "current not understood in convert(). current must be either 'x' or 'q', and was "+str(current) )
+    raise ValueError, "current=%s not understood in convert()"%current
 
-  return t_P, q, current
+  return t_P, q, target
 
 
 ##################################################
