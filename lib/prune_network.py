@@ -180,30 +180,78 @@ def num_couplings_less_than(num_k, network, mode_nums=None):
 
 ##################################################
 def heuristic_greater_than(heuristic, system, freqs=None, mode_nums=None):
+  """ returns a set of modes with heuristic greater than heuristic. If freqs is not supplied, we compute freqs with syste.compute_3mode_freqs()"""
+  if not freqs:
+    freqs = system.compute_3mode_freqs()
+    freqs.sort(key=lambda l: l[0])
+    freqs = [l[1] for l in freqs]
+  if not mode_nums:
+    mode_nums = range(len(system.network))
+
   # ms.compute_heuristic(O, w1, w2, y1, y2)
   raise StandardError, "write me"
 
 ##################################################
 def heuristic_less_than(heuristic, system, freqs=None, mode_nums=None):
+  """ returns a set of modes with heuristic less than heuristic. If freqs is not supplied, we compute freqs with syste.compute_3mode_freqs()"""
+  if not freqs:
+    freqs = system.compute_3mode_freqs()
+    freqs.sort(key=lambda l: l[0])
+    freqs = [l[1] for l in freqs]
+  if not mode_nums:
+    mode_nums = range(len(system.network))
+
   # ms.compute_heuristic(O, w1, w2, y1, y2)
   raise StandardError, "write me"
 
 ##################################################
 def Ethr_greater_than(Ethr, system, freqs=None, mode_nums=None):
+  """ returns a set of modes with Ethr greater than Ethr. If freqs is not supplied, we compute freqs with syste.compute_3mode_freqs()"""
+  if not freqs:
+    freqs = system.compute_3mode_freqs()
+    freqs.sort(key=lambda l: l[0])
+    freqs = [l[1] for l in freqs]
+  if not mode_nums:
+    mode_nums = range(len(system.network))
+
   #ms.compute_Ethr(O, w1, w2, y1, y2, k)
   raise StandardError, "write me"
 
 ##################################################
 def Ethr_less_than(Ethr, system, freqs=None, mode_nums=None):
+  """ returns a set of modes with Ethr less than Ethr. If freqs is not supplied, we compute freqs with syste.compute_3mode_freqs()"""
+  if not freqs:
+    freqs = system.compute_3mode_freqs()
+    freqs.sort(key=lambda l: l[0])
+    freqs = [l[1] for l in freqs]
+  if not mode_nums:
+    mode_nums = range(len(system.network))
+
   #ms.compute_Ethr(O, w1, w2, y1, y2, k)
   raise StandardError, "write me"
 
 ##################################################
 def NmodeE_greater_than(Ethr, system, freqs=None, mode_nums=None):
-  #
+  """ returns a set of modes with NmodeE greater than NmodeE. If freqs is not supplied, we compute freqs with syste.compute_3mode_freqs()"""
+  if not freqs:
+    freqs = system.compute_3mode_freqs()
+    freqs.sort(key=lambda l: l[0])
+    freqs = [l[1] for l in freqs]
+  if not mode_nums:
+    mode_nums = range(len(system.network))
+
   raise StandardError, "write me"
 
 ##################################################
 def NmodeE_less_than(Ethr, system, freqs=None, mode_nums=None):
-  #
+  """ returns a set of modes with NmodeE less than NmodeE. If freqs is not supplied, we compute freqs with syste.compute_3mode_freqs()"""
+  if not freqs:
+    freqs = system.compute_3mode_freqs()
+    freqs.sort(key=lambda l: l[0])
+    freqs = [l[1] for l in freqs]
+  if not mode_nums:
+    mode_nums = range(len(system.network))
+
   raise StandardError, "write me"
+
+
