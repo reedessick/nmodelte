@@ -179,7 +179,7 @@ def coupling_hist(network, gens=False, num_bins=50, log=False, genNos=False):
   return fig, ax
 
 ##################################################
-def coupling_tree_nl(system, tree_type="placement", genNos=[], verbose=False):
+def coupling_tree_nl(system, tree_type="placement", genNos=[], verbose=False, mode_colors="b", conns_colors="r"):
   """
   coupling diagram in the n-l plane via delegation through __coupling_tree_nl.
     tree_type determines the types of connections drawn between modes
@@ -287,10 +287,10 @@ def coupling_tree_nl(system, tree_type="placement", genNos=[], verbose=False):
   else:
     raise ValueError("unkown tree_type=%s in nmode_diagnostic.coupling_tree_nl" % tree_type)
 
-  return __coupling_tree_nl(modes, conns, verbose=verbose)
+  return __coupling_tree_nl(modes, conns, verbose=verbose, modes_colors=modes_colors, conns_colors=conns_colors)
 
 ##################################################
-def __coupling_tree_nl(modes, conns=[], verbose=False, fig_ax=False, mode_color="b", edge_color="r", mode_alpha=0.75, edge_alpha=0.50):
+def __coupling_tree_nl(modes, modes_colors="b", conns=[], conns_colors="r", verbose=False, fig_ax=False, mode_alpha=0.75, edge_alpha=0.50):
   """ 
   a plotting function for coupling_tree_nl. It plots the modes on the n-l plane (with offsets from l described by m) and draws connections between them described in conns)
   Because we can come up with many different lines to connect the modes, this method should be useful through delegation 
@@ -302,6 +302,11 @@ def __coupling_tree_nl(modes, conns=[], verbose=False, fig_ax=False, mode_color=
 
   warning! this plot does not distinguish between frequency signs (+/-), so there may be some confusion. This should be minimized by choosing only one frequency sign for the network's matriarch
   """
+  if isinstance(modes_colors, str):
+    modes_colors = [modes_colors for _ in modes]
+  if isinstance(conns_colors, str):
+    conns_colors = [conns_colors for _ in conns]
+
   if not fig_ax:
     fig = plt.figure()
     ax = plt.subplot(1,1,1)
@@ -318,14 +323,15 @@ def __coupling_tree_nl(modes, conns=[], verbose=False, fig_ax=False, mode_color=
 
   ### draw lines between points
   if verbose: print "\t\tdrawing edges"
-  for modeNo1, modeNo2 in conns:
+  for (modeNo1, modeNo2), color in zip(conns, conns_colors):
     _x, _y = nl_edge(x[modeNo1], y[modeNo1], x[modeNo2], y[modeNo2])
 #    print _x, _y
-    ax.plot(_x, _y, color=edge_color, alpha=edge_alpha)
+    ax.plot(_x, _y, color=color, alpha=edge_alpha)
 
   ### draw modes
   if verbose: print "\t\tdrawing modes"
-  ax.plot(x, y, marker="o", markersize=2, markeredgecolor=mode_color, markerfacecolor=mode_color, linestyle="none", alpha=mode_alpha)
+  for (_x, _y, color) in zip(x,y,modes_colors):
+    ax.plot(_x, _y, marker="o", markersize=2, markeredgecolor=color, markerfacecolor=color, linestyle="none", alpha=mode_alpha)
 
   ax.set_xlabel(r"$l+m/4l$")
   ax.set_ylabel(r"$n$")
