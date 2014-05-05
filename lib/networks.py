@@ -449,7 +449,9 @@ class system:
 
       gi = gip1
 
-    return [(value, key) for key, value in modes.items()]
+    return [modes[modeNo] for modeNo in sorted(modes.keys())]
+#    return modes # (modeNo, freq)
+#    return [(value, key) for key, value in modes.items()]
 
   ###
   def compute_lin_eq(self, t=0.0, default=1e-20, tcurrent="x"):

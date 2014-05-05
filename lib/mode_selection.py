@@ -30,6 +30,19 @@ def compute_heuristic(O, w1, w2, y1, y2):
   return (y1+y2)**2 + (O+w1+w2)**2
 
 ##################################################
+def compute_collE( sorted_Ethrs ):
+  """
+  computes the collective instability threshold for this set of Ethrs.
+    Ethrs is the list of 3mode Ethr for all coupling in which this mode participates as a daughter sorted in order of increasing Ethr
+  """
+  if not len(sorted_Ethrs):
+    return np.infty
+#  return sorted_Ethrs[-1]
+#  return 1.0*sorted_Ethrs[-1]/len(sorted_Ethrs)**2
+  return np.min( np.array(sorted_Ethrs) / np.arange(1,len(sorted_Ethrs)+1)**2 )
+
+
+##################################################
 def compute_Elin(O, wo, yo, U):
   return (wo*U)**2 / ((O-wo)**2 + yo**2)
 

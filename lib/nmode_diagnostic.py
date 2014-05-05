@@ -886,8 +886,8 @@ def Hns_coup_heuristic(Hns_coup, system):
 
   ### find three mode frequencies
   freqs = system.compute_3mode_freqs()
-  freqs.sort(key=lambda l: l[1])
-  freqs = [w for w, modeNo in freqs]
+#  freqs.sort(key=lambda l: l[1])
+#  freqs = [w for w, modeNo in freqs]
 
   ### generate detunings, mean and stdv of Hns_coup
   mH = []
@@ -954,8 +954,8 @@ def Hns_coup_Ethr(Hns_coup, system):
 
   ### find three mode frequencies
   freqs = system.compute_3mode_freqs()
-  freqs.sort(key=lambda l: l[1])
-  freqs = [w for w, modeNo in freqs]
+#  freqs.sort(key=lambda l: l[1])
+#  freqs = [w for w, modeNo in freqs]
 
   ### generate detunings, mean and stdv of Hns_coup
   mH = []
