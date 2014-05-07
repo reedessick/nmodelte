@@ -159,7 +159,7 @@ def compute_num_couplings(network):
   """
   computes the number of couplings for each mode in the network
   """
-  return [K for K in network.K]
+  return [len(K) for K in network.K]
 
 ##################################################
 def num_couplings_greater_than(num_k, network, mode_nums=None):
@@ -184,7 +184,7 @@ def num_couplings_less_than(num_k, network, mode_nums=None):
   num_couplings = compute_num_couplings(network)
   modes = []
   for modeNo in mode_nums:
-    if num_couplings <= num_k:
+    if num_couplings[modeNo] <= num_k:
       modes.append( network.modes[modeNo] )
 
   return modes
@@ -210,7 +210,7 @@ def heuristic_greater_than(heuristic, system, freqs=None, mode_nums=None):
   if not mode_nums:
     mode_nums = range(len(system.network))
 
-  heuristics = __find_heuristics(system, freqs=freqs)
+  heuristics = __find_heuristic(system, freqs=freqs)
   modeNos = set()
   for h, (modeo, modei, modej, k) in heuristics:
     if (h >= heuristic): # downselect triples
@@ -232,10 +232,10 @@ def heuristic_less_than(heuristic, system, freqs=None, mode_nums=None):
   if not mode_nums:
     mode_nums = range(len(system.network))
 
-  heuristics = __find_heuristics(system, freqs=freqs)
+  heuristics = __find_heuristic(system, freqs=freqs)
   modeNos = set()
   for h, (modeo, modei, modej, k) in heuristics:
-    if (h >= heuristic): # downselect triples
+    if (h <= heuristic): # downselect triples
       modeNoo = system.network.modeNoD[modeo.get_nlms()]
       modeNoi = system.network.modeNoD[modei.get_nlms()]
       modeNoj = system.network.modeNoD[modej.get_nlms()]
@@ -317,11 +317,17 @@ def __find_collE(system, freqs=None, mode_nums=None):
 
   Ethrs = __find_Ethr(system, freqs=freqs)
   modes = defaultdict( list )
-  for E, (modeo, modei, modej, k) in Ethrs: # iterate through all triples
-    ### add E to the daughter mode's lists
-    modes[system.network.modeNoD[modei.get_nlms()]].append( E )
-    modes[system.network.modeNoD[modej.get_nlms()]].append( E )
-  
+  for E, triple in Ethrs: # iterate through all triples
+    modeo, modei, modej, k = triple
+    ### determine which mode is the parent
+    w = [(abs(mode.w), ind) for ind, mode in enumerate([modeo, modei, modej])]
+    w.sort(key=lambda l:l[0], reverse=True)
+    ### last two are children --> ad Ethr to them only
+    for mode in [triple[ind] for _,ind in w[1:]]:
+      modes[system.network.modeNoD[mode.get_nlms()]].append( E )
+#      modes[system.network.modeNoD[modei.get_nlms()]].append( E )
+#      modes[system.network.modeNoD[modej.get_nlms()]].append( E )
+
   collE = dict()
   for modeNo in mode_nums:
     if modes.has_key( modeNo ):
@@ -334,10 +340,13 @@ def __find_collE(system, freqs=None, mode_nums=None):
 ##################################################
 def collE_greater_than(Eo, system, freqs=None, mode_nums=None):
   """ returns a set of modes with NmodeE greater than NmodeE. If freqs is not supplied, we compute freqs with syste.compute_3mode_freqs()"""
+  if not mode_nums:
+    mode_nums = range(len(system.network))
 
   collE = __find_collE(system, freqs=freqs, mode_nums=mode_nums)
   modes = []
   for modeNo, e in collE.items():
+    e = collE[modeNo]
     if e >= Eo:
       modes.append( system.network.modes[modeNo] )
     else:
@@ -355,6 +364,7 @@ def collE_less_than(Eo, system, freqs=None, mode_nums=None):
   modes = []
   for modeNo, e in collE.items():
     if e <= Eo:
+#      print e
       modes.append( system.network.modes[modeNo] )
     else:
       pass
