@@ -73,6 +73,8 @@ parser.add_option("", "--conc-verbose", default=False, action="store_true")
 
 ### coupling diagram options
 parser.add_option("", "--coupling-diagram", default=False, type="string", help="the type of coupling diagram to generate. Supply at least one of \"w\", \"nlm\", \"nl-placement\", \"nl-sibling\", \"nl-shared_parent\", \"nl-shared_child\", \"nl-triples\"")
+parser.add_option("", "--coupling-diagram-coloration", default="", type="string", help="coloration schema for coupling diagrams that support it (nl)")
+parser.add_option("", "--coupling-diagram-colormap", default="copper", type="string", help="colormap for mode_colors in coupling diagrams that support it")
 parser.add_option("", "--coupling-diagram-genNos", default="", type="string", help="a string of the genNos to include in \"nl-*\" coupling diagrams")
 parser.add_option("", "--coupling-diagram-modeNo", default=-1, type=int, help="a mode number that will be highlighted in the coupling diagram.")
 
@@ -114,13 +116,16 @@ if opts.tag != "":
 if opts.coupling_hist_genNos:
   opts.coupling_hist_genNos = [int(l) for l in opts.coupling_hist_genNos.split()]
 
+opts.coupling_diagram_coloration = opts.coupling_diagram_coloration.split()
+
+
 ## summary logicals
 scat3 = (opts.scat_detuning or opts.scat_heuristic or opts.scat_Ethr)
 distrib = (opts.Ei_distrib or opts.Hns_distrib or opts.multi_gen_Ei_distrib)
 multi_gen = (opts.multi_gen_Ei_distrib or opts.multi_gen_stacked_hist or opts.coupling_hist) #or opts.multi_gen_Ei_conc or opts.multi_gen_disp_conc)
 conc = (opts.Ei_conc or opts.disp_conc) #or opts.multi_gen_Ei_conc or opts.multi_gen_disp_conc)
 
-if (opts.stacked_hist or scat3 or distrib or conc) and (not opts.outfilename):
+if (opts.stacked_hist or scat3 or distrib or conc or (opts.coupling_diagram and opts.coupling_diagram_coloration)) and (not opts.outfilename):
   opts.outfilename = raw_input("outfilename = ")
 
 if (opts.outfilename) and (not opts.tcurrent):
@@ -337,17 +342,69 @@ if opts.coupling_diagram:
 
     elif "nl-" in diagram_type: ### a class of diagrams
       if opts.verbose: print "\t building coupling_diagaram \"%s\"" % diagram_type
-      fig, ax = nmd.coupling_tree_nl(system, tree_type=diagram_type.split("-")[-1], genNos=[int(l) for l in opts.coupling_diagram_genNos.split()], verbose=opts.verbose)
+      if opts.coupling_diagram_coloration:
 
-      ax.grid(opts.grid)
+        ### define colormap
+        colormap = nmd.plt.get_cmap(opts.coupling_diagram_colormap)
 
-      figname = opts.logfilename+".coupling_diagram-"+diagram_type+opts.tag+".png"
-      if opts.verbose: print "saving "+figname
-      fig.savefig(figname)
-      nmd.plt.close(fig)
+        ### compute colors for each mode based on coloration scheme
+        for coloration in opts.coupling_diagram_coloration:
+          if coloration == "A":
+            if opts.verbose: print "\t\t coloration: A"
+            mA = np.array([np.mean(_) for _ in nms.compute_A(q, Eo=1.0)])
+            mode_colors = [colormap(_) for _ in mA/max(mA)]
+            mode_order = mA.argsort() # smallest values plotted first
+
+          elif coloration == "E":
+            if opts.verbose: print "\t\t coloration: E"
+            mE = np.array([np.mean(_) for _ in nms.compute_E(q, Eo=1.0)])
+            mode_colors = [colormap(_) for _ in mE/max(mE)]
+            mode_order = mE.argsort()
+
+          elif coloration == "disp":
+            if opts.verbose: print "\t\t coloration: disp"
+            myE = -np.array([np.mean(_) for _ in nms.viscous_disp(q, network, Eo=1.0)[-1]])
+            mode_colors = [colormap(_) for _ in myE/max(myE)]
+            mode_order = myE.argsort()
+
+          else:
+            if opts.verbose: print "\t\tcoloration \"%s\" not understood. skipping..." % coloration
+            continue
+
+          fig = nmd.plt.figure()
+          ax = fig.add_axes([0.1, 0.1, 0.750, 0.8])
+          cbax = fig.add_axes([0.875, 0.1, 0.025, 0.8])
+
+          fig, ax = nmd.coupling_tree_nl(system, tree_type=diagram_type.split("-")[-1], genNos=[int(l) for l in opts.coupling_diagram_genNos.split()], verbose=opts.verbose, mode_colors=mode_colors, mode_order=mode_order, fig_ax=(fig,ax))
+          ax.grid(opts.grid)
+
+          ### add color bar!
+#          colorbar = fig.colorbar(cax=cbax, orientation="vertical")
+          colorbar = nmd.matplotlib.colorbar.ColorbarBase(cbax, cmap=colormap, orientation='vertical')
+          if coloration == "A":
+            colorbar.ax.set_ylabel(r"$A_i/\mathrm{max}\{A_i\}$")
+          elif coloration == "E":
+            colorbar.ax.set_ylabel(r"$A_i^2/\mathrm{max}\{A_i^2\}$")
+          elif coloration == "disp":
+            colorbar.ax.set_ylabel(r"$\gamma_i A_i^2/\mathrm{max}\{\gamma_i A_i^2\}$")
+
+          ax.grid(opts.grid)
+
+          figname = opts.logfilename+".coupling_diagram-"+diagram_type+"-"+coloration+opts.tag+".png"
+          if opts.verbose: print "saving "+figname
+          fig.savefig(figname)
+          nmd.plt.close(fig)
+
+      else:
+        fig, ax = nmd.coupling_tree_nl(system, tree_type=diagram_type.split("-")[-1], genNos=[int(l) for l in opts.coupling_diagram_genNos.split()], verbose=opts.verbose)
+        ax.grid(opts.grid)
+        figname = opts.logfilename+".coupling_diagram-"+diagram_type+opts.tag+".png"
+        if opts.verbose: print "saving "+figname
+        fig.savefig(figname)
+        nmd.plt.close(fig)
 
     else:
-      if opts.verbose: print "\tcoupling_diagram \"%s\" not understood. skipping..." % type
+      if opts.verbose: print "\tcoupling_diagram \"%s\" not understood. skipping..." % diagram_type
 
 ####################################################################################################
 #

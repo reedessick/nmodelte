@@ -179,13 +179,16 @@ def coupling_hist(network, gens=False, num_bins=50, log=False, genNos=False):
   return fig, ax
 
 ##################################################
-def coupling_tree_nl(system, tree_type="placement", genNos=[], verbose=False, mode_colors="b", conns_colors="r"):
+def coupling_tree_nl(system, tree_type="placement", genNos=[], verbose=False, mode_colors="b", mode_order=None, conn_colors="r", fig_ax=None):
   """
   coupling diagram in the n-l plane via delegation through __coupling_tree_nl.
     tree_type determines the types of connections drawn between modes
       currently supports : placement, siblings, shared_parent, shared_child, triples
     genNos determines which generations are included (empyt list means we plot everything)
   """
+
+  if isinstance(mode_colors, str):
+    mode_colors = [mode_colors for _ in system.network.modes]
 
   ## break down into generations
   if verbose: print "\t\tbreaking network into generations"
@@ -195,15 +198,14 @@ def coupling_tree_nl(system, tree_type="placement", genNos=[], verbose=False, mo
   if genNos == []: # empty list means we plot all generations
     genNos = range(N_g)
 
-  modes = []
+  modeNos = []
   conns = []
   ### determine the type of plot
   if verbose: print "\t\tdetermining which modes/conns to plot based on tree_type=%s" % tree_type
 
   if tree_type == "placement": ## only the location of selected modes
     for genNo in genNos:
-      for modeNo in gens[genNo]:
-        modes.append( network.modes[modeNo] )
+      modeNos += gens[genNo]
 
   elif tree_type == "triples":
     old_modeNos = set()
@@ -226,7 +228,7 @@ def coupling_tree_nl(system, tree_type="placement", genNos=[], verbose=False, mo
     modeNo_map = {}
     for new_modeNo, old_modeNo in enumerate(old_modeNos): # build modeNo_map and fill out modes
       modeNo_map[old_modeNo] = new_modeNo
-      modes.append( network.modes[old_modeNo] )
+      modeNos.append( old_modeNo )
     for old_modeNo1, old_modeNo2 in old_conns: # convert old_conns with new_modeNo
       conns.append( (modeNo_map[old_modeNo1], modeNo_map[old_modeNo2]) )
 
@@ -235,7 +237,7 @@ def coupling_tree_nl(system, tree_type="placement", genNos=[], verbose=False, mo
     new_modeNo = 0
     for genNo in genNos:
       for modeNo in gens[genNo]:
-        modes.append( network.modes[modeNo] )
+        modeNos.append( modeNo )
         modeNo_map[modeNo] = new_modeNo
         new_modeNo += 1
       if genNo > 0: # gen0 has no siblings by this definition
@@ -247,7 +249,7 @@ def coupling_tree_nl(system, tree_type="placement", genNos=[], verbose=False, mo
     new_modeNo = 0
     for genNo in genNos:
       for modeNo in gens[genNo]:
-        modes.append( network.modes[modeNo] )
+        modeNos.append( modeNo )
         modeNo_map[modeNo] = new_modeNo
         new_modeNo += 1
       if genNo > 0: # gen0 has no parent
@@ -268,7 +270,7 @@ def coupling_tree_nl(system, tree_type="placement", genNos=[], verbose=False, mo
     new_modeNo = 0
     for genNo in genNos:
       for modeNo in gens[genNo]:
-        modes.append( network.modes[modeNo] )
+        modeNos.append( modeNo )
         modeNo_map[modeNo] = new_modeNo
         new_modeNo += 1
       if genNo < N_g-1: # gen(N_g-1) has no children
@@ -287,10 +289,17 @@ def coupling_tree_nl(system, tree_type="placement", genNos=[], verbose=False, mo
   else:
     raise ValueError("unkown tree_type=%s in nmode_diagnostic.coupling_tree_nl" % tree_type)
 
-  return __coupling_tree_nl(modes, conns, verbose=verbose, modes_colors=modes_colors, conns_colors=conns_colors)
+  if mode_order != None: # plot modes in a certain order
+    modeNos = [modeNo for modeNo in mode_order if (modeNo in modeNos)] # rearange modeNos by mode_order
+    modeNo_map = dict( (modeNo, ind) for ind, modeNo in enumerate(modeNos) )
+    conns = [(modeNo_map[modeNo1], modeNo_map[modeNo2]) for modeNo1, modeNo2 in conns]
+
+
+  return __coupling_tree_nl([system.network.modes[modeNo] for modeNo in modeNos], mode_colors=[mode_colors[modeNo] for modeNo in modeNos], conns=conns, conn_colors=conn_colors, verbose=verbose, fig_ax=fig_ax)
+#  return __coupling_tree_nl(modes, mode_colors=__mode_colors, conns=conns, conn_colors=conn_colors, verbose=verbose, fig_ax=fig_ax)
 
 ##################################################
-def __coupling_tree_nl(modes, modes_colors="b", conns=[], conns_colors="r", verbose=False, fig_ax=False, mode_alpha=0.75, edge_alpha=0.50):
+def __coupling_tree_nl(modes, mode_colors="b", conns=[], conn_colors="r", verbose=False, fig_ax=None, mode_alpha=0.75, edge_alpha=0.50):
   """ 
   a plotting function for coupling_tree_nl. It plots the modes on the n-l plane (with offsets from l described by m) and draws connections between them described in conns)
   Because we can come up with many different lines to connect the modes, this method should be useful through delegation 
@@ -302,10 +311,10 @@ def __coupling_tree_nl(modes, modes_colors="b", conns=[], conns_colors="r", verb
 
   warning! this plot does not distinguish between frequency signs (+/-), so there may be some confusion. This should be minimized by choosing only one frequency sign for the network's matriarch
   """
-  if isinstance(modes_colors, str):
-    modes_colors = [modes_colors for _ in modes]
-  if isinstance(conns_colors, str):
-    conns_colors = [conns_colors for _ in conns]
+  if isinstance(mode_colors, str):
+    mode_colors = [mode_colors for _ in modes]
+  if isinstance(conn_colors, str):
+    conn_colors = [conn_colors for _ in conns]
 
   if not fig_ax:
     fig = plt.figure()
@@ -323,14 +332,14 @@ def __coupling_tree_nl(modes, modes_colors="b", conns=[], conns_colors="r", verb
 
   ### draw lines between points
   if verbose: print "\t\tdrawing edges"
-  for (modeNo1, modeNo2), color in zip(conns, conns_colors):
+  for (modeNo1, modeNo2), color in zip(conns, conn_colors):
     _x, _y = nl_edge(x[modeNo1], y[modeNo1], x[modeNo2], y[modeNo2])
 #    print _x, _y
     ax.plot(_x, _y, color=color, alpha=edge_alpha)
 
   ### draw modes
   if verbose: print "\t\tdrawing modes"
-  for (_x, _y, color) in zip(x,y,modes_colors):
+  for (_x, _y, color) in zip(x,y,mode_colors):
     ax.plot(_x, _y, marker="o", markersize=2, markeredgecolor=color, markerfacecolor=color, linestyle="none", alpha=mode_alpha)
 
   ax.set_xlabel(r"$l+m/4l$")
