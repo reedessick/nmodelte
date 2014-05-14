@@ -32,7 +32,8 @@ parser.add_option("", "--steps-per-P", default=1, type="float", help="report the
 parser.add_option("", "--rel-err", default=1e-6, type="float", help="relative error for integrator")
 parser.add_option("", "--abs-err", default=0.0, type="float", help="absolute error for integrator")
 
-parser.add_option("", "--init-conds", default=False, type="string", help="set initial conditions for the integration. Supply a string separated by spaces.")
+parser.add_option("", "--equilib-IC", default=False, type="string", help="either \"lin\" for \"3mode\" and will compute the associated equilibrium amplitudes for the system and use them as initial conditions. WILL BE IGNORED IF --init-conds IS SUPPLIED.")
+parser.add_option("", "--init-conds", default=False, type="string", help="set initial conditions for the integration. Supply a string separated by spaces. WILL BE IGNORED IF --onward IS SUPPLIED.")
 parser.add_option("", "--init-time", default="none", type="string", help="set initial time for the integration in units of orbital periods.")
 parser.add_option("", "--default-value", default=1e-12, type="float", help="the initial value assigned to real&imag parts of a mode when no other information is supplied.")
 
@@ -61,6 +62,14 @@ Oorb = 2*np.pi/Porb
 N_m = len(system.network) # number of modes
 #dimension = np.array(2*(N_m), dtype="i") # dimensionality of the problem
 dimension = 2*(N_m) # dimensionality of the problem
+
+if opts.equilib_IC:
+  if "dxdt" in opts.function:
+    tcurrent = "x"
+  elif "dqdt" in opts.function:
+    tcurrent = "q"
+  else:
+    raise ValueError, "could not determine tcurrent from --function=%s"%opts.function
 
 ####################################################################################################
 #
@@ -122,7 +131,15 @@ else:
     elif len(q) != dimension:
       sys.exit("IC's supplied do not match number of modes.")
   else:
-    q = np.empty((dimension,)); q[:] = opts.default_value
+    if opts.equilib_IC: # compute equilibrium state
+      if opts.equilib_IC == "lin":
+        q = system.compute_lin_eq(t=t, default=opts.default_value, tcurrent="x")
+      elif opts.equilib_IC == "3mode":
+        q = system.compute_3mode_eq(t=t, default=opts.default_value, tcurrent="x")
+      else:
+        raise ValueError, "unknown --equilib-IC=%s"%opts.equilib_IC
+    else:
+      q = np.empty((dimension,)); q[:] = opts.default_value
 
 use_phase = opts.function in ["dxdt_no_NLT_withPHI"]
 

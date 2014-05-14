@@ -27,6 +27,7 @@ import numpy as np
 import nmode_utils as nmu
 import nmode_state as nms
 import nmode_diagnostic as nmd
+import prune_network as pn
 #from nmode_plotting import E_distrib, H_distrib, multi_gen_E_distrib
   
 from optparse import *
@@ -73,6 +74,10 @@ parser.add_option("", "--conc-verbose", default=False, action="store_true")
 
 ### coupling diagram options
 parser.add_option("", "--coupling-diagram", default=False, type="string", help="the type of coupling diagram to generate. Supply at least one of \"w\", \"nlm\", \"nl-placement\", \"nl-sibling\", \"nl-shared_parent\", \"nl-shared_child\", \"nl-triples\"")
+parser.add_option("", "--coupling-diagram-coloration", default="", type="string", help="coloration schema for coupling diagrams that support it (nl)")
+parser.add_option("", "--coupling-diagram-colormap", default="copper", type="string", help="colormap for mode_colors in coupling diagrams that support it")
+parser.add_option("", "--coupling-diagram-logcolors", default=False, action="store_true", help="set the coloration to logarithmic scale")
+
 parser.add_option("", "--coupling-diagram-genNos", default="", type="string", help="a string of the genNos to include in \"nl-*\" coupling diagrams")
 parser.add_option("", "--coupling-diagram-modeNo", default=-1, type=int, help="a mode number that will be highlighted in the coupling diagram.")
 
@@ -114,13 +119,16 @@ if opts.tag != "":
 if opts.coupling_hist_genNos:
   opts.coupling_hist_genNos = [int(l) for l in opts.coupling_hist_genNos.split()]
 
+opts.coupling_diagram_coloration = opts.coupling_diagram_coloration.split()
+
+
 ## summary logicals
 scat3 = (opts.scat_detuning or opts.scat_heuristic or opts.scat_Ethr)
 distrib = (opts.Ei_distrib or opts.Hns_distrib or opts.multi_gen_Ei_distrib)
 multi_gen = (opts.multi_gen_Ei_distrib or opts.multi_gen_stacked_hist or opts.coupling_hist) #or opts.multi_gen_Ei_conc or opts.multi_gen_disp_conc)
 conc = (opts.Ei_conc or opts.disp_conc) #or opts.multi_gen_Ei_conc or opts.multi_gen_disp_conc)
 
-if (opts.stacked_hist or scat3 or distrib or conc) and (not opts.outfilename):
+if (opts.stacked_hist or scat3 or distrib or conc or (opts.coupling_diagram and opts.coupling_diagram_coloration)) and (not opts.outfilename):
   opts.outfilename = raw_input("outfilename = ")
 
 if (opts.outfilename) and (not opts.tcurrent):
@@ -189,6 +197,7 @@ if opts.stacked_hist:
   ### make and save each plot
   for xvar, bin_width in opts.stacked_hist:
 
+    #==========
     if xvar == "w":
       if opts.verbose: print "\t\tw"
       if not bin_width:
@@ -205,7 +214,9 @@ if opts.stacked_hist:
       ax2_ymin = axs[2].get_ylim()[0]
       ax3_ymin = axs[3].get_ylim()[0]
 
-      binned_modeNos = nmd.bin_by_w(bins*system.Oorb, network)
+      ws = [(modeNo, mode.w) for modeNo, mode in enumerate(network.modes)]
+      ws.sort(key=lambda l: l[1])
+      binned_modeNos = nmd.bin_by_x(bins*system.Oorb, ws)
       for binNo, bin in enumerate(binned_modeNos):
         me = sum([mE[i] for i in bin])
         se = nms.sample_var([ sum([E[i][ind] for i in bin]) for ind in range(len(E[0])) ], xo=me)**0.5
@@ -227,7 +238,8 @@ if opts.stacked_hist:
         ax.set_xlim(xmin=-2.5, xmax=2.5)
         ax.grid(opts.grid, which="both")
 
-    if xvar == "l":
+    #==========
+    elif xvar == "l":
       if opts.verbose: print "\t\tl"
       if not bin_width:
         bin_width = 1.0
@@ -243,7 +255,9 @@ if opts.stacked_hist:
       ax2_ymin = axs[2].get_ylim()[0]
       ax3_ymin = axs[3].get_ylim()[0]
 
-      binned_modeNos = nmd.bin_by_l(bins*system.Oorb, network)
+      ls = [(modeNo, mode.l) for modeNo, mode in enumerate(network.modes)]
+      ls.sort(key=lambda l: l[1])
+      binned_modeNos = nmd.bin_by_x(bins, ls)
       for binNo, bin in enumerate(binned_modeNos):
         me = sum([mE[i] for i in bin])
         se = nms.sample_var([ sum([E[i][ind] for i in bin]) for ind in range(len(E[0])) ], xo=me)**0.5
@@ -265,8 +279,176 @@ if opts.stacked_hist:
         ax.set_xlim(xmin=0, xmax=np.ceil(bins[-1]))
         ax.grid(opts.grid, which="both")
 
-    axs[0].set_ylabel(r"No. modes")
-    axs[1].set_ylabel(r"No. $\kappa$")
+    #==========
+    elif xvar == "num_k":
+      if opts.verbose: print "\t\tnum_k"
+      if not bin_width:
+        bin_width = 1.0
+      num_ks = pn.compute_num_couplings(network)
+      bins = np.arange(-0.5, max(num_ks)+0.5, bin_width)
+      if opts.multi_gen_stacked_hist:
+        fig, axs = nmd.generational_stacked_histogram(network, bins, num_ks, data, log=opts.log_stacked_hist)
+      else:
+        fig, axs = nmd.stacked_histogram(bins, num_ks, data, log=opts.log_stacked_hist)
+      axs[-1].set_xlabel(r'No. couplings')
+
+      # variability measures
+      ax2_ymin = axs[2].get_ylim()[0]
+      ax3_ymin = axs[3].get_ylim()[0]
+
+      num_ks = [(modeNo, num_k) for modeNo, num_k in enumerate(num_ks)]
+      num_ks.sort(key=lambda l: l[1])
+      binned_modeNos = nmd.bin_by_x(bins, num_ks)
+      for binNo, bin in enumerate(binned_modeNos):
+        me = sum([mE[i] for i in bin])
+        se = nms.sample_var([ sum([E[i][ind] for i in bin]) for ind in range(len(E[0])) ], xo=me)**0.5
+
+        mde = sum([mdE[i] for i in bin])
+        sde = nms.sample_var([ sum([2*network.wyU[i][1]*E[i][ind] for i in bin]) for ind in range(len(E[0]))], xo=mde)**0.5
+
+        if opts.log_stacked_hist:
+          axs[2].fill_between(bins[binNo:binNo+2], (me+se)*np.ones((2,)), max((me-se), ax2_ymin)*np.ones((2,)), facecolor='b', edgecolor="none", alpha=0.2)
+          axs[3].fill_between(bins[binNo:binNo+2], (mde+sde)*np.ones((2,)), max((mde-sde), ax3_ymin)*np.ones((2,)), facecolor='b', edgecolor="none", alpha=0.2)
+        else:
+          axs[2].fill_between(bins[binNo:binNo+2], (me+se)*np.ones((2,)), (me-se)*np.ones((2,)), facecolor='b', edgecolor="none", alpha=0.2)
+          axs[3].fill_between(bins[binNo:binNo+2], (mde+sde)*np.ones((2,)), (mde-sde)*np.ones((2,)), facecolor='b', edgecolor="none", alpha=0.2)
+
+      axs[2].set_ylim(ymin=ax2_ymin)
+      axs[3].set_ylim(ymin=ax3_ymin)
+
+      for ax in axs:
+        ax.set_xscale('log')
+#        ax.set_xlim(xmin=0, xmax=np.ceil(bins[-1]))
+        ax.grid(opts.grid, which="both")
+
+    #==========
+    elif xvar == "Ethr":
+      if opts.verbose: print "\t\tEthr"
+      if not bin_width:
+        bin_width = N_m/10
+      ethrs = pn.__find_min_Ethr(system)
+#      bins = np.arange(max(min(ethrs)-bin_width/2.0, 0), max(ethrs)+bin_width/2.0, bin_width)
+      bins = np.logspace(np.log10(0.9*min(ethrs)), np.log10(1.1*max(ethrs)), bin_width)
+      if opts.multi_gen_stacked_hist:
+        fig, axs = nmd.generational_stacked_histogram(network, bins, ethrs, data, log=opts.log_stacked_hist)
+      else:
+        fig, axs = nmd.stacked_histogram(bins, ethrs, data, log=opts.log_stacked_hist)
+      axs[-1].set_xlabel(r'$\mathrm{min}\left{E_{\mathrm{thr}}\right}$')
+
+      ethrs = [(modeNo, num_k) for modeNo, num_k in enumerate(ethrs)]
+      ethrs.sort(key=lambda l: l[1])
+      binned_modeNos = nmd.bin_by_x(bins, ethrs)
+      for binNo, bin in enumerate(binned_modeNos):
+        me = sum([mE[i] for i in bin])
+        se = nms.sample_var([ sum([E[i][ind] for i in bin]) for ind in range(len(E[0])) ], xo=me)**0.5
+
+        mde = sum([mdE[i] for i in bin])
+        sde = nms.sample_var([ sum([2*network.wyU[i][1]*E[i][ind] for i in bin]) for ind in range(len(E[0]))], xo=mde)**0.5
+
+        if opts.log_stacked_hist:
+          axs[2].fill_between(bins[binNo:binNo+2], (me+se)*np.ones((2,)), max((me-se), ax2_ymin)*np.ones((2,)), facecolor='b', edgecolor="none", alpha=0.2)
+          axs[3].fill_between(bins[binNo:binNo+2], (mde+sde)*np.ones((2,)), max((mde-sde), ax3_ymin)*np.ones((2,)), facecolor='b', edgecolor="none", alpha=0.2)
+        else:
+          axs[2].fill_between(bins[binNo:binNo+2], (me+se)*np.ones((2,)), (me-se)*np.ones((2,)), facecolor='b', edgecolor="none", alpha=0.2)
+          axs[3].fill_between(bins[binNo:binNo+2], (mde+sde)*np.ones((2,)), (mde-sde)*np.ones((2,)), facecolor='b', edgecolor="none", alpha=0.2)
+
+      axs[2].set_ylim(ymin=ax2_ymin)
+      axs[3].set_ylim(ymin=ax3_ymin)
+
+      for ax in axs:
+	ax.set_xscale('log')
+#        ax.set_xlim(xmin=0, xmax=np.ceil(bins[-1]))
+        ax.grid(opts.grid, which="both")
+
+    #==========
+    elif xvar == "heuristic":
+      if opts.verbose: print "\t\theuristic"
+      if not bin_width:
+        bin_width = 101
+      heuristics = pn.__find_min_heuristic(system)
+#      bins = np.arange(max(min(heuristics)-bin_width/2.0, 0), max(heuristics)+bin_width/2.0, bin_width)
+      bins = np.logspace(np.log10(0.9*min(heuristics)), np.log10(1.1*max(heuristics)), bin_width)
+      if opts.multi_gen_stacked_hist:
+        fig, axs = nmd.generational_stacked_histogram(network, bins, heuristics, data, log=opts.log_stacked_hist)
+      else:
+        fig, axs = nmd.stacked_histogram(bins, heuristics, data, log=opts.log_stacked_hist)
+      axs[-1].set_xlabel(r'$\mathrm{min}\left{h\right}$')
+
+      heuristics = [(modeNo, num_k) for modeNo, num_k in enumerate(heuristics)]
+      heuristics.sort(key=lambda l: l[1])
+      binned_modeNos = nmd.bin_by_x(bins, heuristics)
+      for binNo, bin in enumerate(binned_modeNos):
+        me = sum([mE[i] for i in bin])
+        se = nms.sample_var([ sum([E[i][ind] for i in bin]) for ind in range(len(E[0])) ], xo=me)**0.5
+
+        mde = sum([mdE[i] for i in bin])
+        sde = nms.sample_var([ sum([2*network.wyU[i][1]*E[i][ind] for i in bin]) for ind in range(len(E[0]))], xo=mde)**0.5
+
+        if opts.log_stacked_hist:
+          axs[2].fill_between(bins[binNo:binNo+2], (me+se)*np.ones((2,)), max((me-se), ax2_ymin)*np.ones((2,)), facecolor='b', edgecolor="none", alpha=0.2)
+          axs[3].fill_between(bins[binNo:binNo+2], (mde+sde)*np.ones((2,)), max((mde-sde), ax3_ymin)*np.ones((2,)), facecolor='b', edgecolor="none", alpha=0.2)
+        else:
+          axs[2].fill_between(bins[binNo:binNo+2], (me+se)*np.ones((2,)), (me-se)*np.ones((2,)), facecolor='b', edgecolor="none", alpha=0.2)
+          axs[3].fill_between(bins[binNo:binNo+2], (mde+sde)*np.ones((2,)), (mde-sde)*np.ones((2,)), facecolor='b', edgecolor="none", alpha=0.2)
+
+      axs[2].set_ylim(ymin=ax2_ymin)
+      axs[3].set_ylim(ymin=ax3_ymin)
+
+
+      for ax in axs:
+	ax.set_xscale('log')
+#        ax.set_xlim(xmin=0, xmax=np.ceil(bins[-1]))
+        ax.grid(opts.grid, which="both")
+
+    #==========
+    elif xvar == "collE":
+      if opts.verbose: print "\t\tcollE"
+      if not bin_width:
+        bin_width = 101
+      collEs = pn.__find_collE(system).items()
+      collEs.sort(key=lambda l:l[0])
+      collEs = [l[1] for l in collEs]
+#      bins = np.arange(max(min(collEs)-bin_width/2.0, 0), max([e for e in collEs if e < np.infty])+bin_width/2.0, bin_width)
+      bins = np.logspace(np.log10(0.9*min(collEs)), np.log10(1.1*max([e for e in collEs if e < np.infty])), bin_width)
+      if opts.multi_gen_stacked_hist:
+        fig, axs = nmd.generational_stacked_histogram(network, bins, collEs, data, log=opts.log_stacked_hist)
+      else:
+        fig, axs = nmd.stacked_histogram(bins, collEs, data, log=opts.log_stacked_hist)
+      axs[-1].set_xlabel(r'$\mathrm{min}\left(\mathrm{collective}\ E_{\mathrm{thr}}\right}$')
+
+      collEs = [(modeNo, num_k) for modeNo, num_k in enumerate(collEs)]
+      collEs.sort(key=lambda l: l[1])
+      binned_modeNos = nmd.bin_by_x(bins, collEs)
+      for binNo, bin in enumerate(binned_modeNos):
+        me = sum([mE[i] for i in bin])
+        se = nms.sample_var([ sum([E[i][ind] for i in bin]) for ind in range(len(E[0])) ], xo=me)**0.5
+
+        mde = sum([mdE[i] for i in bin])
+        sde = nms.sample_var([ sum([2*network.wyU[i][1]*E[i][ind] for i in bin]) for ind in range(len(E[0]))], xo=mde)**0.5
+
+        if opts.log_stacked_hist:
+          axs[2].fill_between(bins[binNo:binNo+2], (me+se)*np.ones((2,)), max((me-se), ax2_ymin)*np.ones((2,)), facecolor='b', edgecolor="none", alpha=0.2)
+          axs[3].fill_between(bins[binNo:binNo+2], (mde+sde)*np.ones((2,)), max((mde-sde), ax3_ymin)*np.ones((2,)), facecolor='b', edgecolor="none", alpha=0.2)
+        else:
+          axs[2].fill_between(bins[binNo:binNo+2], (me+se)*np.ones((2,)), (me-se)*np.ones((2,)), facecolor='b', edgecolor="none", alpha=0.2)
+          axs[3].fill_between(bins[binNo:binNo+2], (mde+sde)*np.ones((2,)), (mde-sde)*np.ones((2,)), facecolor='b', edgecolor="none", alpha=0.2)
+
+      axs[2].set_ylim(ymin=ax2_ymin)
+      axs[3].set_ylim(ymin=ax3_ymin)
+
+
+      for ax in axs:
+	ax.set_xscale('log')
+#        ax.set_xlim(xmin=0, xmax=np.ceil(bins[-1]))
+        ax.grid(opts.grid, which="both")
+
+    #==========
+    else:
+      print "stacked_hist=%s not understood. skipping..."%xvar
+      continue
+
+    axs[0].set_ylabel(r"$\mathrm{No.\ modes}$")
+    axs[1].set_ylabel(r"$\mathrm{No.}\ \kappa$")
     axs[2].set_ylabel(r"$A_i^2$")
     axs[3].set_ylabel(r"$2 \gamma_i A_i^2$")
 
@@ -337,17 +519,76 @@ if opts.coupling_diagram:
 
     elif "nl-" in diagram_type: ### a class of diagrams
       if opts.verbose: print "\t building coupling_diagaram \"%s\"" % diagram_type
-      fig, ax = nmd.coupling_tree_nl(system, tree_type=diagram_type.split("-")[-1], genNos=[int(l) for l in opts.coupling_diagram_genNos.split()], verbose=opts.verbose)
+      if opts.coupling_diagram_coloration:
 
-      ax.grid(opts.grid)
+        ### define colormap
+        colormap = nmd.plt.get_cmap(opts.coupling_diagram_colormap)
 
-      figname = opts.logfilename+".coupling_diagram-"+diagram_type+opts.tag+".png"
-      if opts.verbose: print "saving "+figname
-      fig.savefig(figname)
-      nmd.plt.close(fig)
+        ### compute colors for each mode based on coloration scheme
+        for coloration in opts.coupling_diagram_coloration:
+          if coloration == "A":
+            if opts.verbose: print "\t\t coloration: A"
+            mA = np.array([np.mean(_) for _ in nms.compute_A(q, Eo=1.0)])
+            mA /= max(mA)
+
+            mode_colors = [colormap(_) for _ in mA]
+            mode_order = mA.argsort() # smallest values plotted first
+
+          elif coloration == "E":
+            if opts.verbose: print "\t\t coloration: E"
+            mE = np.array([np.mean(_) for _ in nms.compute_E(q, Eo=1.0)])
+            mE /= max(mE)
+
+            mode_colors = [colormap(_) for _ in mE]
+            mode_order = mE.argsort()
+
+          elif coloration == "disp":
+            if opts.verbose: print "\t\t coloration: disp"
+            myE = np.array([-np.mean(_) for _ in nms.viscous_disp(q, network, Eo=1.0)[-1]])
+            myE /= max(myE)
+
+            mode_colors = [colormap(_) for _ in myE]
+            mode_order = myE.argsort()
+
+          else:
+            if opts.verbose: print "\t\tcoloration \"%s\" not understood. skipping..." % coloration
+            continue
+
+          fig = nmd.plt.figure()
+          ax = fig.add_axes([0.1, 0.1, 0.750, 0.8])
+          cbax = fig.add_axes([0.875, 0.1, 0.025, 0.8])
+
+          fig, ax = nmd.coupling_tree_nl(system, tree_type=diagram_type.split("-")[-1], genNos=[int(l) for l in opts.coupling_diagram_genNos.split()], verbose=opts.verbose, mode_colors=mode_colors, mode_order=mode_order, fig_ax=(fig,ax))
+          ax.grid(opts.grid)
+
+          ### add color bar!
+          if opts.coupling_diagram_logcolors:
+            colorbar = nmd.matplotlib.colorbar.ColorbarBase(cbax, cmap=colormap, orientation='vertical', norm=nmd.matplotlib.colors.LogNorm())
+          else:
+            colorbar = nmd.matplotlib.colorbar.ColorbarBase(cbax, cmap=colormap, orientation='vertical')
+
+          if coloration == "A":
+            colorbar.ax.set_ylabel(r"$A_i/\mathrm{max}\{A_i\}$")
+          elif coloration == "E":
+            colorbar.ax.set_ylabel(r"$A_i^2/\mathrm{max}\{A_i^2\}$")
+          elif coloration == "disp":
+            colorbar.ax.set_ylabel(r"$\gamma_i A_i^2/\mathrm{max}\{\gamma_i A_i^2\}$")
+
+          figname = opts.logfilename+".coupling_diagram-"+diagram_type+"-"+coloration+opts.tag+".png"
+          if opts.verbose: print "saving "+figname
+          fig.savefig(figname)
+          nmd.plt.close(fig)
+
+      else:
+        fig, ax = nmd.coupling_tree_nl(system, tree_type=diagram_type.split("-")[-1], genNos=[int(l) for l in opts.coupling_diagram_genNos.split()], verbose=opts.verbose)
+        ax.grid(opts.grid)
+        figname = opts.logfilename+".coupling_diagram-"+diagram_type+opts.tag+".png"
+        if opts.verbose: print "saving "+figname
+        fig.savefig(figname)
+        nmd.plt.close(fig)
 
     else:
-      if opts.verbose: print "\tcoupling_diagram \"%s\" not understood. skipping..." % type
+      if opts.verbose: print "\tcoupling_diagram \"%s\" not understood. skipping..." % diagram_type
 
 ####################################################################################################
 #

@@ -543,7 +543,7 @@ def __collective_metric( pk ):
   computes the ranking metric for an element of a boarder_modes list
 
   pk is assumed to have the following form
-    pk = [ [Ethr, (partner_ind, k)], ... ] 
+    pk = [ [Ethr, (partner_ind, k)], ... ] and is sorted in order of increasing Ethr
 
   """
 #  return max([Ethr for Ethr, _ in pk])
@@ -586,7 +586,8 @@ def __update_boarder_modes(this_mode, this_mode_ind, other_boarder_modes, k_hat,
         other_pk = ms.insert_in_place( [Ethr, (this_mode_ind, k)], other_pk ) # we've appended it to _included_modes
 
         ### update metric
-        other_boarder_modes[ind][0] = __collective_metric( other_pk )
+#        other_boarder_modes[ind][0] = __collective_metric( other_pk )
+        other_boarder_modes[ind][0] = ms.compute_collE( [ethr for ethr, _ in other_pk] )
 
   other_boarder_modes.sort(key=lambda L: L[0]) # can't get rid of this sort, but hopefully quicksort will still run efficiently
 
@@ -634,7 +635,8 @@ def __extend_boarder(this_mode, this_boarder, this_boarder_modes, this_included,
 
     ### add mode to boarders1
     this_boarder[new_mode.l].add( new_mode.n )
-    this_boarder_modes = ms.insert_in_place( [__collective_metric( pk ) , (new_mode, pk)], this_boarder_modes ) # reduces the overhead for sorting during this step. 
+#    this_boarder_modes = ms.insert_in_place( [__collective_metric( pk ) , (new_mode, pk)], this_boarder_modes )
+    this_boarder_modes = ms.insert_in_place( [ms.compute_collE( [ethr for ethr, _ in pk] ) , (new_mode, pk)], this_boarder_modes ) # reduces the overhead for sorting during this step. 
 
   return True
 

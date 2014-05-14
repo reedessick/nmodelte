@@ -1,8 +1,9 @@
 usage=""" contains a class which represents a modal network. Includes basic mode classes """
 
 import math
+import numpy as np
 from nmode_utils import float_to_scientific
-from mode_selection import compute_Ethr
+from mode_selection import compute_Ethr, compute_Elin
 
 ####################################################################################################
 #
@@ -387,6 +388,30 @@ class system:
       self.network = network()
 
   ###
+  def compute_linear_freqs(self, modeNos):
+    """
+    returns the linear oscillation frequency of the modes in modeNos
+      if multichromatic forcing is present (len(U)>1), we select the frequency with highest linear energy
+    """
+    network = self.network
+
+    freqs = []
+    for modeNo in modeNos:
+      wo, yo, Uo = network.wyU[modeNo]
+      mo = network.nlm[modeNo][-1]
+      Elin = -np.infty
+      O = wo
+      for u, k in Uo:
+        o = mo*k*self.Oorb # parent oscillates at -m*k*Oorb
+        elin = compute_Elin(o, wo, yo, u)
+        if elin > Elin:
+          Elin = elin
+          O = o
+      freqs.append( O )
+
+    return freqs
+
+  ###
   def compute_3mode_freqs(self):
     """
     compute all analytic frequencies for this network
@@ -394,9 +419,9 @@ class system:
     network = self.network
     modes = {}
 
-    g0 = network.find_G0()
-    for modeNo in g0:
-      modes[modeNo] = network.nlm[modeNo][-1]*self.Oorb # parents oscillate at -m*Oorb
+    g0 = network.find_G0() # find G0
+    for modeNo, O in zip(g0, self.compute_linear_freqs(g0)): # compute linear frequencies and assign them
+      modes[modeNo] = O
 
     gi = g0
     while len(modes.keys()) < len(network):
@@ -424,5 +449,125 @@ class system:
 
       gi = gip1
 
-    return [(value, key) for key, value in modes.items()]
+    return [modes[modeNo] for modeNo in sorted(modes.keys())]
+#    return modes # (modeNo, freq)
+#    return [(value, key) for key, value in modes.items()]
 
+  ###
+  def compute_lin_eq(self, t=0.0, default=1e-20, tcurrent="x"):
+    """
+    computes the linear equlibrium state at t by choosing the most resonant forcing for each mode and computing the linear amplitude.
+    for modes without linear forcing, we set the real and imaginary parts to rand*default separately.
+    for multi-chromatic forcing, we choose the most resonant frequency.
+    """
+    network = self.network
+    Nm = len(network)
+    q = np.zeros((2*Nm,))
+    for modeNo in range(Nm):
+      wo, yo, Uo = network.wyU[modeNo]
+      if len(Uo): # it is linearly forced
+        mo = network.nlm[modeNo][-1]
+        Elin = -np.infty
+        O = wo
+        U = 0.0
+        for u, k in Uo:
+          o = mo*k*self.Oorb
+          elin = compute_Elin(o, wo, yo, u)
+          if elin > Elin:
+            Elin = elin
+            O = o
+            U = u
+
+        cd = np.cos((wo-O)*wo*U/((wo-O)**2+yo**2))
+        sd = np.sin(yo*wo*U/((wo-O)**2+yo**2))
+
+        if tcurrent == "q":
+          p = o*t
+          cp = np.cos(p)
+          sp = np.sin(p)
+          q[2*modeNo:2*modeNo+2] = Elin**0.5 * np.array([cp*cd + sp*sd, -sp*cd + sd*cp])
+        elif tcurrent == "x":
+          p = (O-wo)*t
+          cp = np.cos(p)
+          sp = np.sin(p)
+          q[2*modeNo:2*modeNo+2] = Elin**0.5 * np.array([cp*cd + sp*sd, -sp*cd + sd*cp])
+        else:
+          raise ValueError, "unknown tcurrent = %s"%tcurrent
+
+      else: # not linearly forced, so we set it to rand*default
+        q[2*modeNo:2*modeNo+2] = np.random.rand(2)*default
+
+    return q
+
+  ###
+  def compute_3mode_eq(self, t=0.0, default=1e-20, tcurrent="x"):
+    """
+    computes the 3mode equilibrium state at t by choosing the G0-G1 triple that minimizes Ethr. Ignores all modes with genNo >1
+    for modes that do not participate in the 3mode equilib, the real and imaginary parts are set to rand*default, with rand chosen separately for the real and imag parts
+
+    if there are no couplings between G0-G1, we return the linear equilibrium state 
+    """
+    network = self.network
+    gens, coups = network.gens()
+
+    if not len(coups[0]): # no couplings from parents to next generation -> only one generation
+      return self.compute_lin_eq(t=t, default=default)
+
+    from nmode_state import threeMode_equilib # we import this here because it avoids conflicts when importing the module as a whole
+
+    freqs = {}
+    for modeNo, O in zip(gens[0], self.compute_linear_freqs(gens[0])): # compute linear frequencies and assign them
+      freqs[modeNo] = O
+      
+    Ethr = np.infty
+    for o,i,j,k in coups[0]: # these are couplings with G0 as parent (o) and G1 as children (i,j)
+      Oo = freqs[o]
+      wi, yi, _ = network.wyU[i]
+      wj, yj, _ = network.wyU[j]
+      ethr = compute_Ethr(Oo, wi, wj, yi, yj, k)
+      if ethr < Ethr: # choose tuple with lowest Ethr
+        Ethr = ethr
+        best_tuple = (o,i,j,k)
+
+    ### for best tuple
+    (o,i,j), (Ao, Ai, Aj), ((so, co), (si, ci), (sj, cj)), (do, di, dj) = threeMode_equilib(best_tuple, freqs[best_tuple[0]], network) # get amplitudes, phases and detunings appropriate for tcurrent == "q"
+  
+    ### instantiate IC vector
+    q = np.random.rand(2*len(network))*default # the vast majority are set to rand*default
+    
+    ### fill in best triple
+    if tcurrent == "q":
+      p = (wo-do)*t
+      cp = np.cos(p)
+      sp = np.sin(p)
+      q[2*o:2*o+2] = Ao*np.array([cp*co + sp*so, -sp*co + cp*so])
+
+      p = (wi-di)*t
+      cp = np.cos(p)
+      sp = np.sin(p)
+      q[2*i:2*i+2] = Ai*np.array([cp*ci + sp*si, -sp*ci + cp*si])
+
+      p = (wj-dj)*t
+      cp = np.cos(p)
+      sp = np.sin(p)
+      q[2*j:2*j+2] = Aj*np.array([cp*cj + sp*sj, -sp*cj + cp*sj])
+
+    elif tcurrent == "x":
+      p = do*t
+      cp = np.cos(p)
+      sp = np.sin(p)
+      q[2*o:2*o+2] = Ao*np.array([cp*co - sp*so, sp*co + cp*so])
+
+      p = di*t
+      cp = np.cos(p)
+      sp = np.sin(p)
+      q[2*i:2*i+2] = Ai*np.array([cp*ci - sp*si, sp*ci + cp*si])
+
+      p = dj*t
+      cp = np.cos(p)
+      sp = np.sin(p)
+      q[2*j:2*j+2] = Aj*np.array([cp*cj - sp*sj, sp*cj + cp*sj])
+    else:
+      raise ValueError, "unknown tcurrent = %s"%tcurrent
+
+    return q
