@@ -333,7 +333,7 @@ if opts.stacked_hist:
         fig, axs = nmd.generational_stacked_histogram(network, bins, ethrs, data, log=opts.log_stacked_hist)
       else:
         fig, axs = nmd.stacked_histogram(bins, ethrs, data, log=opts.log_stacked_hist)
-      axs[-1].set_xlabel(r'$\mathrm{min}\left{E_{\mathrm{thr}}\right}$')
+      axs[-1].set_xlabel(r'$\mathrm{min}\left\{E_{\mathrm{thr}}\right\}$')
 
       ethrs = [(modeNo, num_k) for modeNo, num_k in enumerate(ethrs)]
       ethrs.sort(key=lambda l: l[1])
@@ -372,7 +372,7 @@ if opts.stacked_hist:
         fig, axs = nmd.generational_stacked_histogram(network, bins, heuristics, data, log=opts.log_stacked_hist)
       else:
         fig, axs = nmd.stacked_histogram(bins, heuristics, data, log=opts.log_stacked_hist)
-      axs[-1].set_xlabel(r'$\mathrm{min}\left{h\right}$')
+      axs[-1].set_xlabel(r'$\mathrm{min}\left\{h\right\}$')
 
       heuristics = [(modeNo, num_k) for modeNo, num_k in enumerate(heuristics)]
       heuristics.sort(key=lambda l: l[1])
@@ -414,7 +414,7 @@ if opts.stacked_hist:
         fig, axs = nmd.generational_stacked_histogram(network, bins, collEs, data, log=opts.log_stacked_hist)
       else:
         fig, axs = nmd.stacked_histogram(bins, collEs, data, log=opts.log_stacked_hist)
-      axs[-1].set_xlabel(r'$\mathrm{min}\left(\mathrm{collective}\ E_{\mathrm{thr}}\right}$')
+      axs[-1].set_xlabel(r'$\mathrm{min}\left\{\mathrm{collective}\ E_{\mathrm{thr}}\right\}$')
 
       collEs = [(modeNo, num_k) for modeNo, num_k in enumerate(collEs)]
       collEs.sort(key=lambda l: l[1])
