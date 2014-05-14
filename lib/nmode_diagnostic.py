@@ -40,29 +40,29 @@ def bin_by_x(bins, x):
   return binned
 
 ##################################################
-def bin_by_w(bins, network):
-  """
-  places modes into bins using their natural frequencies.
-  bins is a list of bin edges
-  returns a list of mode numbers corresponding to each bin
-  """
-  ws = [(modeNo, mode.w) for modeNo, mode in enumerate(network.modes)]
-  ws.sort(key=lambda l: l[1])
- 
-  return bin_by_x(bins, ws)
-
+#def bin_by_w(bins, network):
+#  """
+#  places modes into bins using their natural frequencies.
+#  bins is a list of bin edges
+#  returns a list of mode numbers corresponding to each bin
+#  """
+#  ws = [(modeNo, mode.w) for modeNo, mode in enumerate(network.modes)]
+#  ws.sort(key=lambda l: l[1])
+# 
+#  return bin_by_x(bins, ws)
+#
 ##################################################
-def bin_by_l(bins, network):
-  """
-  places modes into bins using their angular quantum number
-  bins is a list of bin edges
-  returns a list of mode numbers corresponding to each bin
-  """
-  ls = [(modeNo, mode.l) for modeNo, mode in enumerate(network.modes)]
-  ls.sort(key=lambda l: l[1])
-
-  return bin_by_x(bins, ls)
-
+#def bin_by_l(bins, network):
+#  """
+#  places modes into bins using their angular quantum number
+#  bins is a list of bin edges
+#  returns a list of mode numbers corresponding to each bin
+#  """
+#  ls = [(modeNo, mode.l) for modeNo, mode in enumerate(network.modes)]
+#  ls.sort(key=lambda l: l[1])
+#
+#  return bin_by_x(bins, ls)
+#
 ####################################################################################################
 #
 #
@@ -92,9 +92,10 @@ def stacked_histogram(bins, xdata, data, log=False):
   # iterate and build plots
   for d in range(depth):
     ax = fig.add_axes([0.15, 0.95-(d+1)*ax_height, ax_width, ax_height-buffer])
-    ax.hist(xdata, bins, weights=[l[d] for l in data], histtype="step", log=log)
+    n, _, _ = ax.hist(xdata, bins, weights=[l[d] for l in data], histtype="step", log=log)
 
     plt.setp(ax.get_xticklabels(), visible=False)
+    ax.set_ylim(ymax=1.1*max(n)) ### auto-scaling appears to mess up occassionally
     axs.append(ax)
 
   plt.setp(ax.get_xticklabels(), visible=True)
@@ -131,7 +132,18 @@ def generational_stacked_histogram(network, bins, xdata, data, log=False):
   buffer = 0.01
 
   # iterate and build plots
-  xdata_by_gen = [ [xdata[modeNo] for modeNo in gen] for gen in gens ]
+  xdata_by_gen = []
+  for gen in gens:
+    this_gen = []
+    for modeNo in gen:
+      x = xdata[modeNo]
+      if x < bins[0]: # in case binning is poor...
+        x = bins[0]
+      elif x > bins[-1]: # in case binning is poor...
+        x = bins[-1]
+      this_gen.append( x )
+    xdata_by_gen.append( this_gen )
+#  xdata_by_gen = [ [xdata[modeNo] for modeNo in gen] for gen in gens ]
 
   for d in range(depth):
     ax = fig.add_axes([0.15, 0.95-(d+1)*ax_height, ax_width, ax_height-buffer])
@@ -179,7 +191,7 @@ def coupling_hist(network, gens=False, num_bins=50, log=False, genNos=False):
   return fig, ax
 
 ##################################################
-def coupling_tree_nl(system, tree_type="placement", genNos=[], verbose=False, mode_colors="b", mode_order=None, conn_colors="r", fig_ax=None):
+def coupling_tree_nl(system, tree_type="placement", genNos=[], verbose=False, mode_colors="b", mode_order=None, conn_colors="r", fig_ax=None, mode_nums=[]):
   """
   coupling diagram in the n-l plane via delegation through __coupling_tree_nl.
     tree_type determines the types of connections drawn between modes
@@ -294,6 +306,10 @@ def coupling_tree_nl(system, tree_type="placement", genNos=[], verbose=False, mo
     modeNo_map = dict( (modeNo, ind) for ind, modeNo in enumerate(modeNos) )
     conns = [(modeNo_map[modeNo1], modeNo_map[modeNo2]) for modeNo1, modeNo2 in conns]
 
+  if mode_nums: ### down-select which modes are plotted
+    modeNos = [modeNo for modeNo in mode_nums if (modeNo in modeNos)]
+    modeNo_map = dict( (modeNo, ind) for ind, modeNo in enumerate(modeNos) )
+    conns = [(modeNo_map[modeNo1], modeNo_map[modeNo2]) for modeNo1, modeNo2 in conns if (modeNo_map.has_key(modeNo1) and modeNo_map.has_key(modeNo2))]
 
   return __coupling_tree_nl([system.network.modes[modeNo] for modeNo in modeNos], mode_colors=[mode_colors[modeNo] for modeNo in modeNos], conns=conns, conn_colors=conn_colors, verbose=verbose, fig_ax=fig_ax)
 #  return __coupling_tree_nl(modes, mode_colors=__mode_colors, conns=conns, conn_colors=conn_colors, verbose=verbose, fig_ax=fig_ax)
@@ -345,8 +361,12 @@ def __coupling_tree_nl(modes, mode_colors="b", conns=[], conn_colors="r", verbos
   ax.set_xlabel(r"$l+m/4l$")
   ax.set_ylabel(r"$n$")
 
-  ax.set_xlim(xmin=min(x)-0.25, xmax=max(x)+0.25)
-  ax.set_ylim(ymin=min(y)*0.90, ymax=max(y)*1.05)
+  if x: ### we're actually plotting something
+    ax.set_xlim(xmin=min(x)-0.25, xmax=max(x)+0.25)
+    ax.set_ylim(ymin=min(y)*0.90, ymax=max(y)*1.05)
+  else:
+    ax.set_xlim(xmin=-0.25, xmax=+0.25)
+    ax.set_ylim(ymin=0, ymax=1)
 
   return fig, ax
 

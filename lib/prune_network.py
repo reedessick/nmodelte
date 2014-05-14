@@ -1,5 +1,6 @@
 usage="""written to add / remove modes from a network"""
 
+import numpy as np
 import nmode_state as nm_s
 import mode_selection as ms
 import networks
@@ -20,16 +21,25 @@ def downselect_Alast(q, Athr, network, mode_nums=None):
   # separate modes based on amplitude threshold
   if not mode_nums:
     mode_nums = range(len(network))
+  if isinstance(Athr, (int,float)):
+    Athr = [Athr]
+    single = True
 
-  remove = []
-  for modeNo in mode_nums:
-    A = sum([l**2 for l in q[modeNo][-1]])**0.5
-    if A <= Athr:
-      remove.append( network.modes[modeNo].get_nlms() )
-    else:
-      pass
+  removes = []
+  for athr in Athr:
+    remove = []
+    for modeNo in mode_nums:
+      A = sum([l**2 for l in q[modeNo][-1]])**0.5
+      if A <= athr:
+        remove.append( network.modes[modeNo].get_nlms() )
+      else:
+        pass
+    removes.append(remove)
 
-  return remove
+  if single:
+    return removes[0]
+  else:
+   return removes
 
 ##################################################
 def downselect_Amean(q, Athr, network, mode_nums=None):
@@ -39,16 +49,25 @@ def downselect_Amean(q, Athr, network, mode_nums=None):
   """
   if not mode_nums:
     mode_nums = range(len(network))
+  if isinstance(Athr, (int,float)):
+    Athr = [Athr]
+    single = True
 
   Amean = [1.0*sum(Ai)/len(Ai) for Ai in nm_s.compute_A(q)] # average amplitudes
-  remove = []
-  for modeNo in mode_nums:
-    if Amean[modeNo] <= Athr:
-      remove.append( network.modes[modeNo].get_nlms() )
-    else:
-      pass
+  removes = []
+  for athr in Athr:
+    remove = []
+    for modeNo in mode_nums:
+      if Amean[modeNo] <= Athr:
+        remove.append( network.modes[modeNo].get_nlms() )
+      else:
+        pass
+    removes.append(remove)
 
-  return remove
+  if single:
+    return removes[0]
+  else:
+    return removes
 
 ##################################################
 def downselect_Afit(q, Athr, network, t_P=None, mode_nums=None):
@@ -63,17 +82,25 @@ def downselect_Afit(q, Athr, network, t_P=None, mode_nums=None):
   """
   if not t_P:
     t_P = range(len(q[0]))
-
   if not mode_nums:
     mode_nums = range(len(network))
+  if isinstance(Athr, (int,float)):
+    Athr = [Athr]
+    single = True
 
   Afit, yfit, chi2_red = nm_s.A_exp_fit(t_P, q)
-  remove = []
-  for modeNo in mode_nums:
-    if (Afit[modeNo] <= Athr) and (yfit[modeNo] < 0):
-      remove.append( network.modes[modeNo].get_nlms() )
+  removes = []
+  for athr in Athr:
+    remove = []
+    for modeNo in mode_nums:
+      if (Afit[modeNo] <= Athr) and (yfit[modeNo] < 0):
+        remove.append( network.modes[modeNo].get_nlms() )
+    removes.append( remove )
 
-  return remove
+  if single:
+    return removes[0]
+  else:
+    return removes
 
 ##################################################
 def within_bandwidth_analytic(min_w, max_w, system, mode_nums=False):
@@ -166,14 +193,23 @@ def num_couplings_greater_than(num_k, network, mode_nums=None):
   """ returns a set of modes with len(K) >= num_k """
   if not mode_nums:
     mode_nums = range(len(network))
+  if isinstance(num_k, (int)):
+    num_k = [num_k]
+    single = True
 
   num_couplings = compute_num_couplings(network)
-  modes = []
-  for modeNo in mode_nums:
-    if num_couplings[modeNo] >= num_k:
-      modes.append( network.modes[modeNo] )
+  all_modes = []
+  for nk in num_k:
+    modes = []
+    for modeNo in mode_nums:
+      if num_couplings[modeNo] >= nk:
+        modes.append( network.modes[modeNo] )
+    all_modes.append( modes )
 
-  return modes
+  if single:
+    return all_modes[0]
+  else:
+    return all_modes
 
 ##################################################
 def num_couplings_less_than(num_k, network, mode_nums=None):
@@ -190,6 +226,24 @@ def num_couplings_less_than(num_k, network, mode_nums=None):
   return modes
 
 ##################################################
+def num_couplings_gl_than(num_k, network, mode_nums=None):
+  """ returns a set of modes with len(K) >= num_k and a separate set with len(K) < num_k. Note, modes with len(K)==num_k are returned only in the greater than list"""
+  if not mode_nums:
+    mode_nums = range(len(network))
+
+  num_couplings = compute_num_couplings(network)
+  modes = []
+  _modes = []
+  for modeNo in mode_nums:
+    if num_couplings[modeNo] >= num_k:
+      modes.append( network.modes[modeNo] )
+    else:
+      _modes.append( network.modes[modeNo] )
+
+  return modes, _modes
+
+
+##################################################
 def __find_heuristic(system, freqs=None, triples=None):
   """ computes heuristic for each triple in triples. If triples=None, we compute all triples in the network"""
   if not freqs:
@@ -203,6 +257,17 @@ def __find_heuristic(system, freqs=None, triples=None):
     heuristics.append( (ms.compute_heuristic(freqs[modeNoo], modei.w, modej.w, modei.y, modej.y), (modeo, modei, modej, k)) )
 
   return heuristics
+
+##################################################
+def __find_min_heuristic(system, freqs=None, triples=None):
+  """ computes the minimum Ethr associated with each mode """
+  heuristics = __find_heuristic(system, freqs=freqs, triples=triples)
+  H = [[np.infty] for _ in system.network.modes]
+  for h, (modeo, modei, modej, k) in heuristics:
+    for mode in [modeo, modei, modej]:
+      modeNo = system.network.modeNoD[mode.get_nlms()]
+      H[modeNo].append( h )
+  return [min(h) for h in H]
 
 ##################################################
 def heuristic_greater_than(heuristic, system, freqs=None, mode_nums=None):
@@ -249,6 +314,36 @@ def heuristic_less_than(heuristic, system, freqs=None, mode_nums=None):
   return [system.network.modes[modeNo] for modeNo in modeNos]
 
 ##################################################
+def heuristic_gl_than(heuristic, system, freqs=None, mode_nums=None):
+  """ returns a set of modes with heuristic greater than heuristic and one with heuristic less than heuristic. If freqs is not supplied, we compute freqs with syste.compute_3mode_freqs()"""
+  if not mode_nums:
+    mode_nums = range(len(system.network))
+
+  heuristics = __find_heuristic(system, freqs=freqs)
+  modeNos = set()
+  _modeNos = set()
+  for h, (modeo, modei, modej, k) in heuristics:
+    if (h >= heuristic): # downselect triples
+      modeNoo = system.network.modeNoD[modeo.get_nlms()]
+      modeNoi = system.network.modeNoD[modei.get_nlms()]
+      modeNoj = system.network.modeNoD[modej.get_nlms()]
+      these_mode_nums = [modeNoo, modeNoi, modeNoj]
+      for modeNo in mode_nums:
+        if (modeNo in these_mode_nums): # if the mode participates in this triple, add it
+          modeNos.add( modeNo )
+    else:
+      modeNoo = system.network.modeNoD[modeo.get_nlms()]
+      modeNoi = system.network.modeNoD[modei.get_nlms()]
+      modeNoj = system.network.modeNoD[modej.get_nlms()]
+      these_mode_nums = [modeNoo, modeNoi, modeNoj]
+      for modeNo in mode_nums:
+        if (modeNo in these_mode_nums): # if the mode participates in this triple, add it
+          _modeNos.add( modeNo )
+
+  return [system.network.modes[modeNo] for modeNo in modeNos], [system.network.modes[modeNo] for modeNo in _modeNos]
+
+
+##################################################
 def __find_Ethr(system, freqs=None, triples=None):
   """ computes Ethr for each triple in triples. If triples=None, we compute all triples in the network"""
   if not freqs:
@@ -262,6 +357,17 @@ def __find_Ethr(system, freqs=None, triples=None):
     Ethrs.append( (ms.compute_Ethr(freqs[modeNoo], modei.w, modej.w, modei.y, modej.y, k), (modeo, modei, modej, k)) )
 
   return Ethrs
+
+##################################################
+def __find_min_Ethr(system, freqs=None, triples=None):
+  """ computes the minimum Ethr associated with each mode """
+  ethrs = __find_Ethr(system, freqs=freqs, triples=triples)
+  Ethrs = [[np.infty] for _ in system.network.modes]
+  for E, (modeo, modei, modej, k) in ethrs:
+    for mode in [modeo, modei, modej]:
+      modeNo = system.network.modeNoD[mode.get_nlms()]
+      Ethrs[modeNo].append( E )
+  return [min(e) for e in Ethrs] 
 
 ##################################################
 def Ethr_greater_than(Ethr, system, freqs=None, mode_nums=None):
@@ -306,6 +412,35 @@ def Ethr_less_than(Ethr, system, freqs=None, mode_nums=None):
       pass
 
   return [system.network.modes[modeNo] for modeNo in modeNos]
+
+##################################################
+def Ethr_gl_than(Ethr, system, freqs=None, mode_nums=None):
+  """ returns a set of modes with Ethr greater than Ethr and one with Ethr less than Ethr. If freqs is not supplied, we compute freqs with syste.compute_3mode_freqs()"""
+  if not mode_nums:
+    mode_nums = range(len(system.network))
+
+  Ethrs = __find_Ethr(system, freqs=freqs)
+  modeNos = set()
+  _modeNos = set()
+  for E, (modeo, modei, modej, k) in Ethrs:
+    if (E >= Ethr): # downselect triples
+      modeNoo = system.network.modeNoD[modeo.get_nlms()]
+      modeNoi = system.network.modeNoD[modei.get_nlms()]
+      modeNoj = system.network.modeNoD[modej.get_nlms()]
+      these_mode_nums = [modeNoo, modeNoi, modeNoj]
+      for modeNo in mode_nums:
+        if (modeNo in these_mode_nums): # if the mode participates in this triple, add it
+          modeNos.add( modeNo )
+    else:
+      modeNoo = system.network.modeNoD[modeo.get_nlms()]
+      modeNoi = system.network.modeNoD[modei.get_nlms()]
+      modeNoj = system.network.modeNoD[modej.get_nlms()]
+      these_mode_nums = [modeNoo, modeNoi, modeNoj]
+      for modeNo in mode_nums:
+        if (modeNo in these_mode_nums): # if the mode participates in this triple, add it
+          _modeNos.add( modeNo )
+
+  return [system.network.modes[modeNo] for modeNo in modeNos], [system.network.modes[modeNo] for modeNo in _modeNos]
 
 ##################################################
 def __find_collE(system, freqs=None, mode_nums=None):
@@ -371,4 +506,21 @@ def collE_less_than(Eo, system, freqs=None, mode_nums=None):
 
   return modes
 
+##################################################
+def collE_gl_than(Eo, system, freqs=None, mode_nums=None):
+  """ returns a set of modes with NmodeE greater than NmodeE and one with NmodeE less than NmodeE. If freqs is not supplied, we compute freqs with syste.compute_3mode_freqs()"""
+  if not mode_nums:
+    mode_nums = range(len(system.network))
+
+  collE = __find_collE(system, freqs=freqs, mode_nums=mode_nums)
+  modes = []
+  _modes = []
+  for modeNo, e in collE.items():
+    if e >= Eo:
+#      print e
+      modes.append( system.network.modes[modeNo] )
+    else:
+      _modes.append( system.network.modes[modeNo] )
+
+  return modes, _modes
 
