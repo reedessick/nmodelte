@@ -211,7 +211,8 @@ def coupling_tree_nl(system, tree_type="placement", genNos=[], verbose=False, mo
     genNos = range(N_g)
 
   modeNos = []
-  conns = []
+#  conns = []
+  conns = set()
   ### determine the type of plot
   if verbose: print "\t\tdetermining which modes/conns to plot based on tree_type=%s" % tree_type
 
@@ -228,42 +229,50 @@ def coupling_tree_nl(system, tree_type="placement", genNos=[], verbose=False, mo
           old_modeNos.add(o)
           old_modeNos.add(i)
           old_modeNos.add(j)
-          conns += [(o,i), (o,j), (i,j)]
+#          conns += [(o,i), (o,j), (i,j)]
+          old_conns.add(tuple(sorted([o,i])))
+          old_conns.add(tuple(sorted([o,j])))
+          old_conns.add(tuple(sorted([i,j])))
       if (genNo>0) and (genNo-1 not in genNos):
         for o,i,j,_ in coups[genNo-1]: # genNo modes are children --> add everything they touch
           old_modeNos.add(o)
           old_modeNos.add(i)
           old_modeNos.add(j)
-          old_conns.add((o,i))
-          old_conns.add((o,j))
-          old_conns.add((i,j))
-    modeNo_map = {}
-    for new_modeNo, old_modeNo in enumerate(old_modeNos): # build modeNo_map and fill out modes
-      modeNo_map[old_modeNo] = new_modeNo
-      modeNos.append( old_modeNo )
-    for old_modeNo1, old_modeNo2 in old_conns: # convert old_conns with new_modeNo
-      conns.append( (modeNo_map[old_modeNo1], modeNo_map[old_modeNo2]) )
+          old_conns.add(tuple(sorted([o,i])))
+          old_conns.add(tuple(sorted([o,j])))
+          old_conns.add(tuple(sorted([i,j])))
+#    modeNo_map = {}
+#    for new_modeNo, old_modeNo in enumerate(old_modeNos): # build modeNo_map and fill out modes
+#      modeNo_map[old_modeNo] = new_modeNo
+#      modeNos.append( old_modeNo )
+#    for old_modeNo1, old_modeNo2 in old_conns: # convert old_conns with new_modeNo
+#      conns.append( (modeNo_map[old_modeNo1], modeNo_map[old_modeNo2]) )
+    modeNos += list(old_modeNos)
+#    conns += list(old_conns)
+    conns.update(old_conns)
 
   elif tree_type == "siblings": # modes in the same generation directly connected to eachother.
-    modeNo_map = {}
-    new_modeNo = 0
+#    modeNo_map = {}
+#    new_modeNo = 0
     for genNo in genNos:
       for modeNo in gens[genNo]:
         modeNos.append( modeNo )
-        modeNo_map[modeNo] = new_modeNo
-        new_modeNo += 1
+#        modeNo_map[modeNo] = new_modeNo
+#        new_modeNo += 1
       if genNo > 0: # gen0 has no siblings by this definition
         for _,i,j,_ in coups[genNo-1]:
-          conns.append( (modeNo_map[i], modeNo_map[j]) )
+#          conns.append( (modeNo_map[i], modeNo_map[j]) )
+#          conns.append( (i, j) )
+          conns.add( tuple(sorted([i,j])) )
 
   elif tree_type == "shared_parent": # modes in the same generation that share a parent
-    modeNo_map = {}
-    new_modeNo = 0
+#    modeNo_map = {}
+#    new_modeNo = 0
     for genNo in genNos:
       for modeNo in gens[genNo]:
         modeNos.append( modeNo )
-        modeNo_map[modeNo] = new_modeNo
-        new_modeNo += 1
+#        modeNo_map[modeNo] = new_modeNo
+#        new_modeNo += 1
       if genNo > 0: # gen0 has no parent
         parent_map = defaultdict( set )
         for o,i,j,_ in coups[genNo-1]: # the couplings that have this genNo as children
@@ -273,18 +282,21 @@ def coupling_tree_nl(system, tree_type="placement", genNos=[], verbose=False, mo
           children = list(children)
           N_children = len(children)
           for ind1 in range(N_children):
-            new_modeNo1 = modeNo_map[children[ind1]]
+ #           new_modeNo1 = modeNo_map[children[ind1]]
+            modeNo_child1 = children[ind1]
             for ind2 in range(ind1+1, N_children): # don't connect modes to themselves because that's stupid in this situation
-              conns.append( (new_modeNo1, modeNo_map[children[ind2]]) )
+#              conns.append( (new_modeNo1, modeNo_map[children[ind2]]) )
+#              conns.append( (modeNo_child1, children[ind2]) )
+              conns.add( tuple(sorted([modeNo_child1, children[ind2]])) )
 
   elif tree_type == "shared_child": # modes in the same generation that share a child
-    modeNo_map = {}
-    new_modeNo = 0
+#    modeNo_map = {}
+#    new_modeNo = 0
     for genNo in genNos:
       for modeNo in gens[genNo]:
         modeNos.append( modeNo )
-        modeNo_map[modeNo] = new_modeNo
-        new_modeNo += 1
+#        modeNo_map[modeNo] = new_modeNo
+#        new_modeNo += 1
       if genNo < N_g-1: # gen(N_g-1) has no children
         child_map = defaultdict( set )
         for o,i,j,_ in coups[genNo]: # these couplings are when genNo is the parent
@@ -294,22 +306,24 @@ def coupling_tree_nl(system, tree_type="placement", genNos=[], verbose=False, mo
           parents = list(parents)
           N_parents = len(parents)
           for ind1 in range(N_parents):
-            new_modeNo1 = modeNo_map[parents[ind1]]
+#            new_modeNo1 = modeNo_map[parents[ind1]]
+            modeNo_parent1 = parents[ind1]
             for ind2 in range(ind1+1, N_parents): # don't connect modes to themselves because that's stupid in this situation
-              conns.append( (new_modeNo1, modeNo_map[parents[ind2]]) )
-
+#              conns.append( (new_modeNo1, modeNo_map[parents[ind2]]) )
+#              conns.append( (modeNo_parent1, parents[ind2]) )
+              conns.add( tuple(sorted([modeNo_parent1, parents[ind2]])) )
   else:
     raise ValueError("unkown tree_type=%s in nmode_diagnostic.coupling_tree_nl" % tree_type)
 
+  if mode_nums: ### down-select which modes are plotted
+    modeNos = [modeNo for modeNo in modeNos if (modeNo in mode_nums)]
+
   if mode_order != None: # plot modes in a certain order
     modeNos = [modeNo for modeNo in mode_order if (modeNo in modeNos)] # rearange modeNos by mode_order
-    modeNo_map = dict( (modeNo, ind) for ind, modeNo in enumerate(modeNos) )
-    conns = [(modeNo_map[modeNo1], modeNo_map[modeNo2]) for modeNo1, modeNo2 in conns]
 
-  if mode_nums: ### down-select which modes are plotted
-    modeNos = [modeNo for modeNo in mode_nums if (modeNo in modeNos)]
-    modeNo_map = dict( (modeNo, ind) for ind, modeNo in enumerate(modeNos) )
-    conns = [(modeNo_map[modeNo1], modeNo_map[modeNo2]) for modeNo1, modeNo2 in conns if (modeNo_map.has_key(modeNo1) and modeNo_map.has_key(modeNo2))]
+  ### transform conns into the appropriate form (new modeNos, etc)
+  modeNo_map = dict( (modeNo, ind) for ind, modeNo in enumerate(modeNos) )
+  conns = [(modeNo_map[modeNo1], modeNo_map[modeNo2]) for modeNo1, modeNo2 in conns if (modeNo_map.has_key(modeNo1) and modeNo_map.has_key(modeNo2))]
 
   return __coupling_tree_nl([system.network.modes[modeNo] for modeNo in modeNos], mode_colors=[mode_colors[modeNo] for modeNo in modeNos], conns=conns, conn_colors=conn_colors, verbose=verbose, fig_ax=fig_ax)
 #  return __coupling_tree_nl(modes, mode_colors=__mode_colors, conns=conns, conn_colors=conn_colors, verbose=verbose, fig_ax=fig_ax)
