@@ -826,6 +826,7 @@ class ggg_coupling_list(ms.coupling_list):
 
       # read in modes
       ind == 0
+      _couplings = []
       for line in f:
         if (num_pair != -1) and (ind >= num_pair): # only load num_pair couplings
           break
@@ -833,9 +834,10 @@ class ggg_coupling_list(ms.coupling_list):
         if line[0] != "#":
           coupling = ggg_coupling_list_element().from_str( line.strip(), self.alpha, self.c, self.wo ).setup( self.parent_mode ).renorm_koab( self.parent_mode, Mo )
           if ms.check_mode(coupling.dmode1, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w) and ms.check_mode(coupling.dmode2, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w):
-            couplings = ms.insert_in_place( (coupling.metric_value, coupling), couplings )
+            _couplings = ms.insert_in_place( (coupling.metric_value, coupling), _couplings )
 
       f.close()
+      couplings = ms.insert_sortedList_in_place( _couplings, couplings, sorted=True)
 
     self.couplings = [c for metric_value, c in couplings]
 
@@ -906,8 +908,9 @@ class ggg_coupling_list(ms.coupling_list):
                   _couplings = ms.insert_in_place( (coupling.metric_value, coupling), _couplings)
 
       f.close()
-      for c in _couplings:
-        couplings = ms.insert_in_place( c, couplings )
+#      for c in _couplings:
+#        couplings = ms.insert_in_place( c, couplings )
+      couplings = ms.insert_sortedList_in_place( _couplings, couplings, sorted=False )
 
     self.couplings = [c for metric_value, c in couplings]
 
@@ -1022,15 +1025,20 @@ not checked.
       self.filenames.append(filename)
 
       # set up iteration
-      _couplings = copy.deepcopy( couplings )
+#      _couplings = copy.deepcopy( couplings )
+      _couplings = []
+      ind = 0
       for line in f:
         if line[0] != "#":
+          ind += 1
           coupling = ggg_coupling_list_element().from_str( line.strip(), self.alpha, self.c, self.wo ).setup( self.parent_mode ).renorm_koab( self.parent_mode, Mo )
           if ms.check_mode(coupling.dmode1, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w) and ms.check_mode(coupling.dmode2, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w):
             _couplings = ms.insert_in_place( (coupling.metric_value, coupling), _couplings )
       f.close()
-      for c in _couplings:
-        couplings = ms.insert_in_place( c, couplings )
+
+#      for c in _couplings:
+#        couplings = ms.insert_in_place( c, couplings )
+      couplings = ms.insert_sortedList_in_place( _couplings, couplings, sorted=True )
 
     self.couplings = [c for metric_value, c in couplings]
     return self
@@ -2441,7 +2449,7 @@ def compute_pairs(metric, parent_mode, O, catalog_dir, min_l=1, max_l=100, min_w
 #
 #    if verbose: print "\tdone: %f seconds" % (time.time()-tos.pop(0))
 
-  if max_num_pairs >= 0: # max_num_pairs is a non-negative number ==> we attempt to downsample the new_filename
+  if (max_num_pairs >= 0) and ("min" not in metric): # max_num_pairs is a non-negative number ==> we attempt to downsample the new_filename
     from clean_catalogs import clean
     for new_filename in new_filenames:
       clean(new_filename, new_filename, max_num_pairs, alpha, c, wo, k_hat, coupling_type="ggg", verbose=verbose)

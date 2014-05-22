@@ -81,7 +81,7 @@ def compute_linearized_growth_rate(w1, w2, y1, y2, O, k, Ao):
 #########################
 def insert_in_place(item, mylist):
   """
-  puts the itemm in place in the list. 
+  puts the item in place in the list. 
   item must have the form: (rank, stuff)
   mylist must have the form: [item1, item2, ...]
     with itemj = (rankj, stuffj)
@@ -95,6 +95,33 @@ def insert_in_place(item, mylist):
       break
   else:
     mylist.append( [irank, stuff] )
+
+  return mylist
+
+#########################
+def insert_sortedList_in_place(sorted_list, mylist, sorted=True):
+  """
+  puts the items in sorted list in place in mylist.
+  sorted_list must have the form [(rank, mystuff), ...]
+  mylist must have the form [(rank, mystuff), ...]
+
+  puts things in order of increasing rank
+  if sorted == False, we first sort the "sorted list"
+  """
+  if not sorted:
+    sorted_list.sort(key=lambda l: l[0])
+
+  ml_ind = 0 # index of mylist
+  while len(sorted_list):
+    sl_rank, stuff = sorted_list.pop(0) # get the first element
+    while ml_ind < len(mylist):
+      rank, _ = mylist[ml_ind]
+      if sl_rank < rank: # insert at this index
+        break
+      else:
+        ml_ind += 1 
+    mylist.insert(ml_ind, [sl_rank, stuff] )
+    ml_ind += 1 # increment because we added something to mylist
 
   return mylist
 
@@ -164,17 +191,28 @@ class coupling_list:
 
     if couplings are repeated, it keeps the one that appears first in the list (lowest metric_value)
     """
+    print "to_unique_couplings"
     new_couplings = []
     pairs = []
+
     for coupling in self.couplings:
-      nlmwy1 = coupling.dmode1.get_nlmwy()
-      nlmwy2 = coupling.dmode2.get_nlmwy()
-      for nlmwyI, nlmwyJ in pairs:
-        if ( (nlmwy1, nlmwy2) == (nlmwyI, nlmwyJ) ) or ( (nlmwy1, nlmwy2) == (nlmwyJ, nlmwyI) ):
-          break # coupling is already in the list
+      nlms1 = coupling.dmode1.get_nlms()
+      nlms2 = coupling.dmode2.get_nlms()
+      if nlms1 > nlms2:
+        this_pair = (nlms1, nlms2)
       else:
+        this_pair = (nlms2, nlms1)
+      for ind, pair in enumerate(pairs):
+        if pair == this_pair:
+          break # pair already exists
+        elif pair > this_pair: # pair does not exist, but would have by now
+          pairs.insert(ind, this_pair) # add it to pairs
+          new_couplings.append( coupling )
+          break
+      else:
+        pairs.append( this_pair ) # reached end of list without finding or adding coupling, so we append
         new_couplings.append( coupling )
-        pairs.append( (nlmwy1, nlmwy2) )
+
     self.couplings = new_couplings
     return self
 
@@ -220,6 +258,7 @@ class coupling_list:
 
       # read in modes
       ind == 0
+      _couplings = []
       for line in f:
         if (num_pair != -1) and (ind > num_pair): # only load num_pair couplings
           break
@@ -227,9 +266,10 @@ class coupling_list:
         if line[0] != "#":
           coupling = coupling_list_element().from_string( line.strip() ).setup( self.parent_mode )
           if check_mode(coupling.dmode1, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w) and check_mode(coupling.dmode2, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w):
-            couplings = insert_in_place( (coupling.metric_value, coupling), couplings )
+            _couplings = insert_in_place( (coupling.metric_value, coupling), _couplings )
 
       f.close()
+      couplings = ms.insert_sortedList_in_place( _couplings, couplings, sorted=True )
 
     self.couplings = [c for metric_value, c in couplings]
 
@@ -292,8 +332,9 @@ class coupling_list:
                   _couplings = insert_in_place( (coupling_metric_value, coupling), _couplings)
 
       f.close()
-      for c in _couplings:
-        couplings = insert_in_place( c, couplings )
+#      for c in _couplings:
+#        couplings = insert_in_place( c, couplings )
+      couplings = ms.insert_sortedList_in_place( _couplings, couplings, sorted=False )
 
     self.couplings = [c for metric_value, c in couplings]
 
