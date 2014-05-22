@@ -2408,7 +2408,7 @@ def compute_pairs(metric, parent_mode, O, catalog_dir, min_l=1, max_l=100, min_w
         sys.exit("\njob Failed! with status "+p.exitcode() )
 
   while len(procs):
-    for ind, (p, _, _) in enumerate(procs):
+    for ind, (p, _) in enumerate(procs):
       if not p.is_alive():
         break
     else:
