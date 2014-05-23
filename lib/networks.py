@@ -37,7 +37,7 @@ class mode:
 
   ###
   def check(self):
-    if abs(m) > l: raise ValueError, "abs(m) > l"
+    if abs(self.m) > self.l: raise ValueError, "abs(m) > l"
 
   ###
   def get_nlm(self):
