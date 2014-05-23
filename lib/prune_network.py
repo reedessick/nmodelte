@@ -194,6 +194,7 @@ def min_Ethr(system, mode_nums=None, freqs=None):
   for triple, E in Ethr(system, freqs=freqs).items():
     for mode in triple[:3]:
       modeNo = system.network.modeNoD[mode.get_nlms()]
+      if not min_Ethr.has_key(modeNo): print "couldn't find modeNo"
       if min_Ethr.has_key(modeNo) and (min_Ethr[modeNo] > E):
         min_Ethr[modeNo] = E
 
@@ -229,7 +230,7 @@ def min_collE(system, freqs=None, mode_nums=None):
     mode_nums = range(len(system.network))
 
   modes = defaultdict( list )
-  for triple, E in Ethr(sytem, freqs=freqs).items():
+  for triple, E in Ethr(system, freqs=freqs).items():
     w = [(abs(mode.w), ind) for ind, mode in enumerate(triple[:3])]    
     w.sort(key=lambda l:l[0], reverse=True)
     for mode in [triple[ind] for _,ind in w[1:]]: ## last 2 modes are children
