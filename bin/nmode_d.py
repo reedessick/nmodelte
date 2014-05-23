@@ -47,7 +47,7 @@ parser.add_option("", "--tcurrent", default=False, type="string")
 parser.add_option("-l", "--logfilename", default=False, type="string")
 
 ### stacked histogram options
-parser.add_option("", "--stacked-hist", default=False, type="string", help="generate a stacked histogram. input should be a list of parameters over which we make histograms. eg: \"w l\"")
+parser.add_option("", "--stacked-hist", default=False, type="string", help="generate a stacked histogram. input should be a list of parameters over which we make histograms. eg: \"w l num_k Ethr heuristic collE\"")
 parser.add_option("", "--multi-gen-stacked-hist", default=False, action="store_true", help="generates a stacked histogram with curves stacked by generation. MUST BE USED WITH --stacked-hist")
 parser.add_option("", "--log-stacked-hist", default=False, action="store_true", help="set stacked histogram y scale to logarithmic. MUST BE USED WITH --stacked-hist")
 parser.add_option("", "--stacked-hist-bin-width", default=False, type="string", help="bin widths for stacked histogram. input a string with the same number of entries as stacked hist")
