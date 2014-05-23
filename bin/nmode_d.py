@@ -284,19 +284,20 @@ if opts.stacked_hist:
       if opts.verbose: print "\t\tnum_k"
       if not bin_width:
         bin_width = 1.0
-      num_ks = pn.compute_num_couplings(network)
+#      num_ks = pn.compute_num_couplings(network)
+      num_ks = pn.num_k(network)
       bins = np.arange(-0.5, max(num_ks)+0.5, bin_width)
       if opts.multi_gen_stacked_hist:
-        fig, axs = nmd.generational_stacked_histogram(network, bins, num_ks, data, log=opts.log_stacked_hist)
+        fig, axs = nmd.generational_stacked_histogram(network, bins, num_ks.values(), data, log=opts.log_stacked_hist)
       else:
-        fig, axs = nmd.stacked_histogram(bins, num_ks, data, log=opts.log_stacked_hist)
+        fig, axs = nmd.stacked_histogram(bins, num_ks.values(), data, log=opts.log_stacked_hist)
       axs[-1].set_xlabel(r'No. couplings')
 
       # variability measures
       ax2_ymin = axs[2].get_ylim()[0]
       ax3_ymin = axs[3].get_ylim()[0]
 
-      num_ks = [(modeNo, num_k) for modeNo, num_k in enumerate(num_ks)]
+      num_ks = num_ks.items()
       num_ks.sort(key=lambda l: l[1])
       binned_modeNos = nmd.bin_by_x(bins, num_ks)
       for binNo, bin in enumerate(binned_modeNos):
@@ -326,16 +327,20 @@ if opts.stacked_hist:
       if opts.verbose: print "\t\tEthr"
       if not bin_width:
         bin_width = N_m/10
-      ethrs = pn.__find_min_Ethr(system)
+      ethrs = pn.min_Ethr(system)
 #      bins = np.arange(max(min(ethrs)-bin_width/2.0, 0), max(ethrs)+bin_width/2.0, bin_width)
-      bins = np.logspace(np.log10(0.9*min(ethrs)), np.log10(1.1*max(ethrs)), bin_width)
+      bins = np.logspace(np.log10(0.9*min(ethrs.values())), np.log10(1.1*max([e for e in ethrs.values() if e < np.infty])), bin_width)
       if opts.multi_gen_stacked_hist:
-        fig, axs = nmd.generational_stacked_histogram(network, bins, ethrs, data, log=opts.log_stacked_hist)
+        fig, axs = nmd.generational_stacked_histogram(network, bins, ethrs.values(), data, log=opts.log_stacked_hist)
       else:
-        fig, axs = nmd.stacked_histogram(bins, ethrs, data, log=opts.log_stacked_hist)
+        fig, axs = nmd.stacked_histogram(bins, ethrs.values(), data, log=opts.log_stacked_hist)
       axs[-1].set_xlabel(r'$\mathrm{min}\left\{E_{\mathrm{thr}}\right\}$')
 
-      ethrs = [(modeNo, num_k) for modeNo, num_k in enumerate(ethrs)]
+      # variability measures
+      ax2_ymin = axs[2].get_ylim()[0]
+      ax3_ymin = axs[3].get_ylim()[0]
+
+      ethrs = ethrs.items()
       ethrs.sort(key=lambda l: l[1])
       binned_modeNos = nmd.bin_by_x(bins, ethrs)
       for binNo, bin in enumerate(binned_modeNos):
@@ -365,16 +370,20 @@ if opts.stacked_hist:
       if opts.verbose: print "\t\theuristic"
       if not bin_width:
         bin_width = 101
-      heuristics = pn.__find_min_heuristic(system)
+      heuristics = pn.min_heuristic(system)
 #      bins = np.arange(max(min(heuristics)-bin_width/2.0, 0), max(heuristics)+bin_width/2.0, bin_width)
-      bins = np.logspace(np.log10(0.9*min(heuristics)), np.log10(1.1*max(heuristics)), bin_width)
+      bins = np.logspace(np.log10(0.9*min(heuristics.values())), np.log10(1.1*max(heuristics.values())), bin_width)
       if opts.multi_gen_stacked_hist:
-        fig, axs = nmd.generational_stacked_histogram(network, bins, heuristics, data, log=opts.log_stacked_hist)
+        fig, axs = nmd.generational_stacked_histogram(network, bins, heuristics.values(), data, log=opts.log_stacked_hist)
       else:
-        fig, axs = nmd.stacked_histogram(bins, heuristics, data, log=opts.log_stacked_hist)
+        fig, axs = nmd.stacked_histogram(bins, heuristics.values(), data, log=opts.log_stacked_hist)
       axs[-1].set_xlabel(r'$\mathrm{min}\left\{h\right\}$')
 
-      heuristics = [(modeNo, num_k) for modeNo, num_k in enumerate(heuristics)]
+      # variability measures
+      ax2_ymin = axs[2].get_ylim()[0]
+      ax3_ymin = axs[3].get_ylim()[0]
+
+      heuristics = heuristics.items()
       heuristics.sort(key=lambda l: l[1])
       binned_modeNos = nmd.bin_by_x(bins, heuristics)
       for binNo, bin in enumerate(binned_modeNos):
@@ -405,18 +414,24 @@ if opts.stacked_hist:
       if opts.verbose: print "\t\tcollE"
       if not bin_width:
         bin_width = 101
-      collEs = pn.__find_collE(system).items()
-      collEs.sort(key=lambda l:l[0])
-      collEs = [l[1] for l in collEs]
+      collEs = pn.min_collE(system)
+#      collEs = pn.min_collE(system).items()
+#      collEs.sort(key=lambda l:l[0])
+#      collEs = [l[1] for l in collEs]
+
 #      bins = np.arange(max(min(collEs)-bin_width/2.0, 0), max([e for e in collEs if e < np.infty])+bin_width/2.0, bin_width)
-      bins = np.logspace(np.log10(0.9*min(collEs)), np.log10(1.1*max([e for e in collEs if e < np.infty])), bin_width)
+      bins = np.logspace(np.log10(0.9*min(collEs.values())), np.log10(1.1*max([e for e in collEs.values() if e < np.infty])), bin_width)
       if opts.multi_gen_stacked_hist:
-        fig, axs = nmd.generational_stacked_histogram(network, bins, collEs, data, log=opts.log_stacked_hist)
+        fig, axs = nmd.generational_stacked_histogram(network, bins, collEs.values(), data, log=opts.log_stacked_hist)
       else:
-        fig, axs = nmd.stacked_histogram(bins, collEs, data, log=opts.log_stacked_hist)
+        fig, axs = nmd.stacked_histogram(bins, collEs.values(), data, log=opts.log_stacked_hist)
       axs[-1].set_xlabel(r'$\mathrm{min}\left\{\mathrm{collective}\ E_{\mathrm{thr}}\right\}$')
 
-      collEs = [(modeNo, num_k) for modeNo, num_k in enumerate(collEs)]
+      # variability measures
+      ax2_ymin = axs[2].get_ylim()[0]
+      ax3_ymin = axs[3].get_ylim()[0]
+
+      collEs = collEs.items()
       collEs.sort(key=lambda l: l[1])
       binned_modeNos = nmd.bin_by_x(bins, collEs)
       for binNo, bin in enumerate(binned_modeNos):
