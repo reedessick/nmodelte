@@ -1400,6 +1400,7 @@ def compute_pairs_Ethr(parent_mode, O, min_l=1, max_l=100, min_w=0, max_w=1.0, a
       lb = la
     else:
       lb = la + 1
+    lb = max(lb, abs(la-lo)) # enforce triangle inequality
     max_lb = la + lo # enforce triangle inequality
     while lb <= max_lb:
       lb_1 = (1+1./lb)**0.5
@@ -1501,6 +1502,7 @@ def compute_pairs_heuristic(parent_mode, O, min_l=1, max_l=100, min_w=0, max_w=1
       lb = la
     else:
       lb = la + 1
+    lb = max(lb, abs(la-lo)) # enforce triangle inequality
     max_lb = la + lo # enforce triangle inequality
     while lb <= max_lb:
       lb_1 = (1+1./lb)**0.5
@@ -1616,6 +1618,7 @@ def compute_min_pairs_Ethr(parent_mode, O, min_l=1, max_l=100, min_w=0, max_w=1.
       lb = la
     else:
       lb = la + 1
+    lb = max(lb, abs(la-lo)) # enforce triangle inequality
     max_lb = la + lo # enforce triangle inequality
 
     while lb <= max_lb:
@@ -1775,6 +1778,7 @@ def deprecated_compute_min_pairs_Ethr(parent_mode, O, min_l=1, max_l=100, min_w=
       lb = la
     else:
       lb = la + 1
+    lb = max(lb, abs(la-lo))
     max_lb = la + lo # enforce triangle inequality
 
     while lb <= max_lb:
@@ -1920,6 +1924,7 @@ def compute_min_pairs_heuristic(parent_mode, O, min_l=1, max_l=100, min_w=0, max
       lb = la
     else:
       lb = la + 1
+    lb = max(lb, abs(la-lo))
     max_lb = la + lo # enforce triangle inequality
 
     while lb <= max_lb:
@@ -2065,6 +2070,7 @@ def flawed_compute_min_pairs_heuristic(parent_mode, O, min_l=1, max_l=100, min_w
       lb = la
     else:
       lb = la + 1
+    lb = max(lb, abs(la-lo))
     max_lb = la + lo # enforce triangle inequality
 
     while lb <= max_lb:
@@ -2211,6 +2217,7 @@ def depredated_compute_min_pairs_heuristic(parent_mode, O, min_l=1, max_l=100, m
       lb = la
     else:
       lb = la + 1
+    lb = max(lb, abs(la-lo))
     max_lb = la + lo # enforce triangle inequality
 
     while lb <= max_lb:
