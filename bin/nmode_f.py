@@ -199,7 +199,7 @@ if opts.function == "dxdt_no_NLT_mpi":
 
 elif opts.function == "dxdt_no_NLT_mp":
   if opts.num_proc == 1:
-    step = odeiv.step_rkf45(dimension, nf.dxdt_no_NLT, args=system)
+    step = odeiv.step_rkf45(dimension, nf.dxdt_no_NLT, args=(dimension, system))
   else:
     num_k_par = int(np.ceil(1.0*sum([len(K) for K in system.network.K])/opts.num_proc))
     Msets = []
@@ -226,7 +226,7 @@ elif opts.function == "dxdt_no_NLT_mp":
 
 elif opts.function == "dxdt_no_NLT_p":
   if opts.num_proc == 1: # default to single core functions for speed
-    step = odeiv.step_rkf45(dimension, nf.dxdt_no_NLT, args=system)
+    step = odeiv.step_rkf45(dimension, nf.dxdt_no_NLT, args=(dimension, system))
   else:
     num_k_par = int(np.ceil(1.0*sum([len(K) for K in system.network.K])/opts.num_proc))
     Msets = []
