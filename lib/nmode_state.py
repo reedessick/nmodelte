@@ -182,8 +182,10 @@ def threeMode_equilib(triple, freq, network, verbose=False):
   Aj2 = (wj*yi)/(wi*yj) * Ai2
 
   Ao = Ao2**0.5
-  Ai = Ai2**0.5
-  Aj = Aj2**0.5
+#  Ai = Ai2**0.5
+#  Aj = Aj2**0.5
+  Ai = abs(Ai2)**0.5
+  Aj = abs(Aj2)**0.5
 
   ### phases
   sin_delta = ( 1 + (didj/yiyj)**2 )**-0.5 # delta = delta_o+delta_i+delta_j
