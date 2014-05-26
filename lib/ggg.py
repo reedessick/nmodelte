@@ -1127,25 +1127,40 @@ not checked.
       ### na-1
       if nb >= 2:
         self.load_minima_list_update(self.metric, lo, mo, na+1, la, ma, nb-1, lb, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
-      ### la+1
-      if (ma > -la) and (la+1 <= lb+lo):
-        self.load_minima_list_update(self.metric, lo, mo, na, la+1, ma, nb, lb, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
-      ### la-1
-      if (la >= 2) and (ma < la) and (abs(lb-lo) <= la-1):
-        self.load_minima_list_update(self.metric, lo, mo, na, la-1, ma, nb, lb, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
-      ### lb+1
-      if (mb > -lb) and (lb+1 <= la+lo):
-        self.load_minima_list_update(self.metric, lo, mo, na, la, ma, nb, lb+1, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
-      ## lb-1
-      if (lb >= 2) and (mb < lb) and (abs(la-lo) <= lb-1):
-        self.load_minima_list_update(self.metric, lo, mo, na, la, ma, nb, lb-1, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
       ### ma+1 ( and mb )
       if (ma < la) and (mb > -lb):
         self.load_minima_list_update(self.metric, lo, mo, na, la, ma+1, nb, lb, mb-1, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
       ### ma-1 ( and mb )
       if (ma > -la) and (mb < lb):
         self.load_minima_list_update(self.metric, lo, mo, na, la, ma-1, nb, lb, mb+1, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
-  
+
+
+      ### la+1, lb+1 # we have to shift both to keep lo+la+lb even
+      if (abs(lb+1-lo) <= la+1) and (la+1 <= (lb+1)+lo): # should always be true
+        self.load_minima_list_update(self.metric, lo, mo, na, la+1, ma, nb, lb+1, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
+      ### la+1, lb-1
+      if (lb > 1) and (mb > -lb) and (abs(lb-1-lo) <= la+1) and (la+1 <= (lb-1)+lo): 
+        self.load_minima_list_update(self.metric, lo, mo, na, la+1, ma, nb, lb-1, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
+      ### la-1, lb+1
+      if (la > 1) and (ma > -la) and (abs(la-1-lo) <= lb+1) and (la-1 <= (lb+1)+lo):
+        self.load_minima_list_update(self.metric, lo, mo, na, la-1, ma, nb, lb+1, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
+      ### la-1, lb-1
+      if (la > 1) and (ma > -la) and (lb > 1) and (mb > -lb) and (abs(la-1-lo) >= lb-1) and (lb-1 <= (la-1+lo)):
+        self.load_minima_list_update(self.metric, lo, mo, na, la-1, ma, nb, lb-1, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
+
+#      ### la+1
+#      if (ma > -la) and (la+1 <= lb+lo):
+#        self.load_minima_list_update(self.metric, lo, mo, na, la+1, ma, nb, lb, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
+#      ### la-1
+#      if (la >= 2) and (ma < la) and (abs(lb-lo) <= la-1):
+#        self.load_minima_list_update(self.metric, lo, mo, na, la-1, ma, nb, lb, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
+#      ### lb+1
+#      if (mb > -lb) and (lb+1 <= la+lo):
+#        self.load_minima_list_update(self.metric, lo, mo, na, la, ma, nb, lb+1, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
+#      ## lb-1
+#      if (lb >= 2) and (mb < lb) and (abs(la-lo) <= lb-1):
+#        self.load_minima_list_update(self.metric, lo, mo, na, la, ma, nb, lb-1, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
+
     return triples
 
 ##################################################
