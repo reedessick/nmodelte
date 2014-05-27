@@ -454,7 +454,7 @@ def downselect_num_k(thr, network, mode_nums=None):
 
   lists are (n,l,m,s)
   """
-  if isintance(thr, (int,float)):
+  if isinstance(thr, (int,float)):
     thr = [thr]
     single = True
 
