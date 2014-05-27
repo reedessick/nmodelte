@@ -1696,7 +1696,8 @@ def compute_min_pairs_Ethr(parent_mode, O, min_l=1, max_l=100, min_w=0, max_w=1.
         ### solve for nb(na,la,lb)
         lana_eta = 1.0*la/na-eta
 
-        nb_roots = np.roots( [3*sigma**2*Lb**3 , 0 , 9*La*(sigma*Lb*na)**2, 0, Lb*((4+3*sigma**2)*lana_eta**2 + 9*(sigma*La*na**2)**2) ,    6*lana_eta*Lb*lb*(sigma**2+1) , 3*sigma**2*(na**6*La**3 + lana_eta*na**2*La + lb**2*Lb) + 2*lb**2*Lb, 2*lana_eta*lb*La*na**2*(6*sigma**2-1), La*na**2*lb*(3*sigma**2-2)] )
+
+        nb_roots = np.roots( [3*sigma**2*Lb**3, 0, 9*sigma**2*na**2*La*Lb**2, 0, 9*sigma**2*na**4*La*Lb - Lb*lana_eta**2, -4*lana_eta*lb*Lb, 3*sigma**2*na**6*La**3 + 3*na**2*La*lana_eta**2 - 3*Lb*lb**2, 4*lana_eta*na**2*La*lb, na**2*La*lb**2] )
         nb_roots = nb_roots[nb_roots.imag == 0]
         nb_roots = nb_roots[(nb_roots >= min_nb)*(nb_roots <= max_nb)] # only keep positive definite roots
 
