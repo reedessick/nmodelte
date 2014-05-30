@@ -51,6 +51,8 @@ parser.add_option("", "--daughter-max-frac-w", default=1.0, type="float", help="
 parser.add_option("", "--Emax", default=np.infty, type="float", help="the maximum Ethr that will be recorded in any new coupling list ASCii files")
 parser.add_option("", "--maxp", default=1, type="int", help="the maximum number of coupling list generation jobs that will be submitted in parallel")
 
+parser.add_option("", "--to-unique-couplings", default=False, action="store_true", help="makes coupling lists explicitly check and remove redundant couplings")
+
 parser.add_option("", "--max-num-pairs", default=50000, type="int", help="the maximum number of couplings that will be written into new ctg files. DEFAULT=50000")
 parser.add_option("", "--catalog-dir", default="./", type="string", help="path to the directory in which catalog files (mode lists) are stored")
 
@@ -150,7 +152,10 @@ for n_m, (O, mode) in enumerate(modes):
         print "\t%s" % filename
   
     if "min_" == opts.daughter_selection[0:4]:
-      my_coupling_list = ggg.ggg_minima_coupling_list(opts.alpha, opts.c, wo, opts.k_hat, parent_mode=mode).load_unsorted_mode_lists(opts.daughter_selection, useful_filenames, min_n=False, max_n=False, min_l=opts.daughter_min_l, max_l=opts.daughter_max_l, min_w=min_w, max_w=max_w).to_unique_couplings()
+      my_coupling_list = ggg.ggg_minima_coupling_list(opts.alpha, opts.c, wo, opts.k_hat, parent_mode=mode).load_unsorted_mode_lists(opts.daughter_selection, useful_filenames, min_n=False, max_n=False, min_l=opts.daughter_min_l, max_l=opts.daughter_max_l, min_w=min_w, max_w=max_w)
+      if opts.to_unique_couplings:
+        if opts.verbose: print "checking for unique couplings"
+        my_coupling_list = my_coupling_list.to_unique_couplings()
 
       for ind, npairs in enumerate(num_pairs):
         if opts.verbose: print "grabbing %d triples" % npairs
@@ -160,7 +165,10 @@ for n_m, (O, mode) in enumerate(modes):
 
 
     else:
-      my_coupling_list = ggg.ggg_coupling_list(opts.alpha, opts.c, wo, opts.k_hat, parent_mode=mode).load_unsorted_mode_lists(opts.daughter_selection, useful_filenames, num_pairs=max(num_pairs), min_n=False, max_n=False, min_l=opts.daughter_min_l, max_l=opts.daughter_max_l, min_w=min_w, max_w=max_w).to_unique_couplings()
+      my_coupling_list = ggg.ggg_coupling_list(opts.alpha, opts.c, wo, opts.k_hat, parent_mode=mode).load_unsorted_mode_lists(opts.daughter_selection, useful_filenames, num_pairs=max(num_pairs), min_n=False, max_n=False, min_l=opts.daughter_min_l, max_l=opts.daughter_max_l, min_w=min_w, max_w=max_w)
+      if opts.to_unique_couplings:
+        if opts.verbose: print "checking for unique couplings"
+        my_coupling_list = my_coupling_list.to_unique_couplings()
 
       for ind, npairs in enumerate(num_pairs):
         if opts.verbose: print "grabbing %d triples" % npairs

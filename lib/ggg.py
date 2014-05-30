@@ -826,6 +826,7 @@ class ggg_coupling_list(ms.coupling_list):
 
       # read in modes
       ind == 0
+      _couplings = []
       for line in f:
         if (num_pair != -1) and (ind >= num_pair): # only load num_pair couplings
           break
@@ -833,9 +834,10 @@ class ggg_coupling_list(ms.coupling_list):
         if line[0] != "#":
           coupling = ggg_coupling_list_element().from_str( line.strip(), self.alpha, self.c, self.wo ).setup( self.parent_mode ).renorm_koab( self.parent_mode, Mo )
           if ms.check_mode(coupling.dmode1, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w) and ms.check_mode(coupling.dmode2, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w):
-            couplings = ms.insert_in_place( (coupling.metric_value, coupling), couplings )
+            _couplings = ms.insert_in_place( (coupling.metric_value, coupling), _couplings )
 
       f.close()
+      couplings = ms.insert_sortedList_in_place( _couplings, couplings, sorted=True)
 
     self.couplings = [c for metric_value, c in couplings]
 
@@ -906,8 +908,9 @@ class ggg_coupling_list(ms.coupling_list):
                   _couplings = ms.insert_in_place( (coupling.metric_value, coupling), _couplings)
 
       f.close()
-      for c in _couplings:
-        couplings = ms.insert_in_place( c, couplings )
+#      for c in _couplings:
+#        couplings = ms.insert_in_place( c, couplings )
+      couplings = ms.insert_sortedList_in_place( _couplings, couplings, sorted=False )
 
     self.couplings = [c for metric_value, c in couplings]
 
@@ -1022,15 +1025,20 @@ not checked.
       self.filenames.append(filename)
 
       # set up iteration
-      _couplings = copy.deepcopy( couplings )
+#      _couplings = copy.deepcopy( couplings )
+      _couplings = []
+      ind = 0
       for line in f:
         if line[0] != "#":
+          ind += 1
           coupling = ggg_coupling_list_element().from_str( line.strip(), self.alpha, self.c, self.wo ).setup( self.parent_mode ).renorm_koab( self.parent_mode, Mo )
           if ms.check_mode(coupling.dmode1, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w) and ms.check_mode(coupling.dmode2, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w):
             _couplings = ms.insert_in_place( (coupling.metric_value, coupling), _couplings )
       f.close()
-      for c in _couplings:
-        couplings = ms.insert_in_place( c, couplings )
+
+#      for c in _couplings:
+#        couplings = ms.insert_in_place( c, couplings )
+      couplings = ms.insert_sortedList_in_place( _couplings, couplings, sorted=True )
 
     self.couplings = [c for metric_value, c in couplings]
     return self
@@ -1119,25 +1127,40 @@ not checked.
       ### na-1
       if nb >= 2:
         self.load_minima_list_update(self.metric, lo, mo, na+1, la, ma, nb-1, lb, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
-      ### la+1
-      if (ma > -la) and (la+1 <= lb+lo):
-        self.load_minima_list_update(self.metric, lo, mo, na, la+1, ma, nb, lb, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
-      ### la-1
-      if (la >= 2) and (ma < la) and (abs(lb-lo) <= la-1):
-        self.load_minima_list_update(self.metric, lo, mo, na, la-1, ma, nb, lb, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
-      ### lb+1
-      if (mb > -lb) and (lb+1 <= la+lo):
-        self.load_minima_list_update(self.metric, lo, mo, na, la, ma, nb, lb+1, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
-      ## lb-1
-      if (lb >= 2) and (mb < lb) and (abs(la-lo) <= lb-1):
-        self.load_minima_list_update(self.metric, lo, mo, na, la, ma, nb, lb-1, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
       ### ma+1 ( and mb )
       if (ma < la) and (mb > -lb):
         self.load_minima_list_update(self.metric, lo, mo, na, la, ma+1, nb, lb, mb-1, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
       ### ma-1 ( and mb )
       if (ma > -la) and (mb < lb):
         self.load_minima_list_update(self.metric, lo, mo, na, la, ma-1, nb, lb, mb+1, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
-  
+
+
+      ### la+1, lb+1 # we have to shift both to keep lo+la+lb even
+      if (abs(lb+1-lo) <= la+1) and (la+1 <= (lb+1)+lo): # should always be true
+        self.load_minima_list_update(self.metric, lo, mo, na, la+1, ma, nb, lb+1, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
+      ### la+1, lb-1
+      if (lb > 1) and (mb > -lb) and (abs(lb-1-lo) <= la+1) and (la+1 <= (lb-1)+lo): 
+        self.load_minima_list_update(self.metric, lo, mo, na, la+1, ma, nb, lb-1, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
+      ### la-1, lb+1
+      if (la > 1) and (ma > -la) and (abs(la-1-lo) <= lb+1) and (la-1 <= (lb+1)+lo):
+        self.load_minima_list_update(self.metric, lo, mo, na, la-1, ma, nb, lb+1, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
+      ### la-1, lb-1
+      if (la > 1) and (ma > -la) and (lb > 1) and (mb > -lb) and (abs(la-1-lo) >= lb-1) and (lb-1 <= (la-1+lo)):
+        self.load_minima_list_update(self.metric, lo, mo, na, la-1, ma, nb, lb-1, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
+
+#      ### la+1
+#      if (ma > -la) and (la+1 <= lb+lo):
+#        self.load_minima_list_update(self.metric, lo, mo, na, la+1, ma, nb, lb, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
+#      ### la-1
+#      if (la >= 2) and (ma < la) and (abs(lb-lo) <= la-1):
+#        self.load_minima_list_update(self.metric, lo, mo, na, la-1, ma, nb, lb, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
+#      ### lb+1
+#      if (mb > -lb) and (lb+1 <= la+lo):
+#        self.load_minima_list_update(self.metric, lo, mo, na, la, ma, nb, lb+1, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
+#      ## lb-1
+#      if (lb >= 2) and (mb < lb) and (abs(la-lo) <= lb-1):
+#        self.load_minima_list_update(self.metric, lo, mo, na, la, ma, nb, lb-1, mb, cpairsD, _couplings, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
+
     return triples
 
 ##################################################
@@ -1392,6 +1415,7 @@ def compute_pairs_Ethr(parent_mode, O, min_l=1, max_l=100, min_w=0, max_w=1.0, a
       lb = la
     else:
       lb = la + 1
+    lb = max(lb, abs(la-lo)) # enforce triangle inequality
     max_lb = la + lo # enforce triangle inequality
     while lb <= max_lb:
       lb_1 = (1+1./lb)**0.5
@@ -1493,6 +1517,7 @@ def compute_pairs_heuristic(parent_mode, O, min_l=1, max_l=100, min_w=0, max_w=1
       lb = la
     else:
       lb = la + 1
+    lb = max(lb, abs(la-lo)) # enforce triangle inequality
     max_lb = la + lo # enforce triangle inequality
     while lb <= max_lb:
       lb_1 = (1+1./lb)**0.5
@@ -1592,6 +1617,159 @@ def compute_min_pairs_Ethr(parent_mode, O, min_l=1, max_l=100, min_w=0, max_w=1.
     print parent_mode.to_str_nlmwy()
 
   # we solve numerically for nb | na, la, lb
+  eta = absO/alpha
+  sigma = c*wo**3/alpha**3
+
+  la = max(1, min_l) # instantiate la
+  while la <= max_l:
+    La = (1+1./la)
+    la_1 = La**0.5
+    min_na = max(1, int(math.ceil(alpha*la/max_w))) # lower bound on na
+    max_na = math.floor(alpha*la/min_w) # upper bound on na
+
+    # demand that lb >= la (computational reasons)
+    # demand that (la+lb+lo) is even
+    if lo%2 == 0:
+      lb = la
+    else:
+      lb = la + 1
+    lb = max(lb, abs(la-lo)) # enforce triangle inequality
+    max_lb = la + lo # enforce triangle inequality
+
+    while lb <= max_lb:
+      Lb = (1+1./lb)
+      lb_1 = Lb**0.5
+      bandwidth_min_nb = alpha*lb/max_w
+      bandwidth_max_nb = alpha*lb/min_w
+
+      # maximize koab over ma, mb
+
+      # require that (ma+mb+mo)=0
+      ma = max(-la, -lb-mo) # bounds on ma and mb=-(mo+ma)
+      if (la == lb): # avoid duplicate work
+        if (mo == 0):
+          max_ma = 0
+        elif (mo > 0):
+          max_ma = -1
+        else: # mo < 0
+          max_ma = min(la, lb-mo)
+          ma = 1 # avoid duplicate pairs
+      else:
+        max_ma = min(la, lb-mo) # bounds on ma and mb=-(mo+ma)
+
+      best_ma = ma
+      best_koab = 0.
+      absbest_koab = 0.
+      while ma <= max_ma:
+        mb = -mo-ma
+        ### exact computation
+        koab = compute_kabc(lo, mo, la, ma, lb, mb, P=Po, k_hat=k_hat)
+        if abs(koab) > absbest_koab:
+          best_ma = ma
+          best_koab = koab
+          absbest_koab = abs(best_koab)
+        ### assymptotic limit?
+#        koab = gm.compute_kabc_assymptotic(lo, mo, la, ma, lb, -mo-ma, P=Po, k_hat=k_hat)
+        ma += 1
+
+      ma = best_ma
+      mb = -mo-ma
+      koab = best_koab
+
+      # compute N dependence once for each la, lb pair
+      na = min_na
+      while na <= max_na:
+        ka_fact = na*la_1
+
+        min_nb = math.ceil(max([1, (ka_fact - ko_fact)/lb_1, bandwidth_min_nb])) # requirement that ko >= | ka - kb| and min_w <= wb <= max_w
+        if (la == lb) and (ma == mb):
+          min_nb = max(na, min_nb) # avoid duplicate pairs
+        max_nb = math.floor(min( [(ka_fact + ko_fact)/lb_1, bandwidth_max_nb] ))
+
+        if min_nb > max_nb: # avoid stupid work
+          na += 1
+          continue
+
+        wa = gm.compute_w(na, la, alpha)
+        ya = cwo3a2 * ka_fact**2 # faster than delegation?
+
+        ### solve for nb(na,la,lb)
+        lana_eta = 1.0*la/na-eta
+
+
+        nb_roots = np.roots( [3*sigma**2*Lb**3, 0, 9*sigma**2*na**2*La*Lb**2, 0, 9*sigma**2*na**4*La*Lb - Lb*lana_eta**2, -4*lana_eta*lb*Lb, 3*sigma**2*na**6*La**3 + 3*na**2*La*lana_eta**2 - 3*Lb*lb**2, 4*lana_eta*na**2*La*lb, na**2*La*lb**2] )
+        nb_roots = nb_roots[nb_roots.imag == 0]
+        nb_roots = nb_roots[(nb_roots >= min_nb)*(nb_roots <= max_nb)] # only keep positive definite roots
+
+        for nb in nb_roots: ### iterate over all allowed roots and pick the best neighbors
+          nb_f = int(math.floor(nb.real))
+          wb_f = gm.compute_w(nb_f, lb, alpha)
+          yb_f = cwo3a2 * nb_f**2 * Lb # faster than delegating?
+
+          nb_c = int(math.ceil(nb.real))
+          wb_c = gm.compute_w(nb_c, lb, alpha)
+          yb_c = cwo3a2 * nb_c**2 * Lb
+
+          E_f = ms.compute_Ethr(-absO, wa, wb_f, ya, yb_f, koab)
+          E_c = ms.compute_Ethr(-absO, wa, wb_c, ya, yb_c, koab)
+          if E_f <= E_c:
+            E = E_f
+            nb, wb, yb = nb_f, wb_f, yb_f
+          else:
+            E = E_c
+            nb, wb, yb = nb_c, wb_c, yb_c
+
+          if (E < Emax): # even if Emax=np.infty, we handle this correctly
+            if filename:
+              print >>f, E, "\t", (na, la, ma, wa, ya), "\t", (nb, lb, mb, wb, yb), "\t", koab
+              f.flush()
+            else:
+              print E, "\t", (na, la, ma, wa, ya), "\t", (nb, lb, mb, wb, yb), "\t", koab
+
+        na += 1
+      lb += 2
+    la += 1
+
+  if filename:
+    f.close()
+    return filename
+  else:
+    return True
+
+
+##################################################
+def deprecated_compute_min_pairs_Ethr(parent_mode, O, min_l=1, max_l=100, min_w=0, max_w=1.0, alpha=4e-3, c=2e-11, wo=1e-5, k_hat=5e4, filename=False, Emax=np.infty):
+  """
+  compute 3mode Ethr for daughter pairs. Daughter pairs are generated on the fly, with 
+    min_l <= la <= max_l
+    min_w <= wa <= max_w
+
+  and all other parameters are limited by the following constraints
+    |lo - la| <= lb <= lo + la
+    lo + la + lb = even
+    mo + ma + mb = 0
+    ko >= |ka - kb|
+
+  WARNING! mode parameters are computed internally without reference to compute_w() or compute_y()
+
+  """
+  no, lo, mo = parent_mode.get_nlm()
+  Po = 2*np.pi/abs(parent_mode.w)
+  cwo3a2 = c*wo**3*alpha**-2
+
+  ko_fact = no*(1+1./lo)**0.5
+
+  absO=abs(O)
+
+  if filename:
+    f=open(filename, "w")
+    print >>f, absO
+    print >>f, parent_mode.to_str_nlmwy()
+  else:
+    print absO
+    print parent_mode.to_str_nlmwy()
+
+  # we solve numerically for nb | na, la, lb
   nb, _na, _la, _lb = sympy.symbols("nb na la lb")
   La = sympy.sqrt(_la*(_la+1))
   Lb = sympy.sqrt(_lb*(_lb+1))
@@ -1608,12 +1786,15 @@ def compute_min_pairs_Ethr(parent_mode, O, min_l=1, max_l=100, min_w=0, max_w=1.
 
     min_na = max(1, int(math.ceil(alpha*la/max_w))) # lower bound on na
     max_na = math.floor(alpha*la/min_w) # upper bound on na
+    print min_na, max_na
+
     # demand that lb >= la (computational reasons)
     # demand that (la+lb+lo) is even
     if lo%2 == 0:
       lb = la
     else:
       lb = la + 1
+    lb = max(lb, abs(la-lo))
     max_lb = la + lo # enforce triangle inequality
 
     while lb <= max_lb:
@@ -1679,6 +1860,7 @@ def compute_min_pairs_Ethr(parent_mode, O, min_l=1, max_l=100, min_w=0, max_w=1.
         ya = cwo3a2 * ka_fact**2
 
         ans = sympy.solve(min_func_lalbna, nb) # numerically solve for nb that are local minima
+        print ans
         for _nb in sorted(ans):
           if sympify(_nb).is_real:
             if (min_nb <= _nb) and (_nb <= max_nb):
@@ -1743,6 +1925,292 @@ def compute_min_pairs_heuristic(parent_mode, O, min_l=1, max_l=100, min_w=0, max
     print parent_mode.to_str_nlmwy()
 
   # we solve numerically for nb | na, la, lb
+  eta = absO/alpha
+  sigma = c*wo**3/alpha**3
+
+  la = max(1, min_l) # instantiate la
+  while la <= max_l:
+    La = (1+1./la)
+    la_1 = La**0.5
+    min_na = max(1, int(math.ceil(alpha*la/max_w))) # lower bound on na
+    max_na = math.floor(alpha*la/min_w) # upper bound on na
+    # demand that lb >= la (computational reasons)
+    # demand that (la+lb+lo) is even
+    if lo%2 == 0:
+      lb = la
+    else:
+      lb = la + 1
+    lb = max(lb, abs(la-lo))
+    max_lb = la + lo # enforce triangle inequality
+
+    while lb <= max_lb:
+      Lb = (1+1./lb)
+      lb_1 = (1+1./lb)**0.5
+      bandwidth_min_nb = alpha*lb/max_w
+      bandwidth_max_nb = alpha*lb/min_w
+
+      # maximize koab over ma, mb
+
+      # require that (ma+mb+mo)=0
+      ma = max(-la, -lb-mo) # bounds on ma and mb=-(mo+ma)
+      if (la == lb): # avoid duplicate work
+        if (mo == 0):
+          max_ma = 0
+        elif (mo > 0):
+          max_ma = -1
+        else: # mo < 0
+          max_ma = min(la, lb-mo)
+          ma = 1 # avoid duplicate pairs
+      else:
+        max_ma = min(la, lb-mo) # bounds on ma and mb=-(mo+ma)
+
+      best_ma = ma
+      best_koab = 0.
+      absbest_koab = 0.
+      while ma <= max_ma:
+        mb = -mo-ma
+        ### exact computation
+        koab = compute_kabc(lo, mo, la, ma, lb, mb, P=Po, k_hat=k_hat)
+        if abs(koab) > absbest_koab:
+          best_ma = ma
+          best_koab = koab
+          absbest_koab = abs(best_koab)
+        ### assymptotic limit?
+#        koab = gm.compute_kabc_assymptotic(lo, mo, la, ma, lb, -mo-ma, P=Po, k_hat=k_hat)
+        ma += 1
+
+      ma = best_ma
+      mb = -mo-ma
+      koab = best_koab
+
+      # compute N dependence once for each la, lb pair
+      na = min_na
+      while na <= max_na:
+        ka_fact = na*la_1
+
+        min_nb = math.ceil(max([1, (ka_fact - ko_fact)/lb_1, bandwidth_min_nb])) # requirement that ko >= | ka - kb| and min_w <= wb <= max_w
+        if (la == lb) and (ma == mb):
+          min_nb = max(na, min_nb) # avoid duplicate pairs
+        max_nb = math.floor(min( [(ka_fact + ko_fact)/lb_1, bandwidth_max_nb] ))
+
+        if min_nb > max_nb: # avoid stupid work
+          na += 1
+          continue
+
+        wa = gm.compute_w(na, la, alpha)
+        ya = cwo3a2 * ka_fact**2 ### faster than delegation?
+
+        ### solve for nb(na,la,lb)
+        nb_roots = np.roots( [2*sigma**2*Lb**2 , 0 , 2*sigma**2*Lb*La*na**2 , 0, 0, lb*(eta-1.0*la/na), -lb**2] )
+        nb_roots = nb_roots[(nb_roots >= min_nb)*(nb_roots <= max_nb)] # only keep positive definite roots
+
+        for nb in nb_roots: ### iterate over all allowed roots and pick the best neighbors
+          nb_f = int(math.floor(nb.real))
+          wb_f = gm.compute_w(nb_f, lb, alpha)
+          yb_f = cwo3a2 * nb_f**2 * Lb # faster than delegating?
+
+          nb_c = int(math.ceil(nb.real))
+          wb_c = gm.compute_w(nb_c, lb, alpha)
+          yb_c = cwo3a2 * nb_c**2 * Lb
+
+          h_f = ms.compute_heuristic(-absO, wa, wb_f, ya, yb_f)
+          h_c = ms.compute_heuristic(-absO, wa, wb_c, ya, yb_c)
+          if h_f <= h_c:
+            h = h_f
+            nb, wb, yb = nb_f, wb_f, yb_f
+          else:
+            h = h_c
+            nb, wb, yb = nb_c, wb_c, yb_c
+
+          if (h < Emax): # even if Emax=np.infty, we handle this correctly
+            if filename:
+              print >>f, h, "\t", (na, la, ma, wa, ya), "\t", (nb, lb, mb, wb, yb), "\t", koab
+              f.flush()
+            else:
+              print h, "\t", (na, la, ma, wa, ya), "\t", (nb, lb, mb, wb, yb), "\t", koab
+
+        na += 1
+      lb += 2 # sum must remain even
+    la += 1
+
+  if filename:
+    f.close()
+    return filename
+  else:
+    return True
+
+##################################################
+def flawed_compute_min_pairs_heuristic(parent_mode, O, min_l=1, max_l=100, min_w=0, max_w=1.0, alpha=4e-3, c=2e-11, wo=1e-5, k_hat=5e4, filename=False, Emax=np.infty):
+  """
+  compute 3mode heuristic for daughter pairs. Daughter pairs are generated on the fly, with 
+    min_l <= la <= max_l
+    min_w <= wa <= max_w
+
+  and all other parameters are limited by the following constraints
+    |lo - la| <= lb <= lo + la
+    lo + la + lb = even
+    mo + ma + mb = 0
+    ko >= |ka - kb|
+
+  WARNING! mode parameters are computed internally without reference to compute_w() or compute_y()
+
+  """
+  no, lo, mo = parent_mode.get_nlm()
+  Po = 2*np.pi/abs(parent_mode.w)
+  cwo3a2 = c*wo**3*alpha**-2
+
+  ko_fact = no*(1+1./lo)**0.5
+
+  absO=abs(O)
+
+  if filename:
+    f=open(filename, "w")
+    print >>f, absO
+    print >>f, parent_mode.to_str_nlmwy()
+  else:
+    print absO
+    print parent_mode.to_str_nlmwy()
+
+  # we solve numerically for nb | na, la, lb
+  eta = absO/alpha
+  sigma = c*wo**3/alpha**3
+
+  la = max(1, min_l) # instantiate la
+  while la <= max_l:
+    la_1 = (1+1./la)
+    min_na = max(1, int(math.ceil(alpha*la/max_w))) # lower bound on na
+    max_na = math.floor(alpha*la/min_w) # upper bound on na
+    # demand that lb >= la (computational reasons)
+    # demand that (la+lb+lo) is even
+    if lo%2 == 0:
+      lb = la
+    else:
+      lb = la + 1
+    lb = max(lb, abs(la-lo))
+    max_lb = la + lo # enforce triangle inequality
+
+    while lb <= max_lb:
+      lb_1 = (1+1./lb)
+      min_nb = alpha*lb/max_w
+      max_nb = alpha*lb/min_w
+
+      # maximize koab over ma, mb
+
+      # require that (ma+mb+mo)=0
+      ma = max(-la, -lb-mo) # bounds on ma and mb=-(mo+ma)
+      if (la == lb): # avoid duplicate work
+        if (mo == 0):
+          max_ma = 0
+        elif (mo > 0):
+          max_ma = -1
+        else: # mo < 0
+          max_ma = min(la, lb-mo)
+          ma = 1 # avoid duplicate pairs
+      else:
+        max_ma = min(la, lb-mo) # bounds on ma and mb=-(mo+ma)
+
+      best_ma = ma
+      best_koab = 0.
+      absbest_koab = 0.
+      while ma <= max_ma:
+        mb = -mo-ma
+        ### exact computation
+        koab = compute_kabc(lo, mo, la, ma, lb, mb, P=Po, k_hat=k_hat)
+        if abs(koab) > absbest_koab:
+          best_ma = ma
+          best_koab = koab
+          absbest_koab = abs(best_koab)
+        ### assymptotic limit?
+#        koab = gm.compute_kabc_assymptotic(lo, mo, la, ma, lb, -mo-ma, P=Po, k_hat=k_hat)
+        ma += 1
+
+      ma = best_ma
+      mb = -mo-ma
+      koab = best_koab
+
+      ### compute best na, nb allowed
+      na_nb = ((la*lb_1)/(lb*la_1))**(1.0/3) ### ratio of na/nb
+      nb_roots = np.roots( [2*sigma**2 * (na_nb**2 *la_1 + lb_1) * lb_1, 0 , 0 , 0, 0, -eta*lb, la*lb*na_nb + lb**2] ) ### 6th order polynomial for nb
+      nb_roots = nb_roots[nb_roots.imag == 0.0] # keep only real roots
+      print nb_roots
+      print nb_roots*na_nb
+      nb_roots = nb_roots[(nb_roots >= min_nb)*(nb_roots <= max_nb)] # only keep positive definite roots
+      na_roots = nb_roots*na_nb
+      print nb_roots
+      print na_roots
+      logical = (na_roots >= min_na)*(na_roots <= max_na)
+      na_roots = na_roots[logical]
+      nb_roots = nb_roots[logical]
+
+      ### for each na,nb pair, select the best neighbor with na, nb integers
+      for na, nb in zip(na_roots, nb_roots):
+        if abs(na*la_1**0.5 - nb*lb_1**0.5) > ko_fact: # skip because coupling goes to zero
+          continue 
+
+        ### iterate over all possible combos
+        h = np.infty
+        for _na in [int(math.floor(na.real)), int(math.ceil(na.real))]:
+          wa = gm.compute_w(_na, la, alpha)
+          ya = gm.compute_y(_na, la, c, wo, alpha)
+          for _nb in [int(math.floor(nb.real)), int(math.ceil(nb.real))]:
+            wb = gm.compute_w(_nb, lb, alpha)
+            yb = gm.compute_y(_nb, lb, c, wo, alpha)
+
+            _h = ms.compute_heuristic(-absO, wa, wb, ya, yb)
+            if _h < h:
+              h = _h
+              this_nwy = (_na, wa, ya, _nb, wb, yb)
+
+        if (h < Emax): # even if Emax=np.infty, we handle this correctly
+          na, wa, ya, nb, wb, yb = this_nwy
+          if filename:
+            print >>f, h, "\t", (na, la, ma, wa, ya), "\t", (nb, lb, mb, wb, yb), "\t", koab
+            f.flush()
+          else:
+            print h, "\t", (na, la, ma, wa, ya), "\t", (nb, lb, mb, wb, yb), "\t", koab
+
+      lb += 2 # sum must remain even
+    la += 1
+
+  if filename:
+    f.close()
+    return filename
+  else:
+    return True
+
+###################################################################################################
+def depredated_compute_min_pairs_heuristic(parent_mode, O, min_l=1, max_l=100, min_w=0, max_w=1.0, alpha=4e-3, c=2e-11, wo=1e-5, k_hat=5e4, filename=False, Emax=np.infty):
+  """
+  compute 3mode heuristic for daughter pairs. Daughter pairs are generated on the fly, with 
+    min_l <= la <= max_l
+    min_w <= wa <= max_w
+
+  and all other parameters are limited by the following constraints
+    |lo - la| <= lb <= lo + la
+    lo + la + lb = even
+    mo + ma + mb = 0
+    ko >= |ka - kb|
+
+  WARNING! mode parameters are computed internally without reference to compute_w() or compute_y()
+
+  """
+  no, lo, mo = parent_mode.get_nlm()
+  Po = 2*np.pi/abs(parent_mode.w)
+  cwo3a2 = c*wo**3*alpha**-2
+
+  ko_fact = no*(1+1./lo)**0.5
+
+  absO=abs(O)
+
+  if filename:
+    f=open(filename, "w")
+    print >>f, absO
+    print >>f, parent_mode.to_str_nlmwy()
+  else:
+    print absO
+    print parent_mode.to_str_nlmwy()
+
+  # we solve numerically for nb | na, la, lb
   nb, _na, _la, _lb = sympy.symbols("nb na la lb")
   La = sympy.sqrt(_la*(_la+1))
   Lb = sympy.sqrt(_lb*(_lb+1))
@@ -1765,6 +2233,7 @@ def compute_min_pairs_heuristic(parent_mode, O, min_l=1, max_l=100, min_w=0, max
       lb = la
     else:
       lb = la + 1
+    lb = max(lb, abs(la-lo))
     max_lb = la + lo # enforce triangle inequality
 
     while lb <= max_lb:
@@ -1970,7 +2439,7 @@ def compute_pairs(metric, parent_mode, O, catalog_dir, min_l=1, max_l=100, min_w
         sys.exit("\njob Failed! with status "+p.exitcode() )
 
   while len(procs):
-    for ind, (p, _, _) in enumerate(procs):
+    for ind, (p, _) in enumerate(procs):
       if not p.is_alive():
         break
     else:
@@ -2003,7 +2472,7 @@ def compute_pairs(metric, parent_mode, O, catalog_dir, min_l=1, max_l=100, min_w
 #
 #    if verbose: print "\tdone: %f seconds" % (time.time()-tos.pop(0))
 
-  if max_num_pairs >= 0: # max_num_pairs is a non-negative number ==> we attempt to downsample the new_filename
+  if (max_num_pairs >= 0) and ("min" not in metric): # max_num_pairs is a non-negative number ==> we attempt to downsample the new_filename
     from clean_catalogs import clean
     for new_filename in new_filenames:
       clean(new_filename, new_filename, max_num_pairs, alpha, c, wo, k_hat, coupling_type="ggg", verbose=verbose)

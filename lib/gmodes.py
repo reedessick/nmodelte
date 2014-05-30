@@ -49,6 +49,7 @@ class gmode(networks.mode):
     self.alpha = alpha
     self.c = c
     self.wo = wo
+    self.check()
 
   ###
   def update(self):

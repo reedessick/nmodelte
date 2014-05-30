@@ -33,6 +33,17 @@ class mode:
     self.w = w
     self.y = y
     self.U = U
+    self.check()
+
+  ###
+  def check(self):
+    return True
+    if self.n < 0:
+      raise ValueError, "n=%d < 0"%self.n
+    if self.l <= 0:
+      raise ValueError, "l=%d <= 0"%self.l
+    if abs(self.m) > self.l: 
+      raise ValueError, "abs(m=%d) > l=%d"%(self.m, self.l)
 
   ###
   def get_nlm(self):

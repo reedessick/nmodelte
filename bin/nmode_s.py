@@ -461,8 +461,8 @@ if opts.conc_fit:
 if opts.dynamical_relevance:
   if opts.verbose: print "sorting modes by mean{A_i**2}"
   if not opts.amplitude:
-    mA = [ nm_s.mean(A) for A in nms.compute_A(q)]
-  dyn_rel_map = [ (modeNo, mA[modeNo]**2) for modeNo in modes ]
+    mE = [ nm_s.mean(E) for E in nms.compute_E(q)]
+  dyn_rel_map = [ (modeNo, mE[modeNo]) for modeNo in modes ]
   dyn_rel_map.sort(key=lambda l: l[1], reverse=True) # sort so biggest amplitudes are first
   modes = [ l[0] for l in dyn_rel_map ]
 
