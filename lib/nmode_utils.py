@@ -572,7 +572,7 @@ def convert(t_P, q, current, target, system, Porb):
 
   ### compute 3mode frequencies
   if current == "y" or target == "y":
-    freqs = dict( [(modeNo, freq) for freq, modeNo in enumerate(system.compute_3mode_freqs())] ) # modeNo:freq
+    freqs = system.compute_3mode_freqs() 
 
   if current == "x":
     if target == "q": # q = x * e^{-i*W*t)
