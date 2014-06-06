@@ -78,15 +78,15 @@ for Athr, method in zip(Athrs, downselection_methods):
   if opts.verbose:  _athr, _athrexp = nm_u.float_to_scientific(Athr)
   if method == "Alast":
     if opts.verbose: print "downselecting modes using %s and Athr=%fe%d" % (method, _athr, _athrexp)
-    remove += pn.downselect_Alast(q, Athr, network)
+    remove += pn.downselect_Alast(q, Athr, network)[1]
   elif method == "Amean":
     if opts.verbose: print "downselecting modes using %s and Athr=%fe%d" % (method, _athr, _athrexp)
-    remove += pn.downselect_Amean(q, Athr, network)
+    remove += pn.downselect_Amean(q, Athr, network)[1]
   elif method == "Afit":
     if opts.verbose: print "downselecting modes using %s and Athr=%fe%d" % (method, _athr, _athrexp)
-    remove += pn.downselect_Afit(q, Athr, network, t_P=t_P)
+    remove += pn.downselect_Afit(q, Athr, network, t_P=t_P)[1]
   else:
-    sys.exit("unknown downselection method: %s\nplease supply at last one downselection method from the following:\n\tAlst\n\tAmean\n\tAfit")
+    raise ValueError, "unknown downselection method: %s\nplease supply at last one downselection method from the following:\n\tAlst\n\tAmean\n\tAfit"
 
 remove = list(set(remove)) # generate a unique set of modes to remove
 
