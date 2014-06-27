@@ -174,23 +174,25 @@ if opts.D2_plots:
           yv = sdata["stats"][yvkey]
           ax.plot([x,x],[max(y-yv,miny),y+yv], color=colors[Ngens], alpha=0.25)
 
-      ax.set_xlabel(xlabel)
-      if xkey != "Ngens":
-        ax.set_xscale('log')
-      else: 
-        maxNgens = max(NgensD.keys())
-        ax.set_xticks(range(1,maxNgens+1))
-        ax.set_xlim(xmin=0.75, xmax=maxNgens+0.25)
-      ax.set_ylabel(ylabel)
-      ax.set_yscale('log')
-      ax.grid(True)
-      ax.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc="lower center", numpoints=1, frameon=False, ncol=max(NgensD.keys()))
+      if NgensD.keys() != []: ### only produce the plot if it isn't stupid to do so
 
-      plt.setp(fig, figwidth=10, figheight=8)
+        ax.set_xlabel(xlabel)
+        if xkey != "Ngens":
+          ax.set_xscale('log')
+        else: 
+          maxNgens = max(NgensD.keys())
+          ax.set_xticks(range(1,maxNgens+1))
+          ax.set_xlim(xmin=0.75, xmax=maxNgens+0.25)
+        ax.set_ylabel(ylabel)
+        ax.set_yscale('log')
+        ax.grid(True)
+        ax.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc="lower center", numpoints=1, frameon=False, ncol=max(NgensD.keys()))
 
-      figname = "%s/%s-%s%s.png" % (opts.output_dir, xkey, ystr, opts.tag)
-      if opts.verbose: print "\t\t\tsaving ", figname
-      fig.savefig(figname)
+        plt.setp(fig, figwidth=10, figheight=8)
+
+        figname = "%s/%s-%s%s.png" % (opts.output_dir, xkey, ystr, opts.tag)
+        if opts.verbose: print "\t\t\tsaving ", figname
+        fig.savefig(figname)
       plt.close(fig)
 
 ####################################################################################################
@@ -307,9 +309,9 @@ for data_set, (stefilename, sdata) in enumerate(dat):
 
   if sdata.has_key("time_domain"):
     outfilename = sdata["time_domain"]["outfilename"]
-    start = sdata["time_domain"]["t_P[0]"]
-    stop  = sdata["time_domain"]["t_P[-1]"]
-    step  = sdata["time_domain"]["dt_P"]
+    start = "%.1f" % sdata["time_domain"]["t_P[0]"]
+    stop  = "%.1f" % sdata["time_domain"]["t_P[-1]"]
+    step  = "%.3f" % sdata["time_domain"]["dt_P"]
   else:
     outfilename = start = stop = step = "--" 
 
@@ -364,9 +366,9 @@ for data_set, (stefilename, sdata) in enumerate(dat):
 
   ### build stats table
   stats_table += r"""
-\multirow{3}{*}{%d} & %.3f & %.1f & %d & %.1f & %s & %s & %s & \multirow{2}{*}{ %s } & \multirow{2}{*}{ %s } & \multirow{2}{*}{ %s } \\
-\multirow{3}{*}{}   & %.3f & %.3f & %d & %.1f & %s & %s & %s & \multirow{2}{*}{}     & \multirow{2}{*}{ }    & \multirow{2}{*}{ }    \\
-\multirow{3}{*}{}   & %.3f & %s   & %d & %.1f & %s & %s & %s & %s                    & %s                    & %s                    \\""" % (data_set, Mprim, Porb, N_m, start, mE, myE, mdE, mHns, mHintHns, mddtHintHns, Rprim, ecc, N_g, step, sE, syE, Mcomp, Eorb, N_t, stop, gE, gyE, sdE, sHns, sHintHns, sddtHintHns)
+\multirow{3}{*}{%d} & %.3f & %.1f & %d & %s & %s & %s & %s & \multirow{2}{*}{ %s } & \multirow{2}{*}{ %s } & \multirow{2}{*}{ %s } \\
+\multirow{3}{*}{}   & %.3f & %.3f & %d & %s & %s & %s & %s & \multirow{2}{*}{}     & \multirow{2}{*}{ }    & \multirow{2}{*}{ }    \\
+\multirow{3}{*}{}   & %.3f & %s   & %d & %s & %s & %s & %s & %s                    & %s                    & %s                    \\""" % (data_set, Mprim, Porb, N_m, start, mE, myE, mdE, mHns, mHintHns, mddtHintHns, Rprim, ecc, N_g, step, sE, syE, sdE, Mcomp, Eorb, N_t, stop, gE, gyE, sdE, sHns, sHintHns, sddtHintHns)
 #  stats_table += r"""
 #\multirow{3}{*}{%d} & %.3f & %.1f & %d & %.1f & %s & %s & %s & \multirow{2}{*}{ %s } & \multirow{2}{*}{ %s } & \multirow{2}{*}{ %s } \\
 #\multirow{3}{*}{}   & %.3f & %.3f & %d & %.1f & %s & %s & %s & \multirow{2}{*}{}     & \multirow{2}{*}{ }    & \multirow{2}{*}{ }    \\
