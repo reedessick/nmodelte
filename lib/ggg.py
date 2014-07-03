@@ -9,6 +9,8 @@ import sympy.physics.wigner as sympy_phys_wigner
 from sympy.core import sympify
 import glob
 
+from collections import defaultdict
+
 ####################################################################################################
 #
 #
@@ -173,7 +175,7 @@ def all_possible_partners(mode1, mode2, min_w, max_w, alpha, c, wo):
   return modes
 
 ##################################################
-def multiple_collective_instabilities(parent, O, Eo, maxp=1, Nmin=0, Nmax=10000, alpha=4e-3, c=2e-10, wo=1e-5, k_hat=5e4, verbose=False, min_l=False, max_l=False, min_n=False, max_n=False, min_absw=False, max_absw=False):
+def multiple_collective_instabilities(parent, O, Eo, maxp=1, Nmin=0, Nmax=10000, alpha=4e-3, c=2e-10, wo=1e-5, k_hat=5e4, verbose=False, min_l=False, max_l=False, min_n=False, max_n=False, min_absw=False, max_absw=False, catalogdir="./"):
   """
   systematically searches for all allowed collectively unstable modes coupled to parent
   """
@@ -184,6 +186,58 @@ def multiple_collective_instabilities(parent, O, Eo, maxp=1, Nmin=0, Nmax=10000,
   P = 2*np.pi/w
   sgnO = abs(O)/O
 
+  ### look for optimal n1,l1,n2,l2 combinations
+  useful_filenames = compute_pairs("min_Ethr", parent, O, catalogdir, min_l=min_l, max_l=max_l, min_w=min_absw, max_w=max_absw, alpha=alpha, c=c, wo=wo, k_hat=k_hat, maxp=maxp, verbose=verbose)
+#  my_coupling_list = ggg_minima_coupling_list(alpha, c, wo, k_hat, parent_mode=parent).load_unsorted_mode_lists("min_Ethr", useful_filenames, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_absw, max_w=max_absw)
+  couplings = ggg_minima_coupling_list(alpha, c, wo, k_hat, parent_mode=parent).load_unsorted_mode_lists("min_Ethr", useful_filenames, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_absw, max_w=max_absw).couplings
+
+  ### pick the global minimum n1,n2 pair given l1,l2
+  ls = defaultdict( list )
+  for coupling_list_element in couplings: 
+    n1,l1,_ = coupling_list_element.dmode1.get_nlm()
+    n2,l2,_ = coupling_list_element.dmode2.get_nlm()
+    ls[tuple(sorted([l1,l2]))].append( coupling_list_element )
+
+  couplings = []
+  for value in ls.values():
+    value.sort(key=lambda l: l.metric_value) ### sort by metric_value
+    couplings.append( value.pop(0) ) ### pick only the best for each l1,l2 combo
+
+  del ls
+
+  starting_triples = []
+  ### iterate over all local minima and start there
+  for coupling_list_element in couplings:
+    n1,l1,_ = coupling_list_element.dmode1.get_nlm()
+    n2,l2,_ = coupling_list_element.dmode2.get_nlm()
+
+    ### separate seed for each allowed m1,m2 combo
+    m1 = max(-l1, -(m+l2))
+    if (n1 == n2) and (l1 == l2):
+      if m1 == 0:
+        max_m1 = 0
+      elif m > 0:
+        max_m1 = -1
+      else: # m < 0
+        max_m1 = 1
+    else:
+      max_m1 = min(l1, l2-m)
+
+    while m1 <= max_m1:
+      m2 = -(m+m1)
+      k = compute_kabc(l, m, l1, m1, l2, m2, k_hat=k_hat, P=P) ### we have to re-compute this each time...
+
+      d1 = gm.gmode(n1, l1, m1, alpha=alpha, c=c, wo=wo) # set up daughter modes
+      d1.w *= -sgnO
+      d2 = gm.gmode(n2, l2, m2, alpha=alpha, c=c, wo=wo)
+      d2.w *= -sgnO
+
+      starting_triples.append( (parent, d1, d2, k) ) # add starting point to list
+
+      m1 += 1
+
+  """
+  #====================== old algorithm, which assumes detuining is vanishingly small for seed locations (not always valid!)
   ### look for all allowed l1,m1,l2,m2 combinations
   if verbose: 
     print "looking for all allowed l1,m1,l2,m2 combinations"
@@ -227,6 +281,7 @@ def multiple_collective_instabilities(parent, O, Eo, maxp=1, Nmin=0, Nmax=10000,
         m1 += 1
       l2 += 2 # increment by 2 because l+l1+l2 must be event
     l1 += 1
+  """
 
   starting_triples.sort(key=lambda l: l[1].n + l[2].n) # sort by the sum of the daughter n's, which should capture the rough size of the parameter space searched?
   if verbose:
@@ -237,7 +292,7 @@ def multiple_collective_instabilities(parent, O, Eo, maxp=1, Nmin=0, Nmax=10000,
   procs = []
   for triple_ind, triple in enumerate(starting_triples):
     con1, con2 = mp.Pipe()
-    new_filename = "single_collective_instability-%d.txt" % triple_ind
+    new_filename = "%s/single_collective_instability-%d.txt" % (catalogdir, triple_ind)
     args = (triple, O, Nmin, Nmax, alpha, c, wo, k_hat, Eo, new_filename, min_l, max_l, min_n, max_n, min_absw, max_absw, con2)
     if verbose:
       print "launching search for collective instability : %s\n\tNmin\t: %d\n\tNmax\t: %d\n\tparent\t\t: %s\n\tdaughter\t: %s\n\tdaughter\t: %s" % (new_filename, Nmin, Nmax, triple[0].to_str_nlmwy(), triple[1].to_str_nlmwy(), triple[2].to_str_nlmwy())
@@ -303,8 +358,6 @@ def single_collective_instability(triple, O, Nmin=0, Nmax=10000, alpha=4e-3, c=2
   else:
     import sys
     stdout = sys.stdout
-
-  from collections import defaultdict
 
   absO = abs(O)
   sgnO = O/absO

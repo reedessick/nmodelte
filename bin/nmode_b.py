@@ -321,7 +321,7 @@ for n_m, (O, mode) in enumerate(modes):
   if daughter_selection == "collective":  ### collective modes
     modeNo = system.network.modeNoD[mode.get_nlms()]
     ### identify mode number in current network
-    my_triples = ggg.multiple_collective_instabilities(mode, O, E[modeNo], maxp=opts.maxp, Nmin=min_num_pairs, Nmax=num_pairs[0], alpha=alpha, c=c, wo=wo, k_hat=k_hat, verbose=opts.verbose, min_l=daughter_min_l, max_l=daughter_max_l, min_absw=min_w, max_absw=max_w)
+    my_triples = ggg.multiple_collective_instabilities(mode, O, E[modeNo], maxp=opts.maxp, Nmin=min_num_pairs, Nmax=num_pairs[0], alpha=alpha, c=c, wo=wo, k_hat=k_hat, verbose=opts.verbose, min_l=daughter_min_l, max_l=daughter_max_l, min_absw=min_w, max_absw=max_w, catalogdir=opts.catalog_dir)
     if opts.verbose: 
       print "found %d triples" % (len(my_triples))
     ### add triples to the network
