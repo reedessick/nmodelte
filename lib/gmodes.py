@@ -50,6 +50,8 @@ class gmode(networks.mode):
     self.c = c
     self.wo = wo
     self.check()
+    if self.is_local():
+      raise ValueError, "gmode is local!\nn=%d\nl=%d\nm=%d\nalpha=%f\nc=%f\nwo=%f"%(self.n, self.l, self.m, self.alpha, self.c, slef.wo)
 
   ###
   def update(self):
@@ -101,6 +103,36 @@ class gmode(networks.mode):
         self.U = [ (compute_U(self, U_hat=compute_Uhat(Mprim, Mcomp, Porb)), "all") ]
 
     return self
+
+  ###
+  def global_travel_time(self):
+    """
+    computes the global travel time of the mode
+    """
+    return 2*np.pi/(self.alpha*self.l/self.n**2)
+
+  ###
+  def is_local(self):
+    """
+    checks to see if the global travel time is longer than the damping rate. If it is, the wave is local!
+      t*y >= 1 ==> local wave!
+    """
+    return self.global_travel_time()*self.y >= 1.0
+
+  ###
+  def is_global(self):
+    """ not is_local() """
+    return (not self.is_local())
+
+  ###
+  def breaking_thr(self, thr=1.0):
+    """
+    computes the amplitude the mode must reach before it begins breaking.
+      k_r * xi_r >= thr
+    assumes maximum is reached near inner turning point
+    """
+    kr_xir = 98**3 * (1.27/(2*26*98*np.pi**2))**0.5 * (self.wo / self.w )**3 * (self.l*(self.l+1))**0.5 # times mode amplitude
+    return thr / kr_xir ### this should be the mode amplitude at which the mode will break.
 
 ####################################################################################################
 #
