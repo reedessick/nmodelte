@@ -145,6 +145,9 @@ if time_domain:
   if opts.verbose: print "loading time-domain data from %s" % opts.filename
   t_P, q, N_m = nm_u.load_out(opts.filename, tmin=opts.tmin, tmax=opts.tmax, downsample=opts.tdownsample)
 
+  if not len(t_P):
+    raise ValueError, "no data loaded from ",opts.filename
+
   if opts.amplitude:
     if opts.verbose: print "computing mode amplitudes"
     x = nm_s.compute_A(q, Eo=1.)
@@ -276,6 +279,9 @@ if time_domain:
 if freq_domain:
   if opts.verbose: print "loading freq-domain data from %s" % opts.freqfilename
   freq, fq, N_m = nm_u.load_out(opts.freqfilename, tmin=opts.fmin, tmax=opts.fmax, downsample=opts.fdownsample)
+
+  if not len(freq):
+    raise ValueError, "no data loaded from ", opts.freqfilename
 
   if opts.freq_peaks:
     if opts.verbose: print "finding peak frequencies by closest point in the FFT"
