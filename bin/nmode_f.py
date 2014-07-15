@@ -23,6 +23,8 @@ from optparse import *
 
 parser=OptionParser(usage=usage)
 
+parser.add_option("", "--outfilename", default=False, type="string", help="file into which integration data is written. If not supplied, data is printed to the terminal.")
+
 # options about integration
 parser.add_option("-P", "--num-periods", dest="N_P", default=False, type="float", help="the number of periods for simulation")
 parser.add_option("-f", "--function", dest="function", default="", type="string", help="the name of the derivative function used in integration. Names come from network_flow.py")
@@ -45,6 +47,11 @@ parser.add_option("-l", "--logfilename", dest="logfilename", default=False, type
 parser.add_option("-t", "--time-integration", default=False, action="store_true", help="time the duration of the integration loop and report the result. This does not include overhead like setting up initial conditions or integration objects")
 
 opts, args = parser.parse_args()
+
+if opts.outfilename:
+  outfile = open(opts.outfilename, "a")
+else:
+  outfile = sys.stdout
 
 if not opts.logfilename:
   opts.logfilename = raw_input("logfilename = ")
@@ -124,12 +131,12 @@ else:
   if opts.init_conds:
     q = [float(l) for l in opts.init_conds.strip().split()]
     if len(q) == 2:
-      print ("# taking %s to be initial conditions for all modes" % str(q))
+      print >>outfile, ("# taking %s to be initial conditions for all modes" % str(q))
       q_o = q[:]
       for m in range(1,dimension/2):
         q += q_o
     elif len(q) != dimension:
-      sys.exit("IC's supplied do not match number of modes.")
+      raise ValueError, "#IC's supplied do not match number of modes."
   else:
     if opts.equilib_IC: # compute equilibrium state
       if opts.equilib_IC == "lin":
@@ -171,19 +178,19 @@ if opts.function == "dxdt_no_NLT_mpi":
 
     ### set up communicators
     comm = MPI.COMM_SELF.Spawn(sys.executable, args=[__file__.strip("nmode_f.py")+"child-dxdt_no_NLT_mpi.py"], maxprocs=opts.num_proc)
-#    print "set up communicators with child processes : ", __file__.strip("nmode_f.py")+"child-dxdt_no_NLT_mpi.py"
+#    print >>outfile, "set up communicators with child processes : ", __file__.strip("nmode_f.py")+"child-dxdt_no_NLT_mpi.py"
 
     ### broadcast basic system parameters, do this only once
     comm.Bcast([np.array(dimension, dtype="i"), MPI.INT], root=MPI.ROOT) # np.array objects (fast)
-#    print "dimension"
+#    print >>outfile, "dimension"
     comm.Bcast([np.array(Oorb, dtype="f"), MPI.FLOAT], root=MPI.ROOT)
-#    print "Oorb"
+#    print >>outfile, "Oorb"
     comm.Bcast([np.array(system.network.nlm, dtype="i"), MPI.INT], root=MPI.ROOT)
-#    print "nlm"
+#    print >>outfile, "nlm"
     comm.bcast(system.network.wyU, root=MPI.ROOT) # python lists (slow), but they have weird shapes...
-#    print "wyU"
+#    print >>outfile, "wyU"
     comm.bcast(system.network.K, root=MPI.ROOT) # this has different variable types...
-#    print "K"
+#    print >>outfile, "K"
 
     ### iterate over children and set up persistent communicators
     dxmdt = np.zeros(dimension, dtype="f")
@@ -193,7 +200,7 @@ if opts.function == "dxdt_no_NLT_mpi":
       snds.append( (comm.Send_init([t, MPI.FLOAT], dest=child), comm.Send_init([q, MPI.FLOAT], dest=child) ) )
       rcvs.append( comm.Recv_init([dxmdt, MPI.FLOAT], source=child) )#, tag=child) )
 
-#    print "succesfully set up persistent communicators"
+#    print >>outfile, "succesfully set up persistent communicators"
 
     step = odeiv.step_rkf45(dimension, nf.dxdt_no_NLT_mpi, args=(dimension, snds, rcvs, dxmdt))
 
@@ -275,24 +282,24 @@ if opts.time_integration:
 # integrate the system and report when necessary 
 if use_phase:
   if (not opts.onward) or (opts.init_time != "none"):
-    print nm_u.report_func(t, q[:-1], Porb)
+    print >>outfile, nm_u.report_func(t, q[:-1], Porb)
   while t < t1:
     while t < sample_time:
       t, h, q = evolve.apply(t, sample_time, h, q) # evolve network and update variables
     sample_time += sample_step
-    print nm_u.report_func(t, q[:-1], Porb) # phase is tacked on the end
+    print >>outfile, nm_u.report_func(t, q[:-1], Porb) # phase is tacked on the end
 
 else:
   if (not opts.onward) or (opts.init_time != "none"):
-    print nm_u.report_func(t, q, Porb)
+    print >>outfile, nm_u.report_func(t, q, Porb)
   while t < t1:
     while t < sample_time:
       t, h, q = evolve.apply(t, sample_time, h, q) # evolve network and update variables
     sample_time += sample_step
-    print nm_u.report_func(t, q, Porb)
+    print >>outfile, nm_u.report_func(t, q, Porb)
     
 if opts.time_integration:
-  print "#total integration time = ", time.time()-to, " sec"
+  print >>outfile, "#total integration time = ", time.time()-to, " sec"
 
 ####################################################################################################
 #
@@ -301,6 +308,8 @@ if opts.time_integration:
 #
 #
 ####################################################################################################
+
+
 if opts.function == "dxdt_no_NLT_mp":
   for proc in procs:
     proc.terminate()
