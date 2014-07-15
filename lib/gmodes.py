@@ -50,8 +50,6 @@ class gmode(networks.mode):
     self.c = c
     self.wo = wo
     self.check()
-    if self.is_local():
-      raise ValueError, "gmode is local!\nn=%d\nl=%d\nm=%d\nalpha=%f\nc=%f\nwo=%f"%(self.n, self.l, self.m, self.alpha, self.c, slef.wo)
 
   ###
   def update(self):
@@ -109,7 +107,7 @@ class gmode(networks.mode):
     """
     computes the global travel time of the mode
     """
-    return 2*np.pi/(self.alpha*self.l/self.n**2)
+    return 2*np.pi/(1.0*self.alpha*self.l/self.n**2)
 
   ###
   def is_local(self):
