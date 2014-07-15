@@ -283,21 +283,25 @@ if opts.time_integration:
 if use_phase:
   if (not opts.onward) or (opts.init_time != "none"):
     print >>outfile, nm_u.report_func(t, q[:-1], Porb)
+    outfile.flush()
   while t < t1:
     while t < sample_time:
       t, h, q = evolve.apply(t, sample_time, h, q) # evolve network and update variables
     sample_time += sample_step
     print >>outfile, nm_u.report_func(t, q[:-1], Porb) # phase is tacked on the end
+    outfile.flush()
 
 else:
   if (not opts.onward) or (opts.init_time != "none"):
     print >>outfile, nm_u.report_func(t, q, Porb)
+    outfile.flush()
   while t < t1:
     while t < sample_time:
       t, h, q = evolve.apply(t, sample_time, h, q) # evolve network and update variables
     sample_time += sample_step
     print >>outfile, nm_u.report_func(t, q, Porb)
-    
+    outfile.flush()
+ 
 if opts.time_integration:
   print >>outfile, "#total integration time = ", time.time()-to, " sec"
 
@@ -308,7 +312,8 @@ if opts.time_integration:
 #
 #
 ####################################################################################################
-
+if opts.outfilename:
+  outfile.close()     
 
 if opts.function == "dxdt_no_NLT_mp":
   for proc in procs:
