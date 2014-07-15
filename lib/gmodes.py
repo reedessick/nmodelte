@@ -107,7 +107,7 @@ class gmode(networks.mode):
     """
     computes the global travel time of the mode
     """
-    return 2*np.pi/(1.0*self.alpha*self.l/self.n**2)
+    return 2*np.pi*self.n**2/(self.alpha*self.l)
 
   ###
   def is_local(self):
@@ -129,7 +129,8 @@ class gmode(networks.mode):
       k_r * xi_r >= thr
     assumes maximum is reached near inner turning point
     """
-    kr_xir = 98**3 * (1.27/(2*26*98*np.pi**2))**0.5 * (self.wo / self.w )**3 * (self.l*(self.l+1))**0.5 # times mode amplitude
+    prefact = 4729.502999063644 ### numerically evaluated prefactor using constants from Weinberg (2012)
+    kr_xir = prefac * (self.wo / self.w )**3 * (self.l*(self.l+1))**0.5 # times mode amplitude
     return thr / kr_xir ### this should be the mode amplitude at which the mode will break.
 
 ####################################################################################################
