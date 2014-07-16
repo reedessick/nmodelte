@@ -50,8 +50,6 @@ class gmode(networks.mode):
     self.c = c
     self.wo = wo
     self.check()
-    if self.is_local():
-      raise ValueError, "gmode is local!\nn=%d\nl=%d\nm=%d\nalpha=%f\nc=%f\nwo=%f"%(self.n, self.l, self.m, self.alpha, self.c, slef.wo)
 
   ###
   def update(self):
