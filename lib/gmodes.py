@@ -132,7 +132,7 @@ class gmode(networks.mode):
     assumes maximum is reached near inner turning point
     """
     prefact = 4729.502999063644 ### numerically evaluated prefactor using constants from Weinberg (2012)
-    kr_xir = prefac * (self.wo / self.w )**3 * (self.l*(self.l+1))**0.5 # times mode amplitude
+    kr_xir = prefact * (self.wo / self.w )**3 * (self.l*(self.l+1))**0.5 # times mode amplitude
     return thr / kr_xir ### this should be the mode amplitude at which the mode will break.
 
 ####################################################################################################
