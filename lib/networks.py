@@ -541,11 +541,11 @@ class system:
         best_tuple = (o,i,j,k)
 
     ### for best tuple
-    (o,i,j), (Ao, Ai, Aj), ((so, co), (si, ci), (sj, cj)), (do, di, dj) = threeMode_equilib(best_tuple, freqs[best_tuple[0]], network, default_A=default) # get amplitudes, phases and detunings appropriate for tcurrent == "q"
+    (o,i,j), (Ao, Ai, Aj), ((so, co), (si, ci), (sj, cj)), (do, di, dj) = threeMode_equilib(best_tuple, freqs[best_tuple[0]], network) # get amplitudes, phases and detunings appropriate for tcurrent == "q"
  
     ### check whether the daughters are non-zero
     if (Ai==0) and (Aj==0):
-      return self.compute_lin_eq(self, t=t, default=default, tcurrent=tcurrent)
+      return self.compute_lin_eq(t=t, default=default, tcurrent=tcurrent)
  
     ### instantiate IC vector
     q = np.random.rand(2*len(network))*default # the vast majority are set to rand*default
