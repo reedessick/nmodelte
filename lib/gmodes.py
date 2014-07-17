@@ -123,7 +123,7 @@ class gmode(networks.mode):
     return (not self.is_local())
 
   ###
-  def breaking_thr(self, thr=1.0):
+  def pessimistic_breaking_thr(self, thr=1.0):
     """
     computes the amplitude the mode must reach before it begins breaking.
       k_r * xi_r >= thr
@@ -132,6 +132,62 @@ class gmode(networks.mode):
     prefact = 4729.502999063644 ### numerically evaluated prefactor using constants from Weinberg (2012)
     kr_xir = prefact * (self.wo / self.w )**3 * (self.l*(self.l+1))**0.5 # times mode amplitude
     return thr / kr_xir ### this should be the mode amplitude at which the mode will break.
+
+  ###
+  def breaking_thr(self, thr=1.0, rtol=1e-6, max_iters=100):
+    """
+    computes the amplitude the mode must reach before it begins breaking
+      k_r * xi_r >= thr
+    solves a transcendental equation for the radius at which k_r*xi_r is extremized.
+      we use Newtons method and require the solution to agree to within rtol for convergence
+    """
+    prefact1 = 4729.502999063644 ### numerically evaluated prefactor using constants from Weinberg (2012)
+    L2 = self.l*(self.l+1)
+    prefact2 = (L2)**(1.5) * (self.wo/self.w)**3
+
+    ### use Newton's method to find the zero
+    ### we solve 0.5*(y+xo) = tan(y)
+    ### where y = k_r*r - xo
+    ###       xo= L2**0.5 - pi/4
+
+    xo = L2**0.5 - np.pi/4
+
+    ### bounds on the solution
+    if self.l == 1: ### the first allowable solution occurs in a different well of tan(y)
+      miny = 5*np.pi/4
+      maxy = 3*np.pi/2
+    else:
+      miny = np.pi/4
+      maxy = np.pi/2
+
+    ### initial guess
+    oldy = miny + np.pi/8
+    ###                           f(y)                                df(y)
+    y = oldy - ( np.tan(oldy) - 0.5*(oldy+xo) )/ (np.cos(oldy)**-2 - 0.5)
+
+    if y < miny:
+      raise ValueError, "y < miny = %f"%miny
+    if y > maxy:
+      raise ValueError, "y > maxy = %f"%maxy
+
+    for _ in xrange(max_iters):
+      print y, oldy
+      if abs(y-oldy) < rtol*oldy:
+        break
+      oldy = y
+      y = oldy - ( np.tan(oldy) - 0.5*(oldy+xo) )/ (np.cos(oldy)**-2 - 0.5)
+      if y < miny:
+        raise ValueError, "y < miny = %f"%miny
+      if y > maxy:
+        raise ValueError, "y > maxy = %f"%maxy
+    else:
+      raise StandardError, "max_iters=%d exceeded without convergence to within rtol=%.9f"%(max_iters, rtol)
+
+    k_rr = y + xo ### k_r*r at max{k_r*xi_r}
+
+    kr_xir = prefact1 * prefact2 * k_rr**-2 ## times the mode amplitude
+    return thr / kr_xir ### this should be the mode amplitude at which the mode will break
+
 
 ####################################################################################################
 #
