@@ -315,7 +315,7 @@ if opts.time_integration:
 if opts.outfilename:
   outfile.close()     
 
-if opts.function == "dxdt_no_NLT_mp":
+if opts.function == "dxdt_no_NLT_mp" and (opts.num_proc != 1):
   for proc in procs:
     proc.terminate()
     
