@@ -49,7 +49,10 @@ parser.add_option("-t", "--time-integration", default=False, action="store_true"
 opts, args = parser.parse_args()
 
 if opts.outfilename:
-  outfile = open(opts.outfilename, "a")
+  if opts.onward and (opts.outfilename==opts.onward): 
+    outfile = open(opts.outfilename, "a")
+  else:
+    outfile = open(opts.outfilename, "w")
 else:
   outfile = sys.stdout
 
