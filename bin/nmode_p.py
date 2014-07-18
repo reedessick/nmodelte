@@ -30,6 +30,9 @@ parser.add_option("-l", "--logfilename", default=False, type="string")
 # time domain options
 parser.add_option("-F", "--filename", dest="filename", default=False, type="string", help="the name of the file you want to plot")
 
+parser.add_option("", "--kr-xir-time", action="store_true", help="generate a plot of k_r*xi_r for each mode as a function of time")
+parser.add_option("", "--multi-gen-kr-xir-time", action="store_true")
+
 parser.add_option("", "--amp-time", action="store_true")
 parser.add_option("", "--phs-time", action="store_true")
 parser.add_option("", "--amp-phs-time", action="store_true", help="generate time-domain data: amplitude and phase.")
@@ -111,7 +114,7 @@ opts, args = parser.parse_args()
 ##################################################
 
 ### make time domain plots?
-if (opts.amp_time or opts.phs_time or opts.amp_phs_time or opts.real_time or opts.imag_time or opts.real_imag_time or opts.multi_gen_amp_time or opts.Hns_time or opts.growth_rates):
+if (opts.amp_time or opts.phs_time or opts.amp_phs_time or opts.real_time or opts.imag_time or opts.real_imag_time or opts.multi_gen_amp_time or opts.Hns_time or opts.growth_rates or opts.kr_xir_time or opts.multi_gen_kr_xir_time):
   time_domain = True
 else:
   time_domain = False
@@ -123,7 +126,7 @@ else:
   freq_domain = False
 
 ### make multi-generation plots?
-if (opts.multi_gen_amp_time or opts.multi_gen_amp_freq or opts.multi_gen_amp_portrait or opts.multi_gen_real_imag_portrait):
+if (opts.multi_gen_amp_time or opts.multi_gen_amp_freq or opts.multi_gen_amp_portrait or opts.multi_gen_real_imag_portrait or opts.multi_gen_kr_xir_time):
   multi_gen = True
 else:
   multi_gen = False
@@ -617,6 +620,64 @@ if time_domain:
 
     plt.close(fig)
 
+  ################################################
+  ### kr_xir_time
+  if opts.kr_xir_time:
+    if opts.verbose: print "\tkr_xir_time"
+    ### compute prefactors from breaking thresholds
+    prefacts = [1.0/mode.breaking_thr(thr=1.0) for mode in system.network.modes]
+    fig, ax = nm_p.amp_plot(t_P, [ [ [l*prefacts[modeNo] for l in Q] for Q in q[modeNo]] for modeNo in range(N_m)], n_l_m=n_l_m, mode_nums=opts.mode_nums) ### strange manipulation of q is to compute k_r*xi_r
+
+    ax.set_ylabel(r'$|\left(k_r\xi_r\right)_i|$')
+    ax.set_xlabel(r'$t/P_{\mathrm{orb}}$')
+    if not opts.lin_amp_time:
+      ax.set_yscale('log')
+
+    if not opts.no_legend:
+      ax.legend(loc=opts.legend_loc, ncol=opts.legend_col, prop={'size':opts.legend_font_size})
+
+    if opts.time_ymin:
+      _ax = ax.axis()
+      ax.axis([_ax[0], _ax[1], opts.time_ymin, _ax[3]])
+    if opts.time_ymax:
+      _ax = ax.axis()
+      ax.axis([_ax[0], _ax[1], _ax[2], opts.time_ymax])
+    if opts.time_xmin:
+      _ax = ax.axis()
+      ax.axis([opts.time_xmin, _ax[1], _ax[2], _ax[3]])
+    if opts.time_xmax:
+      _ax = ax.axis()
+      ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
+
+    # grid lines
+    ax.grid(opts.grid)
+
+    if opts.lin_time:
+      if opts.lin_amp_time:
+        figname = opts.filename + ".Lkr_xir.lin_time" + opts.tag + ".png"
+      else:
+        figname = opts.filename + ".kr_xir.lin_time" + opts.tag + ".png"
+      if opts.verbose: print "saving "+figname
+      plt.savefig(figname)
+
+    if opts.log_time:
+      if opts.lin_amp_time:
+        figname = opts.filename + ".Lkr_xir.log_time" + opts.tag + ".png"
+      else:
+        figname = opts.filename + ".kr_xir.log_time" + opts.tag + ".png"
+      if opts.verbose: print "saving "+figname
+      ax.set_xscale('log')
+      if opts.time_xmin:
+        _ax = ax.axis()
+        ax.axis([opts.time_xmin, _ax[1], _ax[2], _ax[3]])
+      if opts.time_xmax:
+        _ax = ax.axis()
+        ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
+
+      plt.savefig(figname)
+
+    plt.close(fig)
+
 ##################################################
 #
 #      multi-gen plot time-domain plots
@@ -665,6 +726,65 @@ if time_domain:
         figname = opts.filename + ".multi-gen_Lamp.log_time" + opts.tag + ".png"
       else:
         figname = opts.filename + ".multi-gen_amp.log_time" + opts.tag + ".png"
+      if opts.verbose: print "saving "+figname
+      for ax in axs:
+        ax.set_xscale('log')
+        if opts.time_xmin:
+          _ax = ax.axis()
+          ax.axis([opts.time_xmin, _ax[1], _ax[2], _ax[3]])
+        if opts.time_xmax:
+          _ax = ax.axis()
+          ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
+
+      plt.savefig(figname)
+
+    plt.close(fig)
+
+  if opts.multi_gen_kr_xir_time:
+    if opts.verbose: print "\tmulti_gen_kr_xir"
+    ### compute prefactors from breaking thresholds
+    prefacts = [1.0/mode.breaking_thr(thr=1.0) for mode in system.network.modes]
+    figs, axs = nm_p.multi_gen_amp_plot(t_P, [ [ [l*prefacts[modeNo] for l in Q] for Q in q[modeNo]] for modeNo in range(N_m)], gens, n_l_m=n_l_m, mode_nums=opts.mode_nums)
+
+    for ax in axs:
+      ax.set_ylabel(r'$|'+opts.tc+'_i|$')
+      if not opts.lin_amp_time:
+        ax.set_yscale('log')
+
+      if not opts.no_legend:
+        ax.legend(loc=opts.legend_loc, ncol=opts.legend_col, prop={'size':opts.legend_font_size})
+
+      if opts.time_ymin:
+        _ax = ax.axis()
+        ax.axis([_ax[0], _ax[1], opts.time_ymin, _ax[3]])
+      if opts.time_ymax:
+        _ax = ax.axis()
+        ax.axis([_ax[0], _ax[1], _ax[2], opts.time_ymax])
+      if opts.time_xmin:
+        _ax = ax.axis()
+        ax.axis([opts.time_xmin, _ax[1], _ax[2], _ax[3]])
+      if opts.time_xmax:
+        _ax = ax.axis()
+        ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
+
+      # grid lines
+      ax.grid(opts.grid)
+
+    ax.set_xlabel(r'$t/P_{\mathrm{orb}}$')
+
+    if opts.lin_time:
+      if opts.lin_amp_time:
+        figname = opts.filename + ".multi-gen_Lkr_xir.lin_time" + opts.tag + ".png"
+      else:
+        figname = opts.filename + ".multi-gen_kr_xir.lin_time" + opts.tag + ".png"
+      if opts.verbose: print "saving "+figname
+      plt.savefig(figname)
+
+    if opts.log_time:
+      if opts.lin_amp_time:
+        figname = opts.filename + ".multi-gen_Lkr_xir.log_time" + opts.tag + ".png"
+      else:
+        figname = opts.filename + ".multi-gen_kr_xir.log_time" + opts.tag + ".png"
       if opts.verbose: print "saving "+figname
       for ax in axs:
         ax.set_xscale('log')
