@@ -204,7 +204,6 @@ if not opts.config:
 if not opts.new_logfilename:
   opts.new_logfilename = raw_input("new logfilename = ")
 
-
 if not opts.logfilename:
   opts.logfilename = raw_input("old logfilename = ")
 
@@ -215,7 +214,8 @@ config.read(opts.config)
 
 ### requre outfilename with certain parent selection criteria
 selection = dict( config.items("parents") )
-if selection.has_key("min_Amean") or selection.has_key("max_Amean") or selection.has_key("min_Alast") or selection.has_key("max_Alast") or selection.has_key("min_Afit") or selection.has_key("max_Afit"):
+require_outfile = selection.has_key("min_Amean") or selection.has_key("max_Amean") or selection.has_key("min_Alast") or selection.has_key("max_Alast") or selection.has_key("min_Afit") or selection.has_key("max_Afit")
+if require_outfile:
   if not opts.outfilename:
     opts.outfilename = raw_input("outfilename = ")
 
@@ -254,7 +254,7 @@ alpha = config.getfloat("general", "alpha")
 c = config.getfloat("general", "c")
 k_hat = config.getfloat("general", "k_hat")
 
-if opts.outfilename:
+if opts.outfilename and require_outfile:
   if opts.verbose: print "reading integration data from ", opts.outfilename
   t_P, q, N_m = nm_u.load_out_f(opts.outfilename)
 else:
