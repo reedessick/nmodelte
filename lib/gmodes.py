@@ -171,7 +171,6 @@ class gmode(networks.mode):
       raise ValueError, "y > maxy = %f"%maxy
 
     for _ in xrange(max_iters):
-      print y, oldy
       if abs(y-oldy) < rtol*oldy:
         break
       oldy = y
