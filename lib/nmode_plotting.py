@@ -4,6 +4,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+plt.rcParams.update({"text.usetex":True})
+
 import numpy as np
 pi = np.pi
 infty = np.infty
