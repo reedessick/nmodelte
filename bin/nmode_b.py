@@ -25,122 +25,125 @@ def new_parent_selection(config, system, q=False, verbose=False):
   takes the config file and selects new parents based on the criteria therein
   returns [(O,mode), ...]
   """
-  selection = dict( config.items("parents") )
+#  selection = dict( config.items("parents") )
+  selection = dict( [(key.lower(),value) for key, value in config.items("parents")] )
   network = system.network
   freqs = system.compute_3mode_freqs()
 
+  if verbose: print "selection : ", selection
+
   ### modeNos
-  if selection.has_key("modeNos"):
+  if selection.has_key("modeNos".lower()):
     if verbose: print "selecting parents based on modeNo"
-    modeNos = [int(l) for l in selection["modeNos"].strip().split()]
+    modeNos = [int(l) for l in selection["modeNos".lower()].strip().split()]
   else:
     modeNos = range(len(network))
 
   ### genNos
-  if selection.has_key("genNos"):
+  if selection.has_key("genNos".lower()):
     _modeNos = []
     if verbose: print "selecting parents based on genNo"
     gens,_ = network.gens()
-    for genNo in [int(l) for l in selection['genNos'].split()]:
+    for genNo in [int(l) for l in selection['genNos'.lower()].split()]:
       for modeNo in gens[genNo]:
         if modeNo in modeNos:
           _modeNos.append( modeNo )
     modeNos = _modeNos
 
   ### l
-  has_min = selection.has_key("min_l")
-  has_max = selection.has_key("max_l")
+  has_min = selection.has_key("min_l".lower())
+  has_max = selection.has_key("max_l".lower())
   if has_min or has_max:
     if verbose: print "selecting parents based on l"
     _modeNos = []
     for modeNo in modeNos:
       l = network.modes[modeNo].l
-      if (not has_min) or (has_min and (l >= int(selection["min_l"]))):
-        if (not has_max) or (has_max and (l <= int(selection["max_l"]))):
+      if (not has_min) or (has_min and (l >= int(selection["min_l".lower()]))):
+        if (not has_max) or (has_max and (l <= int(selection["max_l".lower()]))):
           _modeNos.append( modeNo )
     modeNos = _modeNos
 
   ### frac_Oorb
-  has_min = selection.has_key("min_frac_Oorb")
-  has_max = selection.has_key("max_frac_Oorb")
+  has_min = selection.has_key("min_frac_Oorb".lower())
+  has_max = selection.has_key("max_frac_Oorb".lower())
   if has_min or has_max:
     if verbose: print "selecting parents based on frac_Oorb"
     _modeNos = []
     for modeNo in modeNos:
       absO_Oorb = abs(freqs[modeNo]/system.Oorb)
-      if (not has_min) or (has_min and (absO_Oorb >= float(selection["min_frac_Oorb"]))):
-        if (not has_max) or (has_max and (absO_Oorb <= float(selection["max_frac_Oorb"]))):
+      if (not has_min) or (has_min and (absO_Oorb >= float(selection["min_frac_Oorb".lower()]))):
+        if (not has_max) or (has_max and (absO_Oorb <= float(selection["max_frac_Oorb".lower()]))):
           _modeNos.append( modeNo )
     modeNos = _modeNos
 
   ### Amean
-  if selection.has_key("min_Amean"):
+  if selection.has_key("min_Amean".lower()):
     if verbose: print "selecting parents based on min_Amean"
-    keep, _ = pn.downselect_Amean(q, float(selection["min_Amean"]), network, mode_nums=modeNos)
+    keep, _ = pn.downselect_Amean(q, float(selection["min_Amean".lower()]), network, mode_nums=modeNos)
     modeNos = [network.modeNoD[nlms] for nlms in keep]
   if selection.has_key("max_Amean"):
     if verbose: print "selecting parents based on max_Amean"
-    _, keep = pn.downselect_Amean(q, float(selection["max_Amean"]), network, mode_nums=modeNos)
+    _, keep = pn.downselect_Amean(q, float(selection["max_Amean".lower()]), network, mode_nums=modeNos)
     modeNos = [network.modeNoD[nlms] for nlms in keep]
     
   ### Alast
-  if selection.has_key("min_Alast"):
+  if selection.has_key("min_Alast".lower()):
     if verbose: print "selecting parents based on min_Alast"
-    keep, _ = pn.downselect_Alast(q, float(selection["min_Alast"]), network, mode_nums=modeNos)
+    keep, _ = pn.downselect_Alast(q, float(selection["min_Alast".lower()]), network, mode_nums=modeNos)
     modeNos = [network.modeNoD[nlms] for nlms in keep]
   if selection.has_key("max_Alast"):
     if verbose: print "selecting parents based on max_Alast"
-    _, keep = pn.downselect_Alast(q, float(selection["max_Alast"]), network, mode_nums=modeNos)
+    _, keep = pn.downselect_Alast(q, float(selection["max_Alast".lower()]), network, mode_nums=modeNos)
     modeNos = [network.modeNoD[nlms] for nlms in keep]
 
   ### Afit
-  if selection.has_key("min_Afit"):
+  if selection.has_key("min_Afit".lower()):
     if verbose: print "selecting parents based on min_Afit"
-    keep, _ = pn.downselect_Afit(q, float(selection["min_Afit"]), network, mode_nums=modeNos)
+    keep, _ = pn.downselect_Afit(q, float(selection["min_Afit".lower()]), network, mode_nums=modeNos)
     modeNos = [network.modeNoD[nlms] for nlms in keep]
   if selection.has_key("max_Afit"):
     if verbose: print "selecting parents based on max_Afit"
-    _, keep = pn.downselect_Afit(q, float(selection["max_Afit"]), network, mode_nums=modeNos)
+    _, keep = pn.downselect_Afit(q, float(selection["max_Afit".lower()]), network, mode_nums=modeNos)
     modeNos = [network.modeNoD[nlms] for nlms in keep]
 
   ### num_k
-  if selection.has_key("min_num_k"):
+  if selection.has_key("min_num_k".lower()):
     if verbose: print "selecting parents based on min_num_k"
-    keep, _ = pn.downselect_num_k(q, float(selection["min_num_k"]), network, mode_nums=modeNos)
+    keep, _ = pn.downselect_num_k(q, float(selection["min_num_k".lower()]), network, mode_nums=modeNos)
     modeNos = [network.modeNoD[nlms] for nlms in keep]
   if selection.has_key("max_num_k"):
     if verbose: print "selecting parents based on max_num_k"
-    _, keep = pn.downselect_num_k(q, float(selection["max_num_k"]), network, mode_nums=modeNos)
+    _, keep = pn.downselect_num_k(q, float(selection["max_num_k".lower()]), network, mode_nums=modeNos)
     modeNos = [network.modeNoD[nlms] for nlms in keep]
 
   ### min_heuristic
-  if selection.has_key("min_heuristic"):
+  if selection.has_key("min_heuristic".lower()):
     if verbose: print "selecting parents based on min_heuristic"
-    keep, _ = pn.downselect_min_heuristic(q, float(selection["min_heuristic"]), network, mode_nums=modeNos)
+    keep, _ = pn.downselect_min_heuristic(q, float(selection["min_heuristic".lower()]), network, mode_nums=modeNos)
     modeNos = [network.modeNoD[nlms] for nlms in keep]
   if selection.has_key("max_heuristic"):
     if verbose: print "selecting parents based on max_heuristic"
-    _, keep = pn.downselect_min_heuristic(q, float(selection["max_heuristic"]), network, mode_nums=modeNos)
+    _, keep = pn.downselect_min_heuristic(q, float(selection["max_heuristic".lower()]), network, mode_nums=modeNos)
     modeNos = [network.modeNoD[nlms] for nlms in keep]
 
   ### min_Ethr
-  if selection.has_key("min_Ethr"):
+  if selection.has_key("min_Ethr".lower()):
     if verbose: print "selecting parents based on min_Ethr"
-    keep, _ = pn.downselect_min_Ethr(q, float(selection["min_Ethr"]), network, mode_nums=modeNos)
+    keep, _ = pn.downselect_min_Ethr(q, float(selection["min_Ethr".lower()]), network, mode_nums=modeNos)
     modeNos = [network.modeNoD[nlms] for nlms in keep]
   if selection.has_key("max_Ethr"):
     if verbose: print "selecting parents based on max_Ethr"
-    _, keep = pn.downselect_min_Ethr(q, float(selection["max_Ethr"]), network, mode_nums=modeNos)
+    _, keep = pn.downselect_min_Ethr(q, float(selection["max_Ethr".lower()]), network, mode_nums=modeNos)
     modeNos = [network.modeNoD[nlms] for nlms in keep]
 
   ### collE
-  if selection.has_key("min_collE"):
+  if selection.has_key("min_collE".lower()):
     if verbose: print "selecting parents based on min_collE"
-    keep, _ = pn.downselect_collE(q, float(selection["min_collE"]), network, mode_nums=modeNos)
+    keep, _ = pn.downselect_collE(q, float(selection["min_collE".lower()]), network, mode_nums=modeNos)
     modeNos = [network.modeNoD[nlms] for nlms in keep]
   if selection.has_key("max_collE"):
     if verbose: print "selecting parents based on max_collE"
-    _, keep = pn.downselect_collE(q, float(selection["max_collE"]), network, mode_nums=modeNos)
+    _, keep = pn.downselect_collE(q, float(selection["max_collE".lower()]), network, mode_nums=modeNos)
     modeNos = [network.modeNoD[nlms] for nlms in keep]
 
   return [(freqs[modeNo], network.modes[modeNo]) for modeNo in sorted(modeNos)]
