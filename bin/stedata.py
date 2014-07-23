@@ -4,6 +4,7 @@ usage = "written to generate a large table with all pertinant ste data in it"
 from optparse import OptionParser
 import nmode_utils as nmu
 import numpy as np
+
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -19,6 +20,9 @@ parser.add_option("-o", "--output-dir", default="./", type="string", help="the d
 
 parser.add_option("", "--D1-plots", default=False, action="store_true", help="attempts to build linear plots with annotations for all available statistics")
 parser.add_option("", "--D2-plots", default=False, action="store_true", help="attempts to build plots of statistics vs. Nmodes, Ngens, Ntriples")
+parser.add_option("", "--D2-bokeh", default=False, action="store_true")
+
+parser.add_option("", "--special-plots", default=False, action="store_true", help="generate plots that do not neatly fall in the D1, D2 catagories")
 
 parser.add_option("", "--unit-system", default="CGS", type="string", help="system of units to use. \"SI\" or \"CGS\" (default)")
 
@@ -195,220 +199,177 @@ if opts.D2_plots:
         fig.savefig(figname)
       plt.close(fig)
 
-####################################################################################################
-#
-#  write table >> file
-#
-####################################################################################################
-### document strings
-ldoc_preamble=r"""\documentclass[10pt]{article}
-\usepackage{fullpage}
-\usepackage{multirow}
-\usepackage[landscape, top=0.1cm, bottom=0.1cm, left=0.1cm, right=0.1cm]{geometry}
-\usepackage{floatrow}
-\DeclareFloatFont{fontsize}{\small}
-\floatsetup[table]{font=fontsize}
+##################################################
+if opts.D2_bokeh:
+  colors = ['blue','red','green','cyan','magenta','yellow','black']
 
-\begin{document}
-"""
-pdoc_preamble=r"""\documentclass[10pt]{article}
-\usepackage{fullpage}
-\usepackage{multirow}
-\usepackage[top=0.1cm, bottom=0.1cm, left=0.1cm, right=0.1cm]{geometry}
-\usepackage{floatrow}
-\DeclareFloatFont{fontsize}{\small}
-\floatsetup[table]{font=fontsize}
+  import bokeh
+  from bokeh import plotting as bplt
+  from bokeh.objects import HoverTool
+  from collections import OrderedDict
 
-\begin{document}
-"""
+  TOOLS="pan,box_zoom,reset,hover"
+  plot_width=600
+  plot_height=300 
 
-doc_suffix=r"""
-\end{document}
-"""
+  if opts.verbose: print "2D_bokeh"
 
-### table strings
-table_preamble=r"""
-\begin{table}
-\caption{%s}
-\begin{center}
-\begin{tabular}{*{%d}{c}}
-"""
+  ### set up html page
+  filename = opts.cachefilename + "%s.html"%opts.tag
+  bplt.output_file(filename)
 
-table_suffix = r"""
-\end{tabular}
-\end{center}
-\end{table}
-"""
+  ### loop over all pairs
+  for ystr, ylabel, ykey, yvkey in known_y:
+    if opts.verbose: print "\t", ystr
+    for xkey, xlabel in known_x:
+      if opts.verbose: print "\t\t", xkey
 
-### column headings
-stats_headings = r"""
-\cline{1-%d}
-\multirow{3}{*}{data set} & $M_{\mathrm{prim}}/M_{\odot}$ & $P_{\mathrm{orb}}$ [%s] & No. modes   & $t/P_{\mathrm{orb}}[0]$         &  $\left<\sum_i A_i^2\right>$ [%s]          & $\left<2\sum_i \gamma_i A_i^2\right>$ [%s/%s]   & \multirow{2}{*}{$\left<\sum_i \mathrm{d}E_i/\mathrm{d}t\right>$ [%s/%s]}   & \multirow{2}{*}{$\left<H_\ast\right>$ [%s]} & \multirow{2}{*}{$\left<H_{int}+H_\ast\right>$ [%s]} & \multirow{2}{*}{$\left<\mathrm{d}(H_{int}+H_\ast)/\mathrm{d}t\right>$ [%s/%s]} \\
-\multirow{3}{*}{}         & $R_{\mathrm{prim}}/R_{\odot}$ & $\epsilon$              & No. gens    & $\mathrm{d}t/P_{\mathrm{orb}}$  &  $\sigma_{\sum_i A_i^2}$ [%s]              & $\sigma_{2\sum_i \gamma_i A_i^2}$ [%s/%s]       & \multirow{2}{*}{}                                                          & \multirow{2}{*}{}                           & \multirow{2}{*}{}                                   & \multirow{2}{*}{} \\ 
-\multirow{3}{*}{}         & $M_{\mathrm{comp}}/M_{J}$     & $E_{\mathrm{orb}}$ [%s] & No. triples & $t/P_{\mathrm{orb}}[-1]$        &  gini\{ $\left<\sum_i A_i^2\right>$ \}     & gini\{ $\left<2\sum_i \gamma_i A_i^2\right>$ \} & $\sigma_{\sum_i \mathrm{d}E_i/\mathrm{d}t}$ [%s/%s]                        & $\sigma_{H_\ast}$ [%s]                      & $\sigma_{H_{int}+H_\ast}$                            & $\sigma_{\mathrm{d}(H_{int}+H_\ast)/\mathrm{d}t}$ [%s/%s] \\
-\cline{1-%d}
-"""
-#stats_headings = r"""
-#\cline{1-%d}
-#\multirow{3}{*}{data set} & $M_{\mathrm{prim}}/M_{\odot}$ & $P_{\mathrm{orb}}$ [%s] & No. modes   & $t/P_{\mathrm{orb}}[0]$         &  $\left<\sum_i A_i^2\right>$ [%s]          & $\left<2\sum_i \gamma_i A_i^2\right>$ [%s/%s]   & $\left<\sum_i \mathrm{d}E_i/\mathrm{d}t\right>$ [%s/%s]   & \multirow{2}{*}{$\left<H_\ast\right>$ [%s]} & \multirow{2}{*}{$\left<H_{int}+H_\ast\right>$ [%s]} & \multirow{2}{*}{$\left<\mathrm{d}(H_{int}+H_\ast)/\mathrm{d}t\right>$ [%s/%s]} \\
-#\multirow{3}{*}{}         & $R_{\mathrm{prim}}/R_{\odot}$ & $\epsilon$              & No. gens    & $\mathrm{d}t/P_{\mathrm{orb}}$  &  $\sigma_{\sum_i A_i^2}$ [%s]              & $\sigma_{2\sum_i \gamma_i A_i^2}$ [%s/%s]       & $\sigma_{\sum_i \mathrm{d}E_i/\mathrm{d}t}$ [%s/%s]       & \multirow{2}{*}{}                           & \multirow{2}{*}{}                                   & \multirow{2}{*}{} \\ 
-#\multirow{3}{*}{}         & $M_{\mathrm{comp}}/M_{J}$     & $E_{\mathrm{orb}}$ [%s] & No. triples & $t/P_{\mathrm{orb}}[-1]$        &  gini\{ $\left<\sum_i A_i^2\right>$ \}     & gini\{ $\left<2\sum_i \gamma_i A_i^2\right>$ \} & gini\{ $\left<\sum_i \mathrm{d}E_i/\mathrm{d}t\right>$ \} & $\sigma_{H_\ast}$ [%s]                      & $\sigma_{H_{int}+H_\ast}$                            & $\sigma_{\mathrm{d}(H_{int}+H_\ast)/\mathrm{d}t}$ [%s/%s] \\
-#\cline{1-%d}
-#"""
-no_stats_cols = 11
+      ### loop and pull out data
+      all_x = []
+      all_y = []
+      all_color = []
 
-lookup_headings = r"""
-\cline{1-%d}
-\multirow{3}{*}{data set} & logfilename \\
-\multirow{3}{*}{}         & outfilename \\
-\multirow{3}{*}{}         & stefilename \\
-\cline{1-%d}
-"""
-no_lookup_cols = 2
+      all_yv = []
 
+      all_stefilename = []
+      all_Nmodes = []
+      all_Ntriples = []
+      all_Ngens = []
 
-sum_tablename = opts.output_dir+"/ste-sum%s.tex" % opts.tag
-if opts.verbose: print "building summary tables"
+      for stefilename, sdata in dat:
+        try:
+          y = sdata["stats"][ykey]
+        except KeyError:
+          print "could not find data for %s in %s... skipping" % (ykey, stefilename)
+          continue
 
-### set up strings which will be written to file
-if opts.tag != "":
-  stats_table = r"""%s
-%s""" % (table_preamble % ("Statistics: "+opts.tag[1:].replace("_","\_"), no_stats_cols), stats_headings % (no_stats_cols, units_time, units_energy, units_energy, units_time, units_energy, units_time, units_energy, units_energy, units_energy, units_time, units_energy, units_energy, units_time, units_energy, units_time, units_energy, units_energy, units_energy, units_time, no_stats_cols) )
-else:
-  stats_table = r"""%s
-%s""" % (table_preamble % ("Statistics", no_stats_cols), stats_headings % (no_stats_cols, units_time, units_energy, units_energy, units_time, units_energy, units_time, units_energy, units_energy, units_energy, units_time, units_energy, units_energy, units_time, units_energy, units_time, units_energy, units_energy, units_energy, units_time, no_stats_cols) )
+        all_stefilename.append( stefilename )
 
-stats_row_No = 0
+        if "Gini_index" in ykey:
+          y = 1-np.array(y)
 
-if opts.tag != "":
-  lookup_table = r"""%s
-%s""" % (table_preamble % ("Filenames: "+opts.tag[1:].replace("_","\_"), no_lookup_cols), lookup_headings % (no_lookup_cols, no_lookup_cols))
-else:
-  lookup_table = r"""%s
-%s""" % (table_preamble % ("Filenames", no_lookup_cols), lookup_headings % (no_lookup_cols, no_lookup_cols))
+        Ngens = sdata["system"]["Ngens"]
+        Nmodes = sdata["system"]["Nmodes"]
+        Ntriples = sdata["system"]["Ntriples"]
 
-lookup_row_No = 0
+        x = sdata["system"][xkey]
 
-### iterate over data and build strings
-for data_set, (stefilename, sdata) in enumerate(dat):
-  if opts.verbose: print "working on "+stefilename
+        all_x.append( x )
+        all_y.append( y )
+        all_color.append( colors[Ngens] )
+        all_Ngens.append( Ngens )
+        all_Nmodes.append( Nmodes )
+        all_Ntriples.append( Ntriples )
 
-  ### extract relevant data
-  nmu.set_units(system=sdata["unit_system"])
+        if yvkey:
+          all_yv.append( sdata["stats"][yvkey] )
 
-  logfilename = sdata["system"]["logfilename"]
-  Mprim = sdata["system"]["Mprim/Msun"]
-  Rprim = sdata["system"]["Rprim/Rsun"]
-  Mcomp = sdata["system"]["Mcomp/Mjup"]
-  Porb  = nmu.convert_time(sdata["system"]["Porb"], nmu.units["time"], units_time)
-  ecc   = sdata["system"]["ecc"]
-  Eorb  = nmu.convert_energy(sdata["system"]["Eorb"], nmu.units["energy"], units_energy) ; absEorb = abs(Eorb) ; Eorb = "%.6fe%d" % nmu.float_to_scientific( Eorb )
-  N_m   = sdata["system"]["Nmodes"]
-  N_g   = sdata["system"]["Ngens"]
-  N_t   = sdata["system"]["Ntriples"]
+      ### check for data
+      if not len(all_y):
+        continue
 
-  if sdata.has_key("time_domain"):
-    outfilename = sdata["time_domain"]["outfilename"]
-    start = "%.1f" % sdata["time_domain"]["t_P[0]"]
-    stop  = "%.1f" % sdata["time_domain"]["t_P[-1]"]
-    step  = "%.3f" % sdata["time_domain"]["dt_P"]
-  else:
-    outfilename = start = stop = step = "--" 
+      fig = bplt.figure()
+      bplt.hold()
 
-  if sdata["stats"].has_key("mean{Hns/|Eorb|}"): # stellar hamiltonian
-    mHns = "$%.6f\cdot10^{%d}$" % nmu.float_to_scientific( sdata["stats"]["mean{Hns/|Eorb|}"]*absEorb )
-    sHns = "$%.6f\cdot10^{%d}$" % nmu.float_to_scientific( sdata["stats"]["stdv{Hns/|Eorb|}"]*absEorb )
-  else:
-    mHns = sHns = "--"
+      ### build data source for hover tool
+      source = bplt.ColumnDataSource(data=dict(x=all_x, y=all_y, stefilename=all_stefilename, Nmodes=all_Nmodes, Ngens=all_Ngens, Ntriples=all_Ntriples))
 
-  if sdata["stats"].has_key("mean{Hint+Hns}/|Eorb|"): # stellar+interaction hamiltonian
-    mHintHns = "$%.6f\cdot10^{%d}$" % nmu.float_to_scientific( sdata["stats"]["mean{Hint+Hns}/|Eorb|"]*absEorb )
-    sHintHns = "$%.6f\cdot10^{%d}$" % nmu.float_to_scientific( sdata["stats"]["stdv{Hint+Hns}/|Eorb|"]*absEorb )
-  else:
-    mHintHns = sHintHns = "--"
+      ### plot circle glyphs
+      bplt.circle(all_x, all_y, source=source, tools=TOOLS, fill_color=None, fill_alpha=0.6, line_color=all_color, Title="%s vs %s"%(xlabel,  ylabel), plot_width=plot_width, plot_height=plot_height)
+#      bplt.circle(all_x, all_y, radius=radii, source=source, tools=TOOLS, fill_color=None, fill_alpha=0.6, line_color=all_color, Title="%s vs %s"%(xlabel,  ylabel))
 
-  if sdata["stats"].has_key("mean{d(Hint+Hns)/dt}*Porb/|Eorb|"): # time rate of change of stellar+interaction hamiltonian
-    mddtHintHns = "$%.6f\cdot10^{%d}$" % nmu.float_to_scientific( sdata["stats"]["mean{d(Hint+Hns)/dt}*Porb/|Eorb|"]*absEorb/Porb )
-    sddtHintHns = "$%.6f\cdot10^{%d}$" % nmu.float_to_scientific( sdata["stats"]["stdv{d(Hint+Hns)/dt}*Porb/|Eorb|"]*absEorb/Porb )
-  else:
-    mddtHintHns = sddtHintHns = "--"
+      ### annotate circle glyphs
+#      text(x, y, text=inds, alpha=0.5, text_font_size="5pt", text_baseline="middle", text_align="center", angle=0)
 
-  if sdata["stats"].has_key("mean{|sum{Edot}|*(Porb/|Eorb|)}"): # viscous dissipation
-    myE = "$%.6f\cdot10^{%d}$" % nmu.float_to_scientific( sdata["stats"]["mean{|sum{Edot}|*(Porb/|Eorb|)}"]*(-absEorb/Porb) )
-    syE = "$%.6f\cdot10^{%d}$" % nmu.float_to_scientific( sdata["stats"]["stdv{|sum{Edot}|*(Porb/|Eorb|)}"]*(-absEorb/Porb) )
-    gyE = "%.6f" % sdata["stats"]["Gini_index{mean{sum{Edot}}}"]
-  else:
-    myE = syE = gyE = "--"
+      ### find hover tool, and tell it what to look for
+      hover = [t for t in bplt.curplot().tools if isinstance(t, HoverTool)][0]
+      hover.tooltips = OrderedDict([ 
+                                    #("index", "$index"), 
+                                    ("(x,y)", "($x, $y)"),
+                                    ("stefilename", "@stefilename"),
+                                    ("Nmodes","@Nmodes"),
+                                    ("Ntriples","@Ntriples"),
+                                    ("Ngens","@Ngens"),
+                                   ])
 
-  if sdata["stats"].has_key("mean{sum{E}/|Eorb|}"): # mode amplitudes squared
-    mE = "$%.6f\cdot10^{%d}$" % nmu.float_to_scientific( sdata["stats"]["mean{sum{E}/|Eorb|}"]*absEorb )
-    sE = "$%.6f\cdot10^{%d}$" % nmu.float_to_scientific( sdata["stats"]["stdv{sum{E}/|Eorb|}"]*absEorb )
-    gE = "%.6f" % sdata["stats"]["Gini_index{mean{sum{E}}}"]
-  else:
-    mE = sE = gE = "--"
+      ### label axes
+      bplt.xaxis().axis_label=xlabel
+      bplt.yaxis().axis_label=ylabel
+      
 
-  if sdata["stats"].has_key("mean{sum{dE/dt*Porb}/|Eorb|}"): # time rate of change of mode energies
-    mdE = "$%.6f\cdot10^{%d}$" % nmu.float_to_scientific( sdata["stats"]["mean{sum{dE/dt*Porb}/|Eorb|}"]*absEorb/Porb )
-    sdE = "$%.6f\cdot10^{%d}$" % nmu.float_to_scientific( sdata["stats"]["stdv{sum{dE/dt*Porb}/|Eorb|}"]*absEorb/Porb )
-    gdE = "%.6f" % sdata["stats"]["Gini_index{mean{sum{dE/dt}}}"]
-  else:
-    mdE = sdE = gdE = "--"
+#  bplt.show() 
 
-  ### build lookup table
-  lookup_table += r"""
-\multirow{3}{*}{%d} & %s \\
-\multirow{3}{*}{}   & %s \\
-\multirow{3}{*}{}   & %s \\""" % (data_set, logfilename.replace("_","\_"), outfilename.replace("_","\_"), stefilename.replace("_","\_"))
-  lookup_row_No += 1
+#=================================================
+if opts.special_plots:
 
-  lookup_table += r"""
-\cline{1-%d}""" % no_lookup_cols
+  axes_loc = [0.15,0.15,0.7,0.8]
+  cb_loc = [0.9, 0.15, 0.05, 0.8]
 
-  ### build stats table
-  stats_table += r"""
-\multirow{3}{*}{%d} & %.3f & %.1f & %d & %s & %s & %s & %s & \multirow{2}{*}{ %s } & \multirow{2}{*}{ %s } & \multirow{2}{*}{ %s } \\
-\multirow{3}{*}{}   & %.3f & %.3f & %d & %s & %s & %s & %s & \multirow{2}{*}{}     & \multirow{2}{*}{ }    & \multirow{2}{*}{ }    \\
-\multirow{3}{*}{}   & %.3f & %s   & %d & %s & %s & %s & %s & %s                    & %s                    & %s                    \\""" % (data_set, Mprim, Porb, N_m, start, mE, myE, mdE, mHns, mHintHns, mddtHintHns, Rprim, ecc, N_g, step, sE, syE, sdE, Mcomp, Eorb, N_t, stop, gE, gyE, sdE, sHns, sHintHns, sddtHintHns)
-#  stats_table += r"""
-#\multirow{3}{*}{%d} & %.3f & %.1f & %d & %.1f & %s & %s & %s & \multirow{2}{*}{ %s } & \multirow{2}{*}{ %s } & \multirow{2}{*}{ %s } \\
-#\multirow{3}{*}{}   & %.3f & %.3f & %d & %.1f & %s & %s & %s & \multirow{2}{*}{}     & \multirow{2}{*}{ }    & \multirow{2}{*}{ }    \\
-#\multirow{3}{*}{}   & %.3f & %s   & %d & %.1f & %s & %s & %s & %s                    & %s                    & %s                    \\""" % (data_set, Mprim, Porb, N_m, start, mE, myE, mdE, mHns, mHintHns, mddtHintHns, Rprim, ecc, N_g, step, sE, syE, sdE, Mcomp, Eorb, N_t, stop, gE, gyE, gdE, sHns, sHintHns, sddtHintHns)
-  stats_row_No += 1
+  ### Ng1 vs Ng2
+  if opts.verbose: print "Ng1 vs Ng2"
 
-  stats_table +=  r"""
-\cline{1-%d}""" % no_stats_cols
+  Ng1 = []
+  Ng2 = []
+  Ntriples = []
+  mEdot = []
+  vEdot = []
 
-  if (stats_row_No+1)%14 == 0:
-    stats_table += table_suffix
-    if opts.tag != "":
-      stats_table += r"""%s
-%s""" % (table_preamble % ("Statistics: "+opts.tag[1:].replace("_","\_"), no_stats_cols), stats_headings % (no_stats_cols, units_time, units_energy, units_energy, units_time, units_energy, units_time, units_energy, units_energy, units_energy, units_time, units_energy, units_energy, units_time, units_energy, units_time, units_energy, units_energy, units_energy, units_time, no_stats_cols) )
+  ### pull out data
+  for stefilename, sdata in dat:
+    ### pull out damping estimates
+    try:
+      mEdot.append( sdata["stats"]["mean{|sum{Edot}|*Porb/|Eorb|}"] )
+      vEdot.append( sdata["stats"]["stdv{|sum{Edot}|*Porb/|Eorb|}"] )
+    except KeyError:
+      print "could not find data for mean{|sum{Edot}|*Porb/|Eorb|} in %s... skipping" % (stefilename)
+      continue
+
+    ### pull out number of modes in each generation
+    Ngens = sdata["system"]["Ngens"]
+    Ngi = sdata["system"]["Ngi"]
+    if Ngens < 2:
+      Ng1.append( 0 )
+      Ng2.append( 0 )
+    elif Ngens < 3:
+      Ng1.append( Ngi[1] )
+      Ng2.append( 0 )
     else:
-      stats_table += r"""%s
-%s""" % (table_preamble % ("Statistics", no_stats_cols), stats_headings % (no_stats_cols, units_time, units_energy, units_energy, units_time, units_energy, units_time, units_energy, units_energy, units_energy, units_time, units_energy, units_energy, units_time, units_energy, units_time, units_energy, units_energy, units_energy, units_time, no_stats_cols) )
+      Ng1.append( Ngi[1] )
+      Ng2.append( Ngi[2] )
 
-  if (lookup_row_No+1)%14 == 0:
-    lookup_table += table_suffix
-    if opts.tag != "":
-      lookup_table += r"""%s
-%s""" % (table_preamble % ("Filenames: "+opts.tag[1:].replace("_","\_"), no_lookup_cols), lookup_headings % (no_lookup_cols, no_lookup_cols))
-    else:
-      lookup_table += r"""%s
-%s""" % (table_preamble % ("Filenames", no_lookup_cols), lookup_headings % (no_lookup_cols, no_lookup_cols))
+    ### pull out Ntriples
+    Ntriples.append( sdata["system"]["Ntriples"] )
 
+  ### convert mEdot into sizes
+  cmap_norm = matplotlib.colors.Normalize(vmin=min(mEdot), vmax=max(mEdot))
+  min_size = 1
+  max_size = 10
+  sizes = [ min_size + (max_size-min_size)*cmap_norm( Edot ) for Edot in mEdot ]
 
-### finish tables
-lookup_table += table_suffix
-stats_table += table_suffix
+  ### convert Ntriples into colors
+  Ntmax = max(Ntriples)
+  Ntmin = min(Ntriples)
+  cmap_norm = matplotlib.colors.Normalize(vmin=min(Ntriples), vmax=max(Ntriples))
+  cmap = plt.get_cmap("jet")
+  colors = [ cmap( cmap_norm(Nt) ) for Nt in Ntriples]
 
-### write document
-if opts.verbose: print "writing summary tables to:\n\t%s" % (sum_tablename)
+  ### generate plot
+  fig = plt.figure()
+  ax = fig.add_axes(axes_loc)
+  ax_cb = fig.add_axes(cb_loc)
 
-sum_tablefile = open(sum_tablename, "w")
-print >> sum_tablefile, ldoc_preamble
-print >> sum_tablefile, stats_table
-print >> sum_tablefile, lookup_table
-print >> sum_tablefile, doc_suffix
-sum_tablefile.close()
+  ax.plot(Ng1, Ng2, marker="o", markeredgecolor=colors, markerfacecolor=colors, markersize=sizes)
+  cb = matplotlib.colorbar.ColorbarBase(ax_cb, cmap=cmap, norm=cmap_norm, orientation='vertical')
 
+  ax.set_xlabel("$N_{G1}$")
+  ax.set_ylabel("$N_{G2}$")
+  cb.set_label(r"$\frac{\sum 2\gamma_i A_i^2}{|E_\mathrm{orb}|/P_\mathrm{orb}}$")
+ 
+  ax.grid(True)
+ 
+  figname = "%s/Ng1-Ng2%s.png" % (opts.output_dir, opts.tag)
+  if opts.verbose: print "\t\t\tsaving ", figname
+  fig.savefig(figname)
+  plt.close(fig)
 
+  
