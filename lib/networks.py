@@ -511,7 +511,7 @@ class system:
     return q
 
   ###
-  def compute_3mode_eq(self, t=0.0, default=1e-20, tcurrent="x"):
+  def compute_single_parent_3mode_eq(self, t=0.0, default=1e-20, tcurrent="x"):
     """
     computes the 3mode equilibrium state at t by choosing the G0-G1 triple that minimizes Ethr. Ignores all modes with genNo >1
     for modes that do not participate in the 3mode equilib, the real and imaginary parts are set to rand*default, with rand chosen separately for the real and imag parts
@@ -529,7 +529,7 @@ class system:
     freqs = {}
     for modeNo, O in zip(gens[0], self.compute_linear_freqs(gens[0])): # compute linear frequencies and assign them
       freqs[modeNo] = O
-      
+
     Ethr = np.infty
     for o,i,j,k in coups[0]: # these are couplings with G0 as parent (o) and G1 as children (i,j)
       Oo = freqs[o]
@@ -542,14 +542,14 @@ class system:
 
     ### for best tuple
     (o,i,j), (Ao, Ai, Aj), ((so, co), (si, ci), (sj, cj)), (do, di, dj) = threeMode_equilib(best_tuple, freqs[best_tuple[0]], network) # get amplitudes, phases and detunings appropriate for tcurrent == "q"
- 
+
     ### check whether the daughters are non-zero
     if (Ai==0) and (Aj==0):
       return self.compute_lin_eq(t=t, default=default, tcurrent=tcurrent)
- 
+
     ### instantiate IC vector
     q = np.random.rand(2*len(network))*default # the vast majority are set to rand*default
-    
+
     ### fill in best triple
     if tcurrent == "q":
       p = (wo-do)*t
@@ -586,3 +586,72 @@ class system:
       raise ValueError, "unknown tcurrent = %s"%tcurrent
 
     return q
+
+
+  ###
+  def compute_3mode_eq(self, t=0.0, default=1e-20, tcurrent="x", rtol=1e-20, max_iters=100):
+    """
+    computes the 3mode equilibrium state at t by choosing the G0-G1 triple that minimzes Ethr. We then find all parents that force the daughters and compute the multi-parent 3mode solution. We ignore all modes with genNo > 1
+    for modes that do not participate in the 3mode equilib, the real and imaginary parts are set to rand*default, with rand chosen separately for the real and imag parts
+
+    if there are no couplings between G0-G1, we return the linear equilibrium state
+
+    rtol is used to define convergence for the numerical solution to the 3mode equilibrium
+    """
+
+    network = self.network
+    gens, coups = network.gens()
+
+    if not len(coups[0]): # no couplings from parents to next generation -> only one generation
+      return self.compute_lin_eq(t=t, default=default)
+    elif len(gens[0]) == 1: ### only a single parent
+      return self.compute_single_parent_3mode_eq(t=t, default=default, tcurrent=tcurrent) 
+    else:
+      print "#WARNING: falling back to compute_single_parent_3mode_eq"
+      return self.compute_single_parent_3mode_eq(t=t, default=default, tcurrent=tcurrent)
+
+    from nmode_state import threeMode_equilib # we import this here because it avoids conflicts when importing the module as a whole
+    from nmode_state import __threeMode_parents_from_daughters
+    from nmode_state import ____threeMode_effective_equilib
+
+    ### compute expected linear frequencies
+    freqs = {}
+    for modeNo, O in zip(gens[0], self.compute_linear_freqs(gens[0])): # compute linear frequencies and assign them
+      freqs[modeNo] = O
+      
+    ### find best tuple
+    Ethr = np.infty
+    best_O
+    for o,i,j,k in coups[0]: # these are couplings with G0 as parent (o) and G1 as children (i,j)
+      Oo = freqs[o]
+      wi, yi, _ = network.wyU[i]
+      wj, yj, _ = network.wyU[j]
+      ethr = compute_Ethr(Oo, wi, wj, yi, yj, k)
+      if ethr < Ethr: # choose tuple with lowest Ethr
+        Ethr = ethr
+        best_tuple = (o,i,j,k)
+        best_O = Oo
+
+    ### find all parents that force the daughters from best_tuple
+    tuples = []
+    best_daughters = tuple(sorted([best_tuple[1],best_tuple[2]]))
+    for o,i,j,k in coups[0]:
+      daughters = tuple(sorted([i,j]))
+      if (best_daughters == daughters):
+        tuples.append( (o,i,j,k) )
+
+    ### generate a starting point for the convergence
+    ### for best tuple
+    (o,i,j), (Ao, Ai, Aj), ((so, co), (si, ci), (sj, cj)), (do, di, dj) = threeMode_equilib(best_tuple, freqs[best_tuple[0]], network)
+
+    ### compute z, kz, wz, etc
+    old_xn = __threeMode_parents_from_daughters(best_O, Ai, Aj, (si,ci), (sj,cj), tuples, network) ### get parent equilib amps
+
+    ### iterate, computing new effective mode
+    xn = __threeMode_effective_equilib(best_O, xn, tuples, network)
+    
+    ### compute residuals and iterate
+    
+    raise StandardError, "WRITE ME"
+
+

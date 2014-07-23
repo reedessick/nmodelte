@@ -204,6 +204,109 @@ def threeMode_equilib(triple, freq, network, verbose=False):
   return (o,i,j), (Ao, Ai, Aj), ((sin_delta_o, cos_delta_o), (sin_delta_i, cos_delta_i), (0.0, 1.0)), (do, di, dj)
 
 ###
+def __threeMode_parents_from_daughters(O,Ai,Aj,(si,ci),(sj,cj),tuples,network):
+  """
+  computes what the parent amplitudes must be (in a non-standard integration variable) given the daughter amplitudes
+  """
+  parents = []
+  for o,i,j,k in tuples:
+    w,y,U = network.wyU[o]
+    if len(U) > 1:
+      raise ValueError, "don't know how to compute 3mode equilibrium when there is more than one harmonic in the linear tidal forcing"
+    else:
+      U = U[0][1]
+    d = w - O
+    r = w*U + 2*w*k*Ai*Aj*(ci*cj - si*sj)
+    i = -2*w*k*Ai*Aj*(ci*sj + si*cj)
+
+    norm = d**2 + y**2
+
+    parents.append( [ (r*d - i*y)/norm , (r*y + i*d)/norm ] ) ### equilib amplitude
+
+  return parents
+
+###
+def __threeMode_effective_equilib(O, xn, tuples, network):
+  """
+  computes the effective 3mode solution when there are multiple parents
+  """
+  if not isinstance(xn, np.ndarray):
+    xn = np.array( xn )
+
+  ### compute effective mode
+  z     = np.zeros((2,),float)
+  kz_z  = z[:]
+  wz_kz = 0.0
+  wz_Uz = 0.0
+  dz_yz_z = np.zeros((2,),float)
+  for x, (o,i,j,k) in zip(zn, tuples):
+    w,y,U = network.wyU[o]
+    d = w - O
+    if len(U) > 1:
+      raise ValueError, "don't know how to compute 3mode equilibrium when there is more than one harmonic in the linear tidal forcing"
+    else:
+      U = U[0][1]
+    z       += x
+    kz_z    += k*x
+    wz_kz   += k*w
+    wz_Uz   += w*U
+    dz_yz_z += np.array( (x[0]*y - x[1]*d, x[0]*d + x[1]*y) )
+
+  raise StandardError, "WRITE ME"
+  """
+  o, i, j, k = triple
+  wo, yo, Uo = network.wyU[o]
+  wi, yi, Ui = network.wyU[i]
+  wj, yj, Uj = network.wyU[j]
+
+  try:
+    Uo = Uo[0][0] # assumes of forcing amplitude structure
+  except IndexError:
+    if verbose: print "mode %d has no linear driving term. Don't know how to compute the equilibrium. skipping..." % o
+    return ((o,i,j), (0,0,0))
+
+  wo = abs(wo) ; wi = -abs(wi) ; wj = -abs(wj) ;
+
+  O = abs(freq)
+  do = wo - O
+  di = (O + wi + wj)/(1 + yj/yi)
+  dj = yj/yi * di
+
+  yiyj = yi+yj
+  didj = O+wi+wj #=di+dj
+
+  ### amplitudes
+  Ao2 = (yi*yj + di*dj)/(wi*wj*4*k**2) # = yi*yj/(4*k**2*wi*wj) * ( 1 + (didj/yiyj)**2 )
+  AL2 =  ( wo*Uo )**2 / ( do**2 + yo**2 )
+
+  if AL2 <= Ao2:
+    return (o,i,j), (AL2**0.5, 0.0, 0.0), ((yo/(do**2+yo**2)**0.5, do/(do**2+yo**2)**0.5), (0.0, 1.0), (0.0, 1.0)), (do, 0.0, 0.0)
+
+  Ai2 = (yj/-wj) * (yo*yiyj + do*abs(didj)) / (4*k**2*wo*yiyj) * ( 1 + ( 1 + (4*k**2*wi*wj*(do**2+yo**2)*yiyj**2)/(yi*yj*(yo*yiyj + do*abs(didj))**2)*(AL2 - Ao2)   )**0.5 )
+  Aj2 = (wj*yi)/(wi*yj) * Ai2
+
+  Ao = Ao2**0.5
+#  Ai = Ai2**0.5
+#  Aj = Aj2**0.5
+  Ai = abs(Ai2)**0.5
+  Aj = abs(Aj2)**0.5
+
+  ### phases
+  sin_delta = ( 1 + (didj/yiyj)**2 )**-0.5 # delta = delta_o+delta_i+delta_j
+  cos_delta = ( 1 + (yiyj/didj)**2 )**-0.5
+
+  sin_delta_o = do*Ao/(wo*Uo) - Ai*Aj/(Ao*Uo)*(di*dj/(wi*wj))**0.5
+  cos_delta_o = yo*Ao/(wo*Uo) - Ai*Aj/(Ao*Uo)*(yi*yj/(wi*wj))**0.5
+
+  ### there is a degeneracy between delta_i and delta_j, so we set delta_j = 0
+  sin_delta_i = sin_delta*cos_delta_o - sin_delta_o*cos_delta
+  cos_delta_i = cos_delta*cos_delta_o + sin_delta*sin_delta_o
+
+  return (o,i,j), (Ao, Ai, Aj), ((sin_delta_o, cos_delta_o), (sin_delta_i, cos_delta_i), (0.0, 1.0)), (do, di, dj)
+  """
+
+
+###
 def deprecated_threeMode_equilib(triple, freq, network, verbose=False):
   """
   computes the three mode equilibrium amplitudes for each triple in triples
