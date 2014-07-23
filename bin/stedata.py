@@ -9,6 +9,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+plt.rcParams.update({"text.usetex":True})
+
 ####################################################################################################
 
 parser = OptionParser(usage=usage)
@@ -302,8 +304,8 @@ if opts.D2_bokeh:
 #=================================================
 if opts.special_plots:
 
-  axes_loc = [0.15,0.15,0.7,0.8]
-  cb_loc = [0.9, 0.15, 0.05, 0.8]
+  axes_loc = [0.15,0.15,0.6,0.8]
+  cb_loc = [0.8, 0.15, 0.05, 0.8]
 
   ### Ng1 vs Ng2
   if opts.verbose: print "Ng1 vs Ng2"
@@ -318,8 +320,8 @@ if opts.special_plots:
   for stefilename, sdata in dat:
     ### pull out damping estimates
     try:
-      mEdot.append( sdata["stats"]["mean{|sum{Edot}|*Porb/|Eorb|}"] )
-      vEdot.append( sdata["stats"]["stdv{|sum{Edot}|*Porb/|Eorb|}"] )
+      mEdot.append( sdata["stats"]["mean{|sum{Edot}|*(Porb/|Eorb|)}"] )
+      vEdot.append( sdata["stats"]["stdv{|sum{Edot}|*(Porb/|Eorb|)}"] )
     except KeyError:
       print "could not find data for mean{|sum{Edot}|*Porb/|Eorb|} in %s... skipping" % (stefilename)
       continue
@@ -340,29 +342,50 @@ if opts.special_plots:
     ### pull out Ntriples
     Ntriples.append( sdata["system"]["Ntriples"] )
 
+  """
   ### convert mEdot into sizes
-  cmap_norm = matplotlib.colors.Normalize(vmin=min(mEdot), vmax=max(mEdot))
+#  cmap_norm = matplotlib.colors.Normalize(vmin=min(mEdot), vmax=max(mEdot))
+  cmap_norm = matplotlib.colors.LogNorm(vmin=min(mEdot), vmax=max(mEdot))
   min_size = 1
   max_size = 10
   sizes = [ min_size + (max_size-min_size)*cmap_norm( Edot ) for Edot in mEdot ]
 
   ### convert Ntriples into colors
-  Ntmax = max(Ntriples)
-  Ntmin = min(Ntriples)
   cmap_norm = matplotlib.colors.Normalize(vmin=min(Ntriples), vmax=max(Ntriples))
+#  cmap_norm = matplotlib.colors.LogNorm(vmin=min(Ntriples), vmax=max(Ntriples))
   cmap = plt.get_cmap("jet")
   colors = [ cmap( cmap_norm(Nt) ) for Nt in Ntriples]
+  """
+
+  ### convert Ntriples into sizes
+  cmap_norm = matplotlib.colors.Normalize(vmin=min(Ntriples), vmax=max(Ntriples))
+#  cmap_norm = matplotlib.colors.LogNormalize(vmin=min(Ntriples), vmax=max(Ntriples))
+  min_size = 1
+  max_size = 10
+  sizes = [min_size + (max_size-min_size)*cmap_norm( Nt ) for Nt in Ntriples]
+
+  ### convert mEdot into colors
+  cmap_norm = matplotlib.colors.Normalize(vmin=min(mEdot), vmax=max(mEdot))
+#  cmap_norm = matplotlib.colors.LogNorm(vmin=min(mEdot), vmax=max(mEdot))
+  cmap = plt.get_cmap("jet")
+  colors = [ cmap( cmap_norm(Edot) ) for Edot in mEdot]
 
   ### generate plot
   fig = plt.figure()
   ax = fig.add_axes(axes_loc)
   ax_cb = fig.add_axes(cb_loc)
 
-  ax.plot(Ng1, Ng2, marker="o", markeredgecolor=colors, markerfacecolor=colors, markersize=sizes)
+  for ng1, ng2, color, size in zip(Ng1, Ng2, colors, sizes):
+    ax.plot(ng1, ng2, marker="o", markeredgecolor=color, markerfacecolor=color, alpha = 0.5, markersize=size)
+
   cb = matplotlib.colorbar.ColorbarBase(ax_cb, cmap=cmap, norm=cmap_norm, orientation='vertical')
 
   ax.set_xlabel("$N_{G1}$")
   ax.set_ylabel("$N_{G2}$")
+
+  """
+  cb.set_label(r"No. triples")
+  """
   cb.set_label(r"$\frac{\sum 2\gamma_i A_i^2}{|E_\mathrm{orb}|/P_\mathrm{orb}}$")
  
   ax.grid(True)
