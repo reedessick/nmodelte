@@ -392,7 +392,7 @@ _val, _valexp = nm_u.float_to_scientific(Eorb)
 print >> stefile, "\tEorb        : %fe%d %s" % (_val, _valexp, nm_u.units['energy'])
 ### add to pickle object
 if opts.pstefilename:
-  sdata["system"] = {"logfilename":opts.logfilename, "Nmodes":N_m, "Ngens":len(network.gens()[0]), "Ntriples":len(network.to_triples()), "Mprim/Msun":Mprim, "Rprim/Rsun":Rprim, "Mcomp/Mjup":Mcomp, "Eo":dimEo, "Porb":Porb, "ecc":system.eccentricity, "Eorb":Eorb}
+  sdata["system"] = {"logfilename":opts.logfilename, "Nmodes":N_m, "Ngens":len(network.gens()[0]), "Ntriples":len(network.to_triples()), "Mprim/Msun":Mprim, "Rprim/Rsun":Rprim, "Mcomp/Mjup":Mcomp, "Eo":dimEo, "Porb":Porb, "ecc":system.eccentricity, "Eorb":Eorb, "Ngi":[len(gen) for gen in network.gens()[0]]}
 
 ### print network totals
 print >> stefile, "STATS"
