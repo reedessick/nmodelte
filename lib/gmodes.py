@@ -134,7 +134,7 @@ class gmode(networks.mode):
     return thr / kr_xir ### this should be the mode amplitude at which the mode will break.
 
   ###
-  def breaking_thr(self, thr=1.0, rtol=1e-6, max_iters=100):
+  def breaking_thr(self, thr=1.0, rtol=1e-6, max_iters=100, verbose=False):
     """
     computes the amplitude the mode must reach before it begins breaking
       k_r * xi_r >= thr
@@ -166,19 +166,28 @@ class gmode(networks.mode):
     y = oldy - ( np.tan(oldy) - 0.5*(oldy+xo) )/ (np.cos(oldy)**-2 - 0.5)
 
     if y < miny:
-      raise ValueError, "y < miny = %f"%miny
+      if verbose: print "WARNING: y<miny"
+      y = miny
+#      raise ValueError, "y < miny = %f"%miny
     if y > maxy:
-      raise ValueError, "y > maxy = %f"%maxy
+      if verbose: print "WARNING: y>maxy"
+      y = maxy
+#      raise ValueError, "y > maxy = %f"%maxy
 
     for _ in xrange(max_iters):
       if abs(y-oldy) < rtol*oldy:
         break
       oldy = y
       y = oldy - ( np.tan(oldy) - 0.5*(oldy+xo) )/ (np.cos(oldy)**-2 - 0.5)
+
       if y < miny:
-        raise ValueError, "y < miny = %f"%miny
+        if verbose: print "WARNING: y<miny"
+        y = miny
+#        raise ValueError, "y < miny = %f"%miny
       if y > maxy:
-        raise ValueError, "y > maxy = %f"%maxy
+        if verbose: print "WARNING: y>maxy"
+        y = maxy
+#        raise ValueError, "y > maxy = %f"%maxy
     else:
       raise StandardError, "max_iters=%d exceeded without convergence to within rtol=%.9f"%(max_iters, rtol)
 
