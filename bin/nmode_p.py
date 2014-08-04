@@ -747,7 +747,7 @@ if time_domain:
     figs, axs = nm_p.multi_gen_amp_plot(t_P, [ [ [l*prefacts[modeNo] for l in Q] for Q in q[modeNo]] for modeNo in range(N_m)], gens, n_l_m=n_l_m, mode_nums=opts.mode_nums)
 
     for ax in axs:
-      ax.set_ylabel(r'$|'+opts.tc+'_i|$')
+      ax.set_ylabel(r'$|\left(k_r\xi_r\right)_i|$')
       if not opts.lin_amp_time:
         ax.set_yscale('log')
 
