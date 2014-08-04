@@ -897,7 +897,7 @@ class ggg_coupling_list(ms.coupling_list):
     return self
 
   ###
-  def load_unsorted_mode_lists(self, metric, filenames, num_pairs=-1, min_n=False, max_n=False, min_l=False, max_l=False, min_w=False, max_w=False):
+  def load_unsorted_mode_lists(self, metric, filenames, num_pairs=-1, min_n=False, max_n=False, min_l=False, max_l=False, min_w=False, max_w=False, Ortol=1e-5):
     """
     loads data from unsorted files into a sorted mode list. Looks for the first num_pairs modes in each list and loads them. 
 
@@ -932,8 +932,9 @@ class ggg_coupling_list(ms.coupling_list):
       # check for forcing freq compatibility
       if self.O == None:
         self.O = absO
-      elif self.O != absO:
-        print "incompatible forcing frequencies!: \n\texisting: %.9f\n\t new: %.9f\nskipping %s" % (self.O, absO, filename)
+#      elif self.O != absO:
+      elif 2*abs(self.O-absO) > Ortol*(self.O+absO):
+        print "incompatible forcing frequencies!: \n\texisting: %.9fe-5\n\t new: %.9fe-5\nskipping %s" % (self.O*1e5, absO*1e5, filename)
         continue
 #        sys.exit("incompatible forcing frequencies!")
       # check for parent mode compatibility
@@ -1035,7 +1036,7 @@ not checked.
     return self.load_unsorted_mode_lists(metric, filenames, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
 
   ###
-  def load_unsorted_mode_lists(self, metric, filenames, min_n=False, max_n=False, min_l=False, max_l=False, min_w=False, max_w=False):
+  def load_unsorted_mode_lists(self, metric, filenames, min_n=False, max_n=False, min_l=False, max_l=False, min_w=False, max_w=False, Ortol=1e-5):
     """ 
     Read in local minima recorded in filenames. Reads in all elements of the files (as it must) 
     assumes the alpha, c, wo, k_hat values are consistent
@@ -1065,8 +1066,9 @@ not checked.
       # check for forcing freq compatibility
       if self.O == None:
         self.O = absO
-      elif self.O != absO:
-        print "incompatible forcing frequencies!: \n\texisting: %.9f\n\t new: %.9f\nskipping %s" % (self.O, absO, filename)
+#      elif self.O != absO:
+      elif 2*abs(self.O-absO) > Ortol*(self.O+absO):
+        print "incompatible forcing frequencies!: \n\texisting: %.9fe-5\n\t new: %.9fe-5\nskipping %s" % (self.O*1e5, absO*1e5, filename)
         continue
 #        sys.exit("incompatible forcing frequencies!")
       # check for parent mode compatibility
