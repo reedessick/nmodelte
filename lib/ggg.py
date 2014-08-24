@@ -832,7 +832,7 @@ class ggg_coupling_list(ms.coupling_list):
     self.num_pairs = -1 # an unphysical number so we don't get confused.
 
   ### 
-  def load_mode_lists(self, metric, filenames, num_pairs=-1, min_n=False, max_n=False, min_l=False, max_l=False, min_w=False, max_w=False):
+  def load_mode_lists(self, metric, filenames, num_pairs=-1, min_n=False, max_n=False, min_l=False, max_l=False, min_w=False, max_w=False, Ortol=1e-5):
     """
     loads data from sorted files into a sorted mode list of g-modes. Looks for the first num_pairs modes in each list and loads them. 
 
@@ -867,13 +867,16 @@ class ggg_coupling_list(ms.coupling_list):
       # check for forcing freq compatibility
       if self.O == None:
         self.O = absO
-      elif self.O != absO:
-        sys.exit("incompatible forcing frequencies!")
+      elif 2*abs(self.O-absO) > Ortol*(self.O+absO):
+        print "incompatible forcing frequencies!: \n\texisting\t: %.9fe-5\n\t new\t: %.9fe-5\nskipping %s" % (self.O*1e5, absO*1e5, filename)
+        continue
+#      elif self.O != absO:
+#        sys.exit("incompatible forcing frequencies!")
       # check for parent mode compatibility
       if self.parent_mode == None:
         self.parent_mode = Mo
       elif (self.parent_mode.l != Mo.l) or (abs(self.parent_mode.m) != abs(Mo.m)):
-        sys.exit("incompatible parent modes!\n\texisting: %s\n\tnew: %s" % (str(self.parent_mode.gen_nlmwy()), str(Mo.get_nlmwy())))
+        sys.exit("incompatible parent modes!\n\texisting\t: %s\n\tnew\t: %s" % (str(self.parent_mode.gen_nlmwy()), str(Mo.get_nlmwy())))
 
       self.filenames.append(filename)
 
@@ -934,14 +937,14 @@ class ggg_coupling_list(ms.coupling_list):
         self.O = absO
 #      elif self.O != absO:
       elif 2*abs(self.O-absO) > Ortol*(self.O+absO):
-        print "incompatible forcing frequencies!: \n\texisting: %.9fe-5\n\t new: %.9fe-5\nskipping %s" % (self.O*1e5, absO*1e5, filename)
+        print "incompatible forcing frequencies!: \n\texisting\t: %.9fe-5\n\tnew\t: %.9fe-5\nskipping %s" % (self.O*1e5, absO*1e5, filename)
         continue
 #        sys.exit("incompatible forcing frequencies!")
       # check for parent mode compatibility
       if self.parent_mode == None:
         self.parent_mode = Mo
       elif (self.parent_mode.l != Mo.l) or (abs(self.parent_mode.m) != abs(Mo.m)):
-        sys.exit("incompatible parent modes!\n\texisting: %s\n\tnew: %s" % (str(self.parent_mode.get_nlmwy()), str(Mo.get_nlmwy())))
+        sys.exit("incompatible parent modes!\n\texisting\t: %s\n\tnew\t: %s" % (str(self.parent_mode.get_nlmwy()), str(Mo.get_nlmwy())))
 
       self.filenames.append(filename)
 
@@ -1068,14 +1071,14 @@ not checked.
         self.O = absO
 #      elif self.O != absO:
       elif 2*abs(self.O-absO) > Ortol*(self.O+absO):
-        print "incompatible forcing frequencies!: \n\texisting: %.9fe-5\n\t new: %.9fe-5\nskipping %s" % (self.O*1e5, absO*1e5, filename)
+        print "incompatible forcing frequencies!: \n\texisting\t: %.9fe-5\n\tnew\t: %.9fe-5\nskipping %s" % (self.O*1e5, absO*1e5, filename)
         continue
 #        sys.exit("incompatible forcing frequencies!")
       # check for parent mode compatibility
       if self.parent_mode == None:
         self.parent_mode = Mo
       elif (self.parent_mode.l != Mo.l) or (abs(self.parent_mode.m) != abs(Mo.m)):
-        sys.exit("incompatible parent modes!\n\texisting: %s\n\tnew: %s" % (str(self.parent_mode.get_nlmwy()), str(Mo.get_nlmwy())))
+        sys.exit("incompatible parent modes!\n\texisting\t: %s\n\tnew\t: %s" % (str(self.parent_mode.get_nlmwy()), str(Mo.get_nlmwy())))
 
       self.filenames.append(filename)
 
@@ -1137,6 +1140,9 @@ not checked.
     if supplied, parent_forcing must be accompanied by Mprim, Mcomp, Porb, eccentricity
     same for daughter forcing
     """
+    ### check that we have at least one seed location
+    if not len(self.couplings):
+      return []
 
     if parent_forcing or daughter_forcing:
       if not (Mprim and Mcomp and Porb and (eccentricity!="none")):
@@ -1155,7 +1161,7 @@ not checked.
     triples = []
     couplings = copy.deepcopy(self.couplings)
     _couplings = [(c.metric_value, c) for c in couplings]
-    while len(triples) < num_pairs:
+    while (len(triples) < num_pairs):
       best_coupling = couplings.pop(0)
       best_coupling.setup( self.parent_mode ) # we don't need to renormalize k because we compute it from the parent mode anyway
       E = best_coupling.metric_value
