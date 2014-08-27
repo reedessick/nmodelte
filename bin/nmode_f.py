@@ -278,35 +278,62 @@ else:
 #
 #
 ####################################################################################################
-if opts.time_integration:
+# integrate the system and report when necessary 
+if opts.time_integration: ### time integrations: individual steps and total time
   import time
   to=time.time()
 
-# integrate the system and report when necessary 
-if use_phase:
-  if (not opts.onward) or (opts.init_time != "none"):
-    print >>outfile, nm_u.report_func(t, q[:-1], Porb)
-    outfile.flush()
-  while t < t1:
-    while t < sample_time:
-      t, h, q = evolve.apply(t, sample_time, h, q) # evolve network and update variables
-    sample_time += sample_step
-    print >>outfile, nm_u.report_func(t, q[:-1], Porb) # phase is tacked on the end
-    outfile.flush()
+  if use_phase:
+    if (not opts.onward) or (opts.init_time != "none"):
+      print >>outfile, nm_u.report_func(t, q[:-1], Porb)
+      outfile.flush()
+    while t < t1:
+      _to = time.time()
+      while t < sample_time:
+        t, h, q = evolve.apply(t, sample_time, h, q) # evolve network and update variables
+      sample_time += sample_step
+      print >>outfile, nm_u.report_func(t, q[:-1], Porb) # phase is tacked on the end
+      print >>outfile, "#dt = ", time.time()-_to
+      outfile.flush()
 
-else:
-  if (not opts.onward) or (opts.init_time != "none"):
-    print >>outfile, nm_u.report_func(t, q, Porb)
-    outfile.flush()
-  while t < t1:
-    while t < sample_time:
-      t, h, q = evolve.apply(t, sample_time, h, q) # evolve network and update variables
-    sample_time += sample_step
-    print >>outfile, nm_u.report_func(t, q, Porb)
-    outfile.flush()
+  else:
+    if (not opts.onward) or (opts.init_time != "none"):
+      print >>outfile, nm_u.report_func(t, q, Porb)
+      outfile.flush()
+    while t < t1:
+      _to = time.time()
+      while t < sample_time:
+        t, h, q = evolve.apply(t, sample_time, h, q) # evolve network and update variables
+      sample_time += sample_step
+      print >>outfile, nm_u.report_func(t, q, Porb)
+      print >>outfile, "#dt = ", time.time()-_to
+      outfile.flush()
  
-if opts.time_integration:
-  print >>outfile, "#total integration time = ", time.time()-to, " sec"
+    print >>outfile, "#total integration time = ", time.time()-to, " sec"
+
+else: ### don't time integrations
+  if use_phase:
+    if (not opts.onward) or (opts.init_time != "none"):
+      print >>outfile, nm_u.report_func(t, q[:-1], Porb)
+      outfile.flush()
+    while t < t1:
+      while t < sample_time:
+        t, h, q = evolve.apply(t, sample_time, h, q) # evolve network and update variables
+      sample_time += sample_step
+      print >>outfile, nm_u.report_func(t, q[:-1], Porb) # phase is tacked on the end
+      outfile.flush()
+
+  else:
+    if (not opts.onward) or (opts.init_time != "none"):
+      print >>outfile, nm_u.report_func(t, q, Porb)
+      outfile.flush()
+    while t < t1:
+      while t < sample_time:
+        t, h, q = evolve.apply(t, sample_time, h, q) # evolve network and update variables
+      sample_time += sample_step
+      print >>outfile, nm_u.report_func(t, q, Porb)
+      outfile.flush()
+
 
 ####################################################################################################
 #
