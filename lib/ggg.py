@@ -1032,11 +1032,11 @@ not checked.
     self.parent_mode = parent_mode
 
   ###
-  def load_mode_lists(self, metric, filenames, min_n=False, max_n=False, min_l=False, max_l=False, min_w=False, max_w=False):
+  def load_mode_lists(self, metric, filenames, min_n=False, max_n=False, min_l=False, max_l=False, min_w=False, max_w=False, Ortol=1e-5):
     """
     delegates to load_unsorted_mode_lists
     """
-    return self.load_unsorted_mode_lists(metric, filenames, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w)
+    return self.load_unsorted_mode_lists(metric, filenames, min_n=min_n, max_n=max_n, min_l=min_l, max_l=max_l, min_w=min_w, max_w=max_w, Ortol=Ortol)
 
   ###
   def load_unsorted_mode_lists(self, metric, filenames, min_n=False, max_n=False, min_l=False, max_l=False, min_w=False, max_w=False, Ortol=1e-5):
