@@ -485,7 +485,7 @@ if time_domain:
 
   ### SyE_time
   if opts.SyE_time:
-    if opts.verbose: print "\tHns_time"
+    if opts.verbose: print "\tSyE_time"
     fig = plt.figure()
     ax = plt.subplot(1,1,1)
 
