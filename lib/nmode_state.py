@@ -370,14 +370,37 @@ def compute_A(q, Eo=1.):
   reuturns amplitudes in q
   """
   Ao = Eo**0.5
-  return [ [ Ao*(Q[0]**2 + Q[1]**2)**0.5 for Q in q[m] ] for m in range(len(q))]
+#  return [ [ Ao*(Q[0]**2 + Q[1]**2)**0.5 for Q in q[m] ] for m in range(len(q))]
+
+  if not isinstance(q, np.ndarray):
+    q = np.array(q)
+
+  return Ao*np.sum(q**2, axis=2)**0.5
+
 
 ##################################################
 def compute_E(q, Eo=1):
   """
   returns energies in q
   """
-  return [ [ Eo*(Q[0]**2 + Q[1]**2) for Q in q[m] ] for m in range(len(q))]
+#  return [ [ Eo*(Q[0]**2 + Q[1]**2) for Q in q[m] ] for m in range(len(q))]
+
+  if not isinstance(q, np.ndarray):
+    q = np.array(q)
+
+  return Eo*np.sum(q**2, axis=2)
+
+##################################################
+def compute_S(E):
+  """
+  returns entropies using energies (E)
+  """
+  if not isinstance(E, np.ndarray):
+    E = np.array(E)
+
+  weights = E / np.outer(np.ones(len(E),float), np.sum(E, axis=0))
+
+  return -np.sum( weights*np.log(weights) , axis=0 )
 
 ##################################################
 def compute_ddt_P_E_q(t_P, q, system, Eo=1.):
