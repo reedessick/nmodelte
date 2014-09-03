@@ -218,7 +218,7 @@ def load_out_f(filename):
   return t_P, q, N_m
 
 ##################################################  
-def load_out(filename, tmin=False, tmax=False, downsample=False):
+def load_out(filename, tmin=False, tmax=False, downsample=False, timing=False):
   """ loads in the output of nmode_f.py and puts it into a standard structure """
   f = open(filename, 'r')
 
@@ -231,6 +231,9 @@ def load_out(filename, tmin=False, tmax=False, downsample=False):
   else:
     return [], [], 0
   f.close
+
+  if timing:
+    dt = []
 
   f = open(filename, 'r')
   # pull data
@@ -248,11 +251,20 @@ def load_out(filename, tmin=False, tmax=False, downsample=False):
           break
         else:
           if (not downsample) or (line_num%downsample == 0): # downsample when reading in data 
+            read_next_timing = True
             t_P.append(line[0])
             for n in range(N_m):
               q[n].append([line[2*n+1], line[2*n+2]]) # store real and imaginary parts of each mode
           line_num += 1
+    elif line[:5] == "#dt =" and timing: 
+      if read_next_timing:
+        dt.append( float(line.split("#dt =")[-1].strip()) )
+        read_next_timing = False
+
   f.close()
+
+  if timing:
+    return t_P, q, N_m, dt
 
   return t_P, q, N_m
 
