@@ -489,7 +489,7 @@ if time_domain:
     fig = plt.figure()
     ax = plt.subplot(1,1,1)
 
-    ax.plot(t_P, np.exp^nm_s.compute_S(-np.array(yE)), label=r"$S(\gamma A^2$")
+    ax.plot(t_P, np.exp(nm_s.compute_S(-np.array(yE))), label=r"$S(\gamma A^2$")
 
     ax.set_ylabel(r"$e^{-\sum w \log w} | w = \frac{\gamma A^2}{\sum \gamma A^2}$")
     ax.set_xlabel(r'$t/P_{\mathrm{orb}}$')
