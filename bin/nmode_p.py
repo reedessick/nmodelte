@@ -41,6 +41,9 @@ parser.add_option("", "--imag-time", action="store_true")
 parser.add_option("", "--real-imag-time", action="store_true", help="generate time-domain data: real and imaginary parts.")
 parser.add_option("", "--multi-gen-amp-time", action="store_true")
 parser.add_option("", "--Hns-time", action="store_true")
+parser.add_option("", "--yE-time", action="store_true")
+parser.add_option("", "--SE-time", action="store_true")
+parser.add_option("", "--SyE-time", action="store_true")
 
 parser.add_option("", "--lin-amp-time", action="store_true", help="sets all amplitude scales to \"linear\" in time-domain plots. Also controls Hns-time's yscale")
 
@@ -114,7 +117,7 @@ opts, args = parser.parse_args()
 ##################################################
 
 ### make time domain plots?
-if (opts.amp_time or opts.phs_time or opts.amp_phs_time or opts.real_time or opts.imag_time or opts.real_imag_time or opts.multi_gen_amp_time or opts.Hns_time or opts.growth_rates or opts.kr_xir_time or opts.multi_gen_kr_xir_time):
+if (opts.amp_time or opts.phs_time or opts.amp_phs_time or opts.real_time or opts.imag_time or opts.real_imag_time or opts.multi_gen_amp_time or opts.Hns_time or opts.growth_rates or opts.kr_xir_time or opts.multi_gen_kr_xir_time or opts.disp_time or opts.SE_time or opts.Sdisp_time):
   time_domain = True
 else:
   time_domain = False
@@ -142,6 +145,16 @@ if opts.Hns_time:
   compute_Hns = True
 else:
   compute_Hns = False
+
+if opts.SE_time:
+  compute_E = True
+else:
+  compute_E = False
+
+if opts.yE_time or opts.SyE_time:
+  compute_yE = True
+else:
+  compute_yE = False
 
 ### make eigenvalue plots?
 if (opts.max_eig_amp_phs or opts.max_eig_Lamp_phs or opts.max_eig_real_imag or opts.eigvals):
@@ -234,6 +247,12 @@ if time_domain:
     elif opts.tc=="x":
       Hns = nm_s.Hns_x(t_P, q, system, Eo=1.)
 
+  if compute_E:
+    E = nm_s.compute_E(q)
+
+  if compute_yE:
+    yE_tot, yE = nm_s.viscous_disp(q, system.network)
+
   ################################################
   ### Hns_time
   if opts.Hns_time:
@@ -280,6 +299,235 @@ if time_domain:
         figname = opts.filename + ".LHns.log_time" + opts.tag + ".png"
       else:
         figname = opts.filename + ".Hns.log_time" + opts.tag + ".png"
+      if opts.verbose: print "saving "+figname
+      ax.set_xscale('log')
+      if opts.time_xmin:
+        _ax = ax.axis()
+        ax.axis([opts.time_xmin, _ax[1], _ax[2], _ax[3]])
+      if opts.time_xmax:
+        _ax = ax.axis()
+        ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
+
+      plt.savefig(figname)
+
+    plt.close(fig)
+
+  ### yE_time
+  if opts.yE_time:
+    if opts.verbose: print "\tdisp_time"
+    fig = plt.figure()
+    ax = plt.subplot(1,1,1)
+
+    ### total
+    ax.plot(t_P, -np.array(yE_tot), label=r'$\sum \gamma A^2$')
+
+    ax.set_ylabel(r"$\sum \gamma A^2$")
+    ax.set_xlabel(r'$t/P_{\mathrm{orb}}$')
+    if not opts.lin_amp_time:
+      ax.set_yscale('log')
+
+    if not opts.no_legend:
+      ax.legend(loc=opts.legend_loc, ncol=opts.legend_col, prop={'size':opts.legend_font_size})
+
+    if opts.time_ymin:
+      _ax = ax.axis()
+      ax.axis([_ax[0], _ax[1], opts.time_ymin, _ax[3]])
+    if opts.time_ymax:
+      _ax = ax.axis()
+      ax.axis([_ax[0], _ax[1], _ax[2], opts.time_ymax])
+    if opts.time_xmin:
+      _ax = ax.axis()
+      ax.axis([opts.time_xmin, _ax[1], _ax[2], _ax[3]])
+    if opts.time_xmax:
+      _ax = ax.axis()
+      ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
+
+    # grid lines
+    ax.grid(opts.grid)
+
+    if opts.lin_time:
+      if opts.lin_amp_time:
+        figname = opts.filename + ".LyE.lin_time" + opts.tag + ".png"
+      else:
+        figname = opts.filename + ".yE.lin_time" + opts.tag + ".png"
+      if opts.verbose: print "saving "+figname
+      plt.savefig(figname)
+
+    if opts.log_time:
+      if opts.lin_amp_time:
+        figname = opts.filename + ".LyE.log_time" + opts.tag + ".png"
+      else:
+        figname = opts.filename + ".yE.log_time" + opts.tag + ".png"
+      if opts.verbose: print "saving "+figname
+      ax.set_xscale('log')
+      if opts.time_xmin:
+        _ax = ax.axis()
+        ax.axis([opts.time_xmin, _ax[1], _ax[2], _ax[3]])
+      if opts.time_xmax:
+        _ax = ax.axis()
+        ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
+
+      plt.savefig(figname)
+
+    plt.close(fig)
+
+    ### by mode
+    fig, ax = nm_p.plot(t_P, yE, n_l_m=n_l_m, mode_nums=opts.mode_nums)
+    ax = plt.subplot(1,1,1)
+
+    ax.set_ylabel(r"$\gamma A^2$")
+    ax.set_xlabel(r'$t/P_{\mathrm{orb}}$')
+    if not opts.lin_amp_time:
+      ax.set_yscale('log')
+
+    if not opts.no_legend:
+      ax.legend(loc=opts.legend_loc, ncol=opts.legend_col, prop={'size':opts.legend_font_size})
+
+    if opts.time_ymin:
+      _ax = ax.axis()
+      ax.axis([_ax[0], _ax[1], opts.time_ymin, _ax[3]])
+    if opts.time_ymax:
+      _ax = ax.axis()
+      ax.axis([_ax[0], _ax[1], _ax[2], opts.time_ymax])
+    if opts.time_xmin:
+      _ax = ax.axis()
+      ax.axis([opts.time_xmin, _ax[1], _ax[2], _ax[3]])
+    if opts.time_xmax:
+      _ax = ax.axis()
+      ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
+
+    # grid lines
+    ax.grid(opts.grid)
+
+    if opts.lin_time:
+      if opts.lin_amp_time:
+        figname = opts.filename + ".Ltot_yE.lin_time" + opts.tag + ".png"
+      else:
+        figname = opts.filename + ".tot_yE.lin_time" + opts.tag + ".png"
+      if opts.verbose: print "saving "+figname
+      plt.savefig(figname)
+
+    if opts.log_time:
+      if opts.lin_amp_time:
+        figname = opts.filename + ".Ltot_yE.log_time" + opts.tag + ".png"
+      else:
+        figname = opts.filename + ".tot_yE.log_time" + opts.tag + ".png"
+      if opts.verbose: print "saving "+figname
+      ax.set_xscale('log')
+      if opts.time_xmin:
+        _ax = ax.axis()
+        ax.axis([opts.time_xmin, _ax[1], _ax[2], _ax[3]])
+      if opts.time_xmax:
+        _ax = ax.axis()
+        ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
+
+      plt.savefig(figname)
+
+    plt.close(fig)
+
+  ### SE_time
+  if opts.SE_time:
+    if opts.verbose: print "\tSE_time"
+    fig = plt.figure()
+    ax = plt.subplot(1,1,1)
+
+    ax.plot(t_P, np.exp(nm_s.compute_S(E)), label=r"$S(E)$")
+
+    ax.set_ylabel(r"$e^{-\sum w \log w} | w = \frac{A^2}{\sum A^2}$")
+    ax.set_xlabel(r'$t/P_{\mathrm{orb}}$')
+    if not opts.lin_amp_time:
+      ax.set_yscale('log')
+
+    if not opts.no_legend:
+      ax.legend(loc=opts.legend_loc, ncol=opts.legend_col, prop={'size':opts.legend_font_size})
+
+    if opts.time_ymin:
+      _ax = ax.axis()
+      ax.axis([_ax[0], _ax[1], opts.time_ymin, _ax[3]])
+    if opts.time_ymax:
+      _ax = ax.axis()
+      ax.axis([_ax[0], _ax[1], _ax[2], opts.time_ymax])
+    if opts.time_xmin:
+      _ax = ax.axis()
+      ax.axis([opts.time_xmin, _ax[1], _ax[2], _ax[3]])
+    if opts.time_xmax:
+      _ax = ax.axis()
+      ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
+
+    # grid lines
+    ax.grid(opts.grid)
+
+    if opts.lin_time:
+      if opts.lin_amp_time:
+        figname = opts.filename + ".LSE.lin_time" + opts.tag + ".png"
+      else:
+        figname = opts.filename + ".SE.lin_time" + opts.tag + ".png"
+      if opts.verbose: print "saving "+figname
+      plt.savefig(figname)
+
+    if opts.log_time:
+      if opts.lin_amp_time:
+        figname = opts.filename + ".LSE.log_time" + opts.tag + ".png"
+      else:
+        figname = opts.filename + ".HSE.log_time" + opts.tag + ".png"
+      if opts.verbose: print "saving "+figname
+      ax.set_xscale('log')
+      if opts.time_xmin:
+        _ax = ax.axis()
+        ax.axis([opts.time_xmin, _ax[1], _ax[2], _ax[3]])
+      if opts.time_xmax:
+        _ax = ax.axis()
+        ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
+
+      plt.savefig(figname)
+
+    plt.close(fig)
+
+  ### SyE_time
+  if opts.SyE_time:
+    if opts.verbose: print "\tHns_time"
+    fig = plt.figure()
+    ax = plt.subplot(1,1,1)
+
+    ax.plot(t_P, np.exp^nm_s.compute_S(-np.array(yE)), label=r"$S(\gamma A^2$")
+
+    ax.set_ylabel(r"$e^{-\sum w \log w} | w = \frac{\gamma A^2}{\sum \gamma A^2}$")
+    ax.set_xlabel(r'$t/P_{\mathrm{orb}}$')
+    if not opts.lin_amp_time:
+      ax.set_yscale('log')
+
+    if not opts.no_legend:
+      ax.legend(loc=opts.legend_loc, ncol=opts.legend_col, prop={'size':opts.legend_font_size})
+
+    if opts.time_ymin:
+      _ax = ax.axis()
+      ax.axis([_ax[0], _ax[1], opts.time_ymin, _ax[3]])
+    if opts.time_ymax:
+      _ax = ax.axis()
+      ax.axis([_ax[0], _ax[1], _ax[2], opts.time_ymax])
+    if opts.time_xmin:
+      _ax = ax.axis()
+      ax.axis([opts.time_xmin, _ax[1], _ax[2], _ax[3]])
+    if opts.time_xmax:
+      _ax = ax.axis()
+      ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
+
+    # grid lines
+    ax.grid(opts.grid)
+
+    if opts.lin_time:
+      if opts.lin_amp_time:
+        figname = opts.filename + ".LSyE.lin_time" + opts.tag + ".png"
+      else:
+        figname = opts.filename + ".SyE.lin_time" + opts.tag + ".png"
+      if opts.verbose: print "saving "+figname
+      plt.savefig(figname)
+
+    if opts.log_time:
+      if opts.lin_amp_time:
+        figname = opts.filename + ".LSyE.log_time" + opts.tag + ".png"
+      else:
+        figname = opts.filename + ".SyE.log_time" + opts.tag + ".png"
       if opts.verbose: print "saving "+figname
       ax.set_xscale('log')
       if opts.time_xmin:

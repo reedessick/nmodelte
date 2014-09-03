@@ -21,6 +21,21 @@ import nmode_utils as nm_u
 #                              labels should be set by caller
 #
 ####################################################################################################
+def plot(x, y, n_l_m=False, mode_nums=False):
+  fig = plt.figure()
+  ax = plt.subplot(1,1,1)
+  if not mode_nums:
+    mode_nums = range(len(y))
+
+  for m in mode_nums:
+    label = "mode %d" % m
+    if n_l_m:
+      label += ":%s" % str(n_l_m[m])
+    ax.plot(x, y[m], label=label)
+
+  return fig, ax
+
+##################################################
 def amp_plot(x, y, n_l_m=False, mode_nums=False):
   fig = plt.figure()
   ax = plt.subplot(1,1,1)
