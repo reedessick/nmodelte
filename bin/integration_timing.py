@@ -65,7 +65,7 @@ if opts.hist:
 	ax.set_xlabel("duration [sec]")
 	ax.set_ylabel("count")
 
-	ax.grid(opts.grid)
+	ax.grid(opts.grid, which="both")
 
 	figname = opts.outfilename+".dt-hist%s.png"%opts.tag
 	if opts.verbose: print figname
@@ -93,7 +93,7 @@ if opts.dt_time:
 	ax.set_xlabel("$t/P_{\mathrm{orb}}$")
 	ax.set_ylabel("duration [sec]")
 
-	ax.grid(opts.grid)
+	ax.grid(opts.grid, which="both")
 
 	figname = opts.outfilename+".dt.lin_time%s.png"%opts.tag
 	if opts.verbose: print figname

@@ -488,7 +488,7 @@ if opts.coupling_hist:
 
   fig, ax = nmd.coupling_hist(network, gens=gens, num_bins=opts.coupling_hist_num_bins, log=opts.coupling_hist_log, genNos=opts.coupling_hist_genNos)
 
-  ax.grid(opts.grid)
+  ax.grid(opts.grid, which="both")
 
   if not opts.no_legend:
     ax.legend(loc=opts.legend_loc, ncol=opts.legend_col, prop={'size':opts.legend_font_size})
@@ -510,7 +510,7 @@ if opts.coupling_diagram:
         if opts.verbose: print "\thighlighting modeNo: %d" % opts.coupling_diagram_modeNo
         nmd.couling_tree_highlight(opts.coupling_diagram_modeNo, gens, coups, edges)
  
-      ax.grid(opts.grid)
+      ax.grid(opts.grid, which="both")
 
       figname = opts.logfilename+".coupling_diagram-"+diagram_type+opts.tag+".png"
       if opts.verbose: print "saving "+figname
@@ -525,7 +525,7 @@ if opts.coupling_diagram:
         if opts.verbose: print "\thighlighting modeNo: %d" % opts.coupling_diagram_modeNo
         nmd.couling_tree_highlight(opts.coupling_diagram_modeNo, gens, coups, edges)
  
-      ax.grid(opts.grid)
+      ax.grid(opts.grid, which="both")
 
       figname = opts.logfilename+".coupling_diagram-"+diagram_type+opts.tag+".png"
       if opts.verbose: print "saving "+figname
@@ -574,7 +574,7 @@ if opts.coupling_diagram:
           cbax = fig.add_axes([0.875, 0.1, 0.025, 0.8])
 
           fig, ax = nmd.coupling_tree_nl(system, tree_type=diagram_type.split("-")[-1], genNos=[int(l) for l in opts.coupling_diagram_genNos.split()], verbose=opts.verbose, mode_colors=mode_colors, mode_order=mode_order, fig_ax=(fig,ax))
-          ax.grid(opts.grid)
+          ax.grid(opts.grid, which="both")
 
           ### add color bar!
           if opts.coupling_diagram_logcolors:
@@ -596,7 +596,7 @@ if opts.coupling_diagram:
 
       else:
         fig, ax = nmd.coupling_tree_nl(system, tree_type=diagram_type.split("-")[-1], genNos=[int(l) for l in opts.coupling_diagram_genNos.split()], verbose=opts.verbose)
-        ax.grid(opts.grid)
+        ax.grid(opts.grid, which="both")
         figname = opts.logfilename+".coupling_diagram-"+diagram_type+opts.tag+".png"
         if opts.verbose: print "saving "+figname
         fig.savefig(figname)
@@ -621,7 +621,7 @@ if opts.Ei_distrib:
   ax.set_xlabel(r"$A_i^2$")
   ax.set_ylabel(r"$p(A_i^2)$")
 
-  ax.grid(opts.grid) # grid lines
+  ax.grid(opts.grid, which="both") # grid lines
 
   figname = opts.outfilename+".Ei_distrib"+opts.tag+".png"
   if opts.verbose: print "saving "+figname
@@ -636,7 +636,7 @@ if opts.multi_gen_Ei_distrib:
   
   for ax in axs:
     ax.set_ylabel(r'$p(A_i^2)$')
-    ax.grid(opts.grid) # grid lines
+    ax.grid(opts.grid, which="both") # grid lines
 
   ax.set_xlabel(r'$A_i^2$')
 
@@ -671,7 +671,7 @@ if scat3:
     if opts.verbose: print "\tscat_detuning"
     fig, ax, ax_Hns, ax_det = nmd.Hns_coup_detuning(Hns_coup, system)
 
-    ax.grid(opts.grid)
+    ax.grid(opts.grid, which="both")
     ax_Hns.grid(opts.grid)
     ax_det.grid(opts.grid)
 
@@ -685,7 +685,7 @@ if scat3:
     if opts.verbose: print "\tscat_heuristic"
     fig, ax, ax_Hns, ax_heuristic = nmd.Hns_coup_heuristic(Hns_coup, system)
 
-    ax.grid(opts.grid)
+    ax.grid(opts.grid, which="both")
     ax_Hns.grid(opts.grid)
     ax_heuristic.grid(opts.grid)
 
@@ -699,7 +699,7 @@ if scat3:
     if opts.verbose: print "\tscat_Ethr"
     fig, ax, ax_Hns, ax_Ethr = nmd.Hns_coup_Ethr(Hns_coup, system)
 
-    ax.grid(opts.grid)
+    ax.grid(opts.grid, which="both")
     ax_Hns.grid(opts.grid)
     ax_Ethr.grid(opts.grid)
 
@@ -729,7 +729,7 @@ if opts.Hns_distrib:
   ax.set_xlabel(r"$H_{*}$")
   ax.set_ylabel(r"$p(H_{*})$")
 
-  ax.grid(opts.grid)
+  ax.grid(opts.grid, which="both")
 
   figname = opts.outfilename+".Hns_distrib"+opts.tag+".png"
   if opts.verbose: print "saving "+figname
@@ -841,7 +841,7 @@ $\chi^2_{\mathrm{reduced}} = %.6f$""" % (fitparams[0], covar[0]**0.5, fitparams[
 
     for genNo, ax in enumerate(axs):
       ax.set_ylabel('fraction of\n'+r'$\sum_{i\in'+str(genNo)+'} A_i^2$')
-      ax.grid(opts.grid) # grid lines
+      ax.grid(opts.grid, which="both") # grid lines
 
       if opts.conc_ymin:
         ax.set_ylim(ymin=opts.conc_ymin)
@@ -862,7 +862,7 @@ $\chi^2_{\mathrm{reduced}} = %.6f$""" % (fitparams[0], covar[0]**0.5, fitparams[
 
     for genNo, ax in enumerate(axs):
       ax.set_ylabel('fraction of\n'+r'$\sum_{i\in'+str(genNo)+'} A_i^2$')
-      ax.grid(opts.grid) # grid lines
+      ax.grid(opts.grid, which="both") # grid lines
 
       if opts.conc_ymin:
         ax.set_ylim(ymin=opts.conc_ymin)
@@ -976,7 +976,7 @@ $\chi^2_{\mathrm{reduced}} = %.6f$""" % (fitparams[0], covar[0]**0.5, fitparams[
 
     for genNo, ax in enumerate(axs):
       ax.set_ylabel('fraction of\n'+r'$2\sum_{i\in'+str(genNo)+'} \gamma_i A_i^2$')
-      ax.grid(opts.grid) # grid lines
+      ax.grid(opts.grid, which="both") # grid lines
 
       if opts.conc_ymin:
         ax.set_ylim(ymin=opts.conc_ymin)
@@ -996,7 +996,7 @@ $\chi^2_{\mathrm{reduced}} = %.6f$""" % (fitparams[0], covar[0]**0.5, fitparams[
 
     for genNo, ax in enumerate(axs):
       ax.set_ylabel('fraction of\n'+r'$2\sum_{i\in'+str(genNo)+'} \gamma_i A_i^2$')
-      ax.grid(opts.grid) # grid lines
+      ax.grid(opts.grid, which="both") # grid lines
 
       if opts.conc_ymin:
         ax.set_ylim(ymin=opts.conc_ymin)

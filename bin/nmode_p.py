@@ -284,7 +284,7 @@ if time_domain:
       ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
 
     # grid lines
-    ax.grid(opts.grid)
+    ax.grid(opts.grid, which="both")
 
     if opts.lin_time:
       if opts.lin_amp_time:
@@ -343,7 +343,7 @@ if time_domain:
       ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
 
     # grid lines
-    ax.grid(opts.grid)
+    ax.grid(opts.grid, which="both")
 
     if opts.lin_time:
       if opts.lin_amp_time:
@@ -397,7 +397,7 @@ if time_domain:
       ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
 
     # grid lines
-    ax.grid(opts.grid)
+    ax.grid(opts.grid, which="both")
 
     if opts.lin_time:
       if opts.lin_amp_time:
@@ -455,7 +455,7 @@ if time_domain:
       ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
 
     # grid lines
-    ax.grid(opts.grid)
+    ax.grid(opts.grid, which="both")
 
     if opts.lin_time:
       if opts.lin_amp_time:
@@ -513,7 +513,7 @@ if time_domain:
       ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
 
     # grid lines
-    ax.grid(opts.grid)
+    ax.grid(opts.grid, which="both")
 
     if opts.lin_time:
       if opts.lin_amp_time:
@@ -568,7 +568,7 @@ if time_domain:
       ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
 
     # grid lines
-    ax.grid(opts.grid)
+    ax.grid(opts.grid, which="both")
 
     if opts.lin_time:
       if opts.lin_amp_time:
@@ -616,7 +616,7 @@ if time_domain:
       ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
 
     # grid lines
-    ax.grid(opts.grid)
+    ax.grid(opts.grid, which="both")
 
     if opts.lin_time:
       figname = opts.filename + ".phs.lin_time" + opts.tag + ".png"
@@ -733,7 +733,7 @@ if time_domain:
       ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
 
     # grid lines
-    ax.grid(opts.grid)
+    ax.grid(opts.grid, which="both")
 
     if opts.lin_time:
       figname = opts.filename + ".real.lin_time" + opts.tag + ".png"
@@ -782,7 +782,7 @@ if time_domain:
       ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
 
     # grid lines
-    ax.grid(opts.grid)
+    ax.grid(opts.grid, which="both")
 
     if opts.lin_time:
       figname = opts.filename + ".imag.lin_time" + opts.tag + ".png"
@@ -898,7 +898,7 @@ if time_domain:
       ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
 
     # grid lines
-    ax.grid(opts.grid)
+    ax.grid(opts.grid, which="both")
 
     if opts.lin_time:
       if opts.lin_amp_time:
@@ -957,7 +957,7 @@ if time_domain:
         ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
 
       # grid lines
-      ax.grid(opts.grid)
+      ax.grid(opts.grid, which="both")
 
     ax.set_xlabel(r'$t/P_{\mathrm{orb}}$')
 
@@ -1016,7 +1016,7 @@ if time_domain:
         ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
 
       # grid lines
-      ax.grid(opts.grid)
+      ax.grid(opts.grid, which="both")
 
     ax.set_xlabel(r'$t/P_{\mathrm{orb}}$')
 
@@ -1065,7 +1065,7 @@ if time_domain:
     if not opts.no_legend:
       ax.legend(loc=opts.legend_loc, ncol=opts.legend_col, prop={'size':opts.legend_font_size})
 
-    ax.grid(opts.grid)
+    ax.grid(opts.grid, which="both")
 
     figname = opts.filename+".amp_portrait"+opts.tag+".png"
     if opts.verbose: print "saving "+figname
@@ -1085,7 +1085,7 @@ if time_domain:
       if not opts.no_legend:
         ax.legend(loc=opts.legend_loc, ncol=opts.legend_col, prop={'size':opts.legend_font_size})
 
-      ax.grid(opts.grid)
+      ax.grid(opts.grid, which="both")
 
     ax.set_xlabel(r'$|'+opts.tc+'_i|$')
 
@@ -1107,7 +1107,7 @@ if time_domain:
     if not opts.no_legend:
       ax.legend(loc=opts.legend_loc, ncol=opts.legend_col, prop={'size':opts.legend_font_size})
 
-    ax.grid(opts.grid)
+    ax.grid(opts.grid, which="both")
 
     figname = opts.filename+".real_imag_portrait"+opts.tag+".png"
     if opts.verbose: print "saving "+figname
@@ -1128,7 +1128,7 @@ if time_domain:
         ax.legend(loc=opts.legend_loc, ncol=opts.legend_col, prop={'size':opts.legend_font_size})
 
       # grid lines
-      ax.grid(opts.grid)
+      ax.grid(opts.grid, which="both")
 
     ax.set_xlabel(r'$\mathbb{R}\{'+opts.tc+'\}$')
 
@@ -1435,7 +1435,7 @@ if freq_domain:
       ax.axis([_ax[0], opts.freq_xmax, _ax[2], _ax[3]])
 
     # grid lines
-    ax.grid(opts.grid)
+    ax.grid(opts.grid, which="both")
 
     if opts.lin_freq:
       if opts.lin_amp_freq:
@@ -1483,7 +1483,7 @@ if freq_domain:
       ax.axis([_ax[0], opts.freq_xmax, _ax[2], _ax[3]])
 
     # grid lines
-    ax.grid(opts.grid)
+    ax.grid(opts.grid, which="both")
 
     if opts.lin_freq:
       figname = opts.freqfilename + ".phs.lin_freq" + opts.tag + ".png"
@@ -1600,7 +1600,7 @@ if freq_domain:
       ax.axis([_ax[0], opts.freq_xmax, _ax[2], _ax[3]])
 
     # grid lines
-    ax.grid(opts.grid)
+    ax.grid(opts.grid, which="both")
 
     if opts.lin_freq:
       figname = opts.freqfilename + ".real.lin_freq" + opts.tag + ".png"
@@ -1642,7 +1642,7 @@ if freq_domain:
       ax.axis([_ax[0], opts.freq_xmax, _ax[2], _ax[3]])
 
     # grid lines
-    ax.grid(opts.grid)
+    ax.grid(opts.grid, which="both")
 
     if opts.lin_freq:
       figname = opts.freqfilename + ".imag.lin_freq" + opts.tag + ".png"
@@ -1755,7 +1755,7 @@ if freq_domain:
         ax.axis([_ax[0], opts.freq_xmax, _ax[2], _ax[3]])
 
       # grid lines
-      ax.grid(opts.grid)
+      ax.grid(opts.grid, which="both")
 
     ax.set_xlabel(r'$f/f_{\mathrm{orb}}$')
 
