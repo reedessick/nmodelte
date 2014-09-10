@@ -21,12 +21,11 @@ parser.add_option("", "--tmax", default=np.infty, type="float")
 parser.add_option("", "--downsample", default=1, type="float")
 
 parser.add_option("", "--hist", default=False, action="store_true")
-parser.add_option("", "--num-bin", default=20, type="float")
+parser.add_option("", "--n-per-bin", default=10, type="float")
 parser.add_option("", "--log-bin", default=False, action="store_true")
 
 parser.add_option("", "--dt-time", default=False, action="store_true")
 
-parser.add_option("-o", "--output-dir", default="./", type="string")
 parser.add_option("-t", "--tag", default="", type="string")
 
 parser.add_option("-g", "--grid", default=False, action="store_true")
@@ -41,8 +40,11 @@ if not (opts.hist or opts.dt_time):
 
 #=================================================
 ### read in outfiles, get dt
-if opts.verbose: print "reading data from ", outfilename
-t_P, q, N_m, dt = nmu.load_out(outfilename, tmin=opts.tmin, tmax=opts.tmax, downsample=opts.downsample, timing=True)
+if opts.verbose: print "reading data from ", opts.outfilename
+t_P, q, N_m, dt = nmu.load_out(opts.outfilename, tmin=opts.tmin, tmax=opts.tmax, downsample=opts.downsample, timing=True)
+
+if not len(dt):
+	raise StandardError, "could not find any integration timing information in ", opts.outfilename
 
 #=================================================
 ### generate plots
@@ -52,18 +54,22 @@ if opts.hist:
 	fig = nmp.plt.figure()
 	ax = nmp.plt.subplot(1,1,1)
 
-	if opts.log_bin:
-		bins = np.logspace(np.log10(np.min(dt)/1.1), np.log10(np.max(dt)*1.1), opts.num_bin+1)
-	else:
-		bins = np.linspace(np.min(dt)/1.1, np.max(dt)*1.1, opts.num_bin+1)
+	num_bin = len(dt)/opts.n_per_bin+1
 
-	ax.hist(dt, bins=bins, histtype="step")
+	if opts.log_bin:
+		bins = np.logspace(np.log10(np.min(dt)/1.1), np.log10(np.max(dt)*1.1), num_bin+1)
+	else:
+		bins = np.linspace(np.min(dt)/1.1, np.max(dt)*1.1, num_bin+1)
+
+	n, b, p = ax.hist(dt, bins=bins, histtype="step")
 
 	if opts.log_bin:
 		ax.set_xscale("log")
 
 	ax.set_xlabel("duration [sec]")
 	ax.set_ylabel("count")
+
+	ax.set_ylim(ymin=min(n)/1.1, ymax=max(n)*1.1)
 
 	ax.grid(opts.grid, which="both")
 
@@ -88,7 +94,7 @@ if opts.dt_time:
 	fig = nmp.plt.figure()
 	ax = nmp.plt.subplot(1,1,1)
 
-	nmp.plot(t_P, dt, label="duration")
+	ax.plot(t_P, dt, label="duration")
 
 	ax.set_xlabel("$t/P_{\mathrm{orb}}$")
 	ax.set_ylabel("duration [sec]")
