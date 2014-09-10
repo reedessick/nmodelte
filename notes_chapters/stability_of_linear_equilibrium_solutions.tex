@@ -1,0 +1,219 @@
+\section*{Stability of linear equilibrium solutions}
+
+\textbf{repeat Nevin's analysis here, and derive the growth rates for the daughters' non-linear amplitudes around the linear equilibrium.}
+
+\begin{subequations}
+\begin{align}
+\dot{q}_1 + (i\omega_1 + \gamma_1)q_1 = & i\omega_1 U_1(t) + 2i\omega_1\kappa q_0^\ast q_2^\ast \\
+\dot{q}_2 + (i\omega_2 + \gamma_2)q_2 = & i\omega_2 U_2(t) + 2i\omega_2\kappa q_0^\ast q_1^\ast \\
+\end{align}
+\end{subequations}
+
+we assume there is a linear solution and consider perturbations about that assuming $q_0$ is given by it's linear value.
+
+\begin{subequations}
+\begin{align}
+\dot{q}_{1,NL} + (i\omega_1 + \gamma_1)q_{1,NL} = & 2i\omega_1\kappa q_0^\ast q_{2,NL}^\ast \\
+\dot{q}_{2,NL} + (i\omega_2 + \gamma_2)q_{2,NL} = & 2i\omega_2\kappa q_0^\ast q_{1,NL}^\ast \\
+\end{align}
+\end{subequations}
+
+If we make the (standard) transformation $q_i \rightarrow x_i$, we can re-write these equations so they are time independent ($x_o$ is just a complex constant).
+
+\begin{subequations}
+\begin{align}
+\dot{x}_{1,NL} + (i\Delta_1 + \gamma_1)x_{1,NL} = & 2i\omega_1\kappa x_0^\ast x_{2,NL}^\ast \\
+\dot{x}_{2,NL} + (i\Delta_2 + \gamma_2)x_{2,NL} = & 2i\omega_2\kappa x_0^\ast x_{1,NL}^\ast \\
+\end{align}
+\end{subequations}
+
+We further assume the solution is linear, in that it takes the form $\vec{x} \propto e^{st}$, which yields
+
+\begin{subequations}
+\begin{align}
+(i\omega_1 + s+\Delta_1)x_{1,NL} = & 2i\omega_1\kappa x_0^\ast x_{2,NL}^\ast \\
+(i\omega_2 + s+\Delta_2)x_{2,NL} = & 2i\omega_2\kappa x_0^\ast x_{1,NL}^\ast \\
+\end{align}
+\end{subequations}
+
+Which we can combine as follows:
+\begin{subequations}
+\begin{align}
+(i\Delta_1 + s+\gamma_1)(-i\Delta_2 + s+\gamma_2)x_{1,NL} = & (2i\omega_1\kappa x_0^\ast) ((-i\Delta_2 + s+\gamma_2)x_{2,NL}^\ast) \\
+ = & (2i\omega_1\kappa x_0^\ast) (-2i\omega_2\kappa x_0 x_{1,NL}) \\
+ = & -4\omega_1\omega_2 \kappa^2 |x_0|^2 x_{1,NL} \\
+\Rightarrow (i\Delta_1 + s+\gamma_1)(-i\Delta_2 + s+\gamma_2) = & -4\omega_1\omega_2 \kappa^2 |x_0|^2
+\end{align}
+\end{subequations}
+
+Which is quadratic in $s$, and there is a required symmetry $1 \leftrightarrow 2$, so we should expect 4 (complex) solutions to two quadratic equations. Maintaining our present course, we can solve for $s$ explicitly, which yields
+
+\begin{subequations}\label{equation:3mode-eig}
+\begin{align}
+s = & \frac{1}{2}\left[ -(\gamma_1 + \gamma_2) -i(\Delta_1 - \Delta_2) \pm \sqrt{ (\gamma_1 + \gamma_2 + i(\Delta_1 - \Delta_2))^2 -4((\gamma_1 + i\Delta_1)(\gamma_2-i\Delta_2) - 4\omega_1\omega_2\kappa^2 A_0^2) } \right]\\
+  = & \frac{1}{2}\left[ -(\gamma_1 + \gamma_2) -i(\Delta_1 - \Delta_2) \pm \sqrt{ (\gamma_1 - \gamma_2)^2 - (\Delta_1 + \Delta_2)^2 + + 16\omega_1\omega_2\kappa^2A_0^2 + 2i(\Delta_1+\Delta_2)(\gamma_1-\gamma_2)  } \right]
+\end{align}
+\end{subequations}
+
+and there is an implicit set of companion solutions: $1\leftrightarrow 2$. We're interested in the solutions for which $\mathbb{R}\{s\} \geq 0$, which are (marginally) unstable to linear perturbations. While this takes some algebraic back-flips to accomplish, it is relatively straightforward to derive 
+
+\begin{subequations}
+\begin{align}
+\mathbb{R}\{s\} = \frac{1}{2} & \left[ -(\gamma_1+\gamma_2) \pm \left( ( (\gamma_1-\gamma_2)^2 - (\Delta_1+\Delta_2)^2 + 16\omega_1\omega_2\kappa^2A_0^2)^2  + 4(\gamma_1-\gamma_2)^2(\Delta_1+\Delta_2)^2 \right)^{1/4} \right.\\
+                              & \left.\ \times\cos\left( \frac{1}{2} \tan^{-1} \left( \frac{2(\Delta_1+\Delta_2)(\gamma_1-\gamma_2)}{(\gamma_1-\gamma_2)^2 - (\Delta_1+\Delta_2)^2 + 16\omega_1\omega_2\kappa^2A_0^2 }\right)\right)     \right] 
+\end{align}
+\end{subequations}
+
+Which looks to be transcendental. However, if we solve for the marginally stable case $\mathbb{R}\{s\} = 0$, and square both sides we can apply a trig-identity $cos^2(\theta) = (1+cos(2\theta))/2$, which renders the problem algebraic. Further manipulation reveals the threshold energy for the parent mode:
+
+\begin{subequations}\label{equation:3mode Athr}
+\begin{align}
+(A_0^2)_{thr} = & \frac{(\gamma_1+\gamma_2)^2 - (\gamma_1-\gamma_2)^2}{(\gamma_1+\gamma_2)^2}\left[\frac{1}{16\omega_1\omega_2\kappa^2}\left( (\gamma_1+\gamma_2)^2 + (\Delta_1+\Delta_2)^2\right) \right] \\
+              = & \frac{\gamma_1\gamma_2}{4\omega_1\omega_2\kappa^2}\left( 1 + \frac{(\Delta_1+\Delta_2)^2}{(\gamma_1+\gamma_2)^2}\right) \\
+\end{align}
+\end{subequations}
+
+which is the exact solution for the 3-mode stability threshold.
+
+\subsection*{assympotic limits for 3-mode eigenvalues: $A_0^2 \gg A_{thr}^2$}
+
+Taking as our staring point Equation \ref{equation:3mode-eig}, we define 
+
+\begin{equation}
+\epsilon \equiv \frac{A_thr}{A_0} \ll 0
+\end{equation}
+
+Upon substition, this yields
+
+\begin{subequations}
+\begin{align}
+2s + (\gamma_1+\gamma_2) + i(\Delta_1-\Delta_2) = & \pm \sqrt{ (\gamma_1 - \gamma_2)^2 - (\Delta_1 + \Delta_2)^2 + + 16\omega_1\omega_2\kappa^2A_0^2 + 2i(\Delta_1+\Delta_2)(\gamma_1-\gamma_2)  }  \\
+\Rightarrow 2s + (\gamma_1+\gamma_2) + i(\Delta_1-\Delta_2) = & \pm \sqrt{ (\gamma_1 - \gamma_2)^2 - (\Delta_1 + \Delta_2)^2 + 16\omega_1\omega_2\kappa^2A_{thr}^2\frac{1}{\epsilon^2} + 2i(\Delta_1+\Delta_2)(\gamma_1-\gamma_2)  } \\
+ = & \pm \frac{1}{\epsilon} 4\sqrt{\omega_1\omega_2}\kappa A_{thr} \sqrt{ 1 + \frac{(\gamma_1 - \gamma_2)^2 - (\Delta_1 + \Delta_2)^2 + 2i(\Delta_1+\Delta_2)(\gamma_1-\gamma_2)}{16\omega_1\omega_2\kappa^2A_{thr}^2 }\epsilon^2 }  \\
+ = & \pm \frac{1}{\epsilon} 4\sqrt{\omega_1\omega_2}\kappa A_{thr} \left( 1 + \frac{1}{2}\frac{(\gamma_1 - \gamma_2)^2 - (\Delta_1 + \Delta_2)^2 + 2i(\Delta_1+\Delta_2)(\gamma_1-\gamma_2)}{16\omega_1\omega_2\kappa^2A_{thr}^2 }\epsilon^2 + O(\epsilon^4)\right)  \\
+ = & \pm \left( \frac{1}{\epsilon} 4\sqrt{\omega_1\omega_2}\kappa A_{thr}  + \frac{1}{2}\frac{(\gamma_1 - \gamma_2)^2 - (\Delta_1 + \Delta_2)^2 + 2i(\Delta_1+\Delta_2)(\gamma_1-\gamma_2)}{4\sqrt{\omega_1\omega_2}\kappa A_{thr} }\epsilon + O(\epsilon^3)\right)  \\
+\end{align}
+\end{subequations}
+
+from which we can immediately write
+
+\begin{subequations}
+\begin{align}
+\mathbb{R}\{s\} = & -\frac{1}{2}(\gamma_1+\gamma_2) \pm \left( 2\sqrt{\omega_1\omega_2}\kappa \frac{A_{thr}}{\epsilon} + \frac{(\gamma_1-\gamma_2)^2 - (\Delta_1+\Delta_2)^2}{8\sqrt{\omega_1\omega_2}\kappa} \frac{\epsilon}{A_{thr}} + O(\epsilon^3) \right) \\
+                = & -\frac{1}{2}(\gamma_1+\gamma_2) \pm 2\sqrt{\omega_1\omega_2}\kappa A_0 + O(\epsilon) \\
+          \approx & \pm 2\sqrt{\omega_1\omega_2}\kappa A_0 + O(\epsilon) \\
+\end{align}
+\end{subequations}
+
+and 
+
+\begin{subequations}
+\begin{align}
+\mathbb{I}\{s\} = & \frac{1}{2}(\Delta_1-\Delta_2) \pm \frac{(\Delta_1-\Delta_2)*(\gamma_1-\gamma_2)}{8\sqrt{\omega_1\omega_2}\kappa}\frac{\epsilon}{A_{thr}} + O(\epsilon^3) \\
+          \approx & \frac{1}{2}(\Delta_1-\Delta_2) + O(\epsilon) 
+\end{align}
+\end{subequations}
+
+Note that there are 4 total eigenvalues (the $\pm$ and $2\leftrightarrow1$ exchange), but there are only 2 distinct $\mathbb{R}\{s\}$ values and 2 distince $\mathbb{I}\{s\}$ values, corresponding to growing and decaying modes, each able to oscillate in both directions. Furthermore, the quantity $\Delta_1+\Delta_2=\Omega+\omega_1+\omega_2$ is determined by out transformation and there is no ambiguity in $\mathbb{R}\{s\}$. However, $\Delta_1-\Delta_2$ is not determined and there is an ambiguity in the oscillation frequencies. Because we are mostly interested in the growth rates, this is acceptable. 
+
+It appears that this ambiguity disappears in integration data and modes typically oscillate at $\Omega/2$. A hand-wavey argument for this is as follows. Assume the daughter modes obey
+
+\begin{equation}
+\dot{q}_c + (i\omega_c+\gamma_c)q_c = \omega_c \sum_b \kappa_{0bc} q_0^\ast q_b^\ast = \omega_c \sum_b \kappa_{0bc} A_0 e^{i m_0 \Omega_{orb}t} q_b^\ast | \dot{A_0} = 0
+\end{equation}
+
+If we assume the daughter behave as $q_c = A_c e^{s_c t} | \dot{A}_c=0$, then we have
+
+\begin{subequations}
+\begin{align}
+(s_c + i\omega_c + \gamma_c) A_c e^{s_c t} = & \omega_c \sum_b \kappa_{0bc} A_0 A_b e^{(s_b^\ast + im_0\Omega_orb)t} \\
+(s_c + i\omega_c + \gamma_c) A_c = & \omega_c \sum_b \kappa_{0bc} A_0 A_b e^{(s_b^\ast-s_c - i(m_b+m_c)\Omega_orb)t} \\
+\end{align}
+\end{subequations}
+
+because $m_a+m_b+m_c=0$, as required by the coupling. The LHS is a constant, so we need to remove all time dependence from the RHS, meaning
+
+\begin{subequations}
+\begin{align}
+s_b^\ast - s_c - i(m_b+m_c)\Omega_{orb} = & 0 \ \forall \ b,c \\
+\Rightarrow \mathbb{R}\{s_b\} = & \mathbb{R}\{s_c\} \ \forall \ b,c \\
+ \mathbb{I}\{s_b\} + \mathbb{I}\{s_c\} = & -(m_b+m_c)\Omega_{orb} \ \forall \ b,c\\
+\end{align}
+\end{subequations}
+
+The last constraint (on the imaginary parts of the eigenfunctions), can be satisfied in two way:
+\begin{enumerate}
+  \item{$\mathbb{I}\{s_b\} = -m_b\Omega_{orb} \ \forall \ b$}
+  \item{$\mathbb{I}\{s_b\} = \frac{1}{2}m_a\Omega_{orb} \ \forall \ b$}
+\end{enumerate}
+
+Integration appers to favor the latter, most likely because it is more symmetric between the daughter modes (and therefore more stable?).
+
+
+\subsection*{assymptotic limits for 3-mode eigenvalues: $A_0^2 - A_{thr}^2 \ll A_{thr}^2$}
+
+Here, we define
+
+\begin{equation}
+\epsilon = \frac{A_0^2}{A_{thr}^2} - 1 \ll 0
+\end{equation}
+
+which yields
+
+\begin{subequations}
+\begin{align}
+2s +(\gamma_1+\gamma_2)+i(\Delta_1-\Delta_2) = & \pm \sqrt{ (\gamma_1-\gamma_2)^2 - (\Delta_1+\Delta_2)^2 + 16\omega_1\omega_2\kappa^2 A_{thr}^2 (1+\epsilon) +  2i(\Delta_1+\Delta_2)(\gamma_1+\gamma_2) } \\
+= & \sqrt{ (\gamma_1-\gamma_2)^2 - (\Delta_1+\Delta_2)^2 + 16\omega_1\omega_2\kappa^2 A_{thr}^2 +  2i(\Delta_1+\Delta_2)(\gamma_1+\gamma_2) } \\
+  &\ \times \left(1 + \frac{1}{2}\frac{16\omega_1\omega_2\kappa^2 A_{thr}^2}{(\gamma_1-\gamma_2)^2 - (\Delta_1+\Delta_2)^2 + 16\omega_1\omega_2\kappa^2 A_{thr}^2 +  2i(\Delta_1+\Delta_2)(\gamma_1+\gamma_2)} \epsilon  + O(\epsilon^3) \right) \\
+\end{align}
+\end{subequations}
+
+which is horrible. However, by definition 
+
+\begin{equation}
+\mathbb{R}\{\sqrt{ (\gamma_1-\gamma_2)^2 - (\Delta_1+\Delta_2)^2 + 16\omega_1\omega_2\kappa^2 A_{thr}^2 +  2i(\Delta_1+\Delta_2)(\gamma_1+\gamma_2) } \} = (\gamma_1+\gamma_2)
+\end{equation}
+
+and we can simply define
+
+\begin{equation}
+\mathbb{I}\{\sqrt{ (\gamma_1-\gamma_2)^2 - (\Delta_1+\Delta_2)^2 + 16\omega_1\omega_2\kappa^2 A_{thr}^2 +  2i(\Delta_1+\Delta_2)(\gamma_1+\gamma_2) } \} \equiv \Theta
+\end{equation}
+
+choosing the maximum eigenvalue, of course. This allows us to write
+
+\begin{subequations}
+\begin{align}
+2s +(\gamma_1+\gamma_2)+i(\Delta_1-\Delta_2) = &  ( (\gamma_1+\gamma_2) + i\Theta ) \left( 1 + \frac{1}{2}\frac{16\omega_1\omega_2\kappa^2 A_{thr}^2}{(\gamma_1+\gamma_2 + i\Theta)**2} \epsilon + O(\epsilon^2) \right)\\
+\Rightarrow 2s + i(\Delta_1-\Delta_2 \pm \Theta) = &  \frac{1}{2}\frac{16\omega_1\omega_2\kappa^2 A_{thr}^2}{(\gamma_1+\gamma_2)**2 + \Theta**2} (\gamma_1+\gamma_2-i\Theta) \epsilon + O(\epsilon^2) \\
+\end{align}
+\end{subequations}
+
+which we can simplify to
+\begin{subequations}
+\begin{align}
+\mathbb{R}\{s\} = & \frac{1}{2}\frac{16\omega_1\omega_2\kappa^2 A_{thr}^2}{(\gamma_1+\gamma_2)**2 + \Theta**2} (\gamma_1+\gamma_2) \epsilon + O(\epsilon^2) \\
+                = & \left[\frac{(\gamma_1+\gamma_2)\gamma_1\gamma_2 \left( 1 + \left(\frac{\Delta_1+\Delta_2}{\gamma_1+\gamma_2}\right)^2\right)}{ \left( \left[(\gamma_1-\gamma_2)^2 - (\Delta_1+\Delta_2)^2 + 4\gamma_1\gamma_2\left( 1 + \left(\frac{\Delta_1+\Delta_2}{\gamma_1+\gamma_2}\right)^2\right) \right]^2 + 4(\Delta_1+\Delta_2)^2(\gamma_1+\gamma_2)^2\right)^{-1/2} }\right] \epsilon + O(\epsilon^2) \\
+\end{align}
+\end{subequations}
+
+where we've substituted 
+
+\begin{equation}
+16\omega_1\omega_2\kappa^2 A_{thr}^2 = \gamma_1\gamma_2 \left( 1 + \left(\frac{\Delta_1+\Delta_2}{\gamma_1+\gamma_2}\right)^2\right)
+\end{equation}
+
+and used the definition of $\Theta$ and it's relation to $(\gamma_1+\gamma_2)$ to deteriming the norm.
+
+There is an analogous equation for the imaginary components, but that is unteresting. Note that the real part only depends on the combination $(\Delta_1+\Delta_2)=\Omega+\omega_1+\omega_2$ and there is no ambiguity in $\mathbb{R}\{s\}$. Furthermore, we should point out that the prefactor multiplying $\epsilon$ is almostly commically complicated and it should be no surprise to find cases where the minimum $A_{thr}$ pair does \emph{emph} correspond to the maximum $\mathbb{R}\{s\}$ pair. This is commonly seen in integrations and could be due to differences in this prefactor.
+
+
+\subsection*{stability of single self-coupled daughter}
+
+this probably isn't the correct place for this, but derive the stability/threshold energy for the parent here using:
+\begin{equation}
+\dot{q}_{d,NL} + (i\omega_d + \gamma_d)q_{d,NL} = 2i\omega_d \kappa q_0^\ast q_{d,NL}^\ast
+\end{equation}
+
+By similar arguments, we arrive at the same stability threshold and can simply replace $2\rightarrow1$ in the above solution.
+

@@ -1,0 +1,287 @@
+\subsection*{Collective instabilities (N inter-coupled daughter)}
+
+In this section, we analyze collective instabilities, ie sets of daughter modes that display \emph{rapid} growth rates due to their mutual inter-coupling. Specifically, we're interested in the stability of linear solutions for such networks. This means we can take the parent to be god-given as
+
+\begin{equation}
+q_o = A_o e^{-i(\Omega t -\delta_o)}
+\end{equation}
+
+and each daughter will obey an equation like
+\begin{eqnarray}
+\dot{q}_\alpha + (i\omega_\alpha+\gamma_\alpha)q_\alpha & = & i\omega_\alpha \sum_{\beta} \kappa_{o\alpha\beta} A_o e^{+i(\Omega t -\delta_o)} q_\beta^\ast \\
+& = & i\omega_\alpha\kappa_{o\alpha\alpha}A_o e^{+i(\Omega t -\delta_o)} q_\alpha^\ast + 2i\omega_\alpha\sum_{\beta\neq\alpha}\kappa{o\alpha\beta}A_o e^{+i(\Omega t -\delta_o)} q_\beta^\ast \\
+\end{eqnarray}
+
+defining a new set of variables $q = xe^{-i(\omega -\Delta)t}$, we can re-write the daughter equations as
+
+\begin{eqnarray}
+\dot{x}_\alpha + (i\Delta_\alpha+\gamma_\alpha)x_\alpha & = & i\omega_\alpha\kappa_{o\alpha\alpha}A_o x_\beta^\ast e^{+i(\Omega +2\omega_\alpha-2\Delta_\alpha)t-i\delta_o} \\
+& &  + 2i\omega_\alpha\sum_{\beta\neq\alpha}\kappa_{o\alpha\beta}A_o x_\beta^\ast e^{+i(\Omega +\omega_\alpha+\omega_\beta -\Delta_\alpha-\Delta_\beta)t -i\delta_o} \\
+& = & i\omega_\alpha\kappa_{o\alpha\alpha}A_o x_\beta^\ast e^{-i\delta_o} + 2i\omega_\alpha\sum_{\beta\neq\alpha}\kappa_{o\alpha\beta}A_o x_\beta^\ast e^{-i\delta_o} \\
+\end{eqnarray}
+
+where in the last step we've demanded that the time dependence cancels
+
+\begin{equation}
+\Omega +\omega_\alpha+\omega_\beta -\Delta_\alpha-\Delta_\beta = 0\ \forall\ \{\alpha,\beta\}
+\end{equation}
+
+This equation then begs to be analyzed as an eigenvalue problem, and to do so we break $x$ into $\mathbb{R}$eal and $\mathbb{I}$maginary parts: $x=R+iI$. This yields
+
+\begin{eqnarray}
+\dot{R}_\alpha & = & -\gamma_\alpha R_\alpha + \Delta_\alpha I_\alpha + \omega_\alpha A_o \kappa_{o\alpha\alpha} \left(R_\alpha \sin\delta_o + I_\alpha \cos\delta_o\right ) + 2\omega_\alpha A_o \sum_{\beta\neq\alpha} \kappa_{o\alpha\beta} \left(R_\beta \sin\delta_o + I_\beta \cos\delta_o\right ) \\
+\dot{I}_\alpha & = & -\Delta_\alpha R_\alpha -\gamma_\alpha I_\alpha + \omega_\alpha A_o \kappa_{o\alpha\alpha}\left(R_\alpha \cos\delta_o - I_\alpha\sin\delta_o\right) + 2\omega_\alpha A_o \sum_{\beta\neq\alpha} \kappa_{o\alpha\beta} \left(R_\beta \cos\delta_o - I_\beta \sin\delta_o\right) 
+\end{eqnarray}
+
+which can be re-written in matrix form as
+
+\begin{equation}
+\begin{bmatrix}
+\dot{R}_\alpha \\
+\dot{I}_\alpha 
+\end{bmatrix}
+=
+\begin{bmatrix}
+-\gamma_\alpha + \omega_\alpha A_o \kappa_{o\alpha\alpha}\sin\delta_o & \Delta_\alpha + \omega_\alpha A_o \kappa_{o\alpha\alpha}\cos\delta_o \\
+-\Delta_\alpha + \omega_\alpha A_o \kappa_{o\alpha\alpha}\cos\delta_o & -\gamma_\alpha - \omega_\alpha A_o \kappa_{o\alpha\alpha}\sin\delta_o 
+\end{bmatrix}
+\begin{bmatrix}
+R_\alpha \\
+I_\alpha \\
+\end{bmatrix}
++ \sum_{\beta\neq\alpha} \begin{bmatrix}
+2\omega_\alpha A_o \kappa_{o\alpha\beta}\sin\delta_o & 2\omega_\alpha A_o \kappa_{o\alpha\beta}\cos\delta_o \\
+2\omega_\alpha A_o \kappa_{o\alpha\beta}\cos\delta_o & -2\omega_\alpha A_o \kappa_{o\alpha\beta}\sin\delta_o 
+\end{bmatrix}
+\end{equation}
+
+If we assume
+
+\begin{equation}
+\begin{bmatrix} R_\alpha\\ I_\alpha \end{bmatrix} \propto e^{st}\ \forall\ \alpha
+\end{equation}
+
+then this equation becomes
+
+\begin{equation}
+0
+=
+\begin{bmatrix}
+-(\gamma_\alpha+s) + \omega_\alpha A_o \kappa_{o\alpha\alpha}\sin\delta_o & \Delta_\alpha + \omega_\alpha A_o \kappa_{o\alpha\alpha}\cos\delta_o \\
+-\Delta_\alpha + \omega_\alpha A_o \kappa_{o\alpha\alpha}\cos\delta_o & -(\gamma_\alpha+s) - \omega_\alpha A_o \kappa_{o\alpha\alpha}\sin\delta_o 
+\end{bmatrix}
+\begin{bmatrix}
+R_\alpha \\
+I_\alpha \\
+\end{bmatrix}
++ \sum_{\beta\neq\alpha} \begin{bmatrix}
+2\omega_\alpha A_o \kappa_{o\alpha\beta}\sin\delta_o & 2\omega_\alpha A_o \kappa_{o\alpha\beta}\cos\delta_o \\
+2\omega_\alpha A_o \kappa_{o\alpha\beta}\cos\delta_o & -2\omega_\alpha A_o \kappa_{o\alpha\beta}\sin\delta_o 
+\end{bmatrix}
+\end{equation}
+
+Clearly, this is an eigenvalue problem for a large matrix. The general decomposition is difficult, although we should note that the matrix can be made almost symmetric. If we make several approximations this becomes tractable. Specifically, if we assume
+
+\begin{equation}
+\left.\begin{matrix}
+\omega_\alpha = \omega \\ 
+\gamma_\alpha = \gamma \\
+\kappa_{o\alpha\alpha} = \kappa_s 
+\end{matrix}\ \right|\ \forall\ \alpha
+\end{equation}
+
+and 
+
+\begin{equation}
+\kappa_{o\alpha\beta} = \kappa\ \forall\ \alpha\neq\beta
+\end{equation}
+
+then we can define
+
+\begin{equation}
+M_S \equiv 
+\begin{bmatrix}
+-(\gamma+s) + \omega A_o \kappa_s\sin\delta_o & \Delta + \omega A_o \kappa_s\cos\delta_o \\
+-\Delta + \omega A_o \kappa_s\cos\delta_o & -(\gamma+s) - \omega A_o \kappa_s\sin\delta_o
+\end{bmatrix}
+\end{equation}
+
+and 
+
+\begin{equation}
+M_I \equiv
+\begin{bmatrix}
+2\omega A_o \kappa\sin\delta_o & 2\omega A_o \kappa\cos\delta_o \\
+2\omega A_o \kappa\cos\delta_o & -2\omega A_o \kappa\sin\delta_o
+\end{bmatrix}
+\end{equation}
+
+where we should note that $\omega_\alpha = \omega\ \forall\ \alpha \Rightarrow \Delta_\alpha = \Delta\ \forall\ \alpha$. We can then write out system of equations as 
+
+\begin{equation}
+0 = M_S \begin{bmatrix} R_\alpha \\ I_\alpha\end{bmatrix} + \sum_{\beta\neq\alpha} M_I \begin{bmatrix} R_\beta \\ I_\beta \end{bmatrix} \ \forall \ \alpha
+\end{equation}
+
+Writing this as a single matrix and requiring non-trivial mode amplitudes, we obtain
+
+\begin{equation}
+0=\mathrm{det}
+\begin{vmatrix}
+M_S & M_I & M_I & M_I & \cdots & M_I & M_I \\
+M_I & M_S & M_I & M_I & \cdots & M_I & M_I \\
+M_I & M_I & M_S & M_I & \cdots & M_I & M_I \\
+M_I & M_I & M_I & M_S & \cdots & M_I & M_I \\
+\vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\
+M_I & M_I & M_I & M_I & \cdots & M_S & M_I \\
+M_I & M_I & M_I & M_I & \cdots & M_I & M_S 
+\end{vmatrix}
+\end{equation}
+
+which we can attack with Gaussian elimination as follows:
+
+(A) subtract the second row from the first
+\begin{equation}
+\mathrm{det}
+\begin{vmatrix}
+M_S & M_I & M_I & M_I & \cdots & M_I & M_I \\
+M_I & M_S & M_I & M_I & \cdots & M_I & M_I \\
+M_I & M_I & M_S & M_I & \cdots & M_I & M_I \\
+M_I & M_I & M_I & M_S & \cdots & M_I & M_I \\
+\vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\
+M_I & M_I & M_I & M_I & \cdots & M_S & M_I \\
+M_I & M_I & M_I & M_I & \cdots & M_I & M_S 
+\end{vmatrix}
+\Rightarrow
+\mathrm{det}
+\begin{vmatrix}
+M_S-M_I & M_I-M_S & 0 & 0 & \cdots & 0 & 0 \\
+M_I & M_S & M_I & M_I & \cdots & M_I & M_I \\
+M_I & M_I & M_S & M_I & \cdots & M_I & M_I \\
+M_I & M_I & M_I & M_S & \cdots & M_I & M_I \\
+\vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\
+M_I & M_I & M_I & M_I & \cdots & M_S & M_I \\
+M_I & M_I & M_I & M_I & \cdots & M_I & M_S 
+\end{vmatrix}
+\end{equation}
+
+(B) iterate through subtracting row $N$ from row $N-1$.
+\begin{eqnarray}
+&\mathrm{det}
+\begin{vmatrix}
+M_S-M_I & M_I-M_S & 0 & 0 & \cdots & 0 & 0 \\
+M_I & M_S & M_I & M_I & \cdots & M_I & M_I \\
+M_I & M_I & M_S & M_I & \cdots & M_I & M_I \\
+M_I & M_I & M_I & M_S & \cdots & M_I & M_I \\
+\vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\
+M_I & M_I & M_I & M_I & \cdots & M_S & M_I \\
+M_I & M_I & M_I & M_I & \cdots & M_I & M_S 
+\end{vmatrix}&
+\\
+&\Downarrow&\\
+&\mathrm{det}
+\begin{vmatrix}
+M_S-M_I & M_I-M_S & 0       &  \cdots & 0 & 0 \\
+0       & M_S-M_I & M_I-M_S &  \cdots & 0 & 0 \\
+0 & 0 & M_S-M_I & \cdots & 0 & 0 \\
+\vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\
+0 & 0 & 0 & \cdots & M_S-M_I & M_I-M_S \\
+M_I & M_I & M_I & \cdots & M_I & M_S 
+\end{vmatrix}&
+\end{eqnarray}
+
+(C) add the first column to the second column
+\begin{eqnarray}
+&\mathrm{det}
+\begin{vmatrix}
+M_S-M_I & M_I-M_S & 0       &  \cdots & 0 & 0 \\
+0       & M_S-M_I & M_I-M_S &  \cdots & 0 & 0 \\
+0 & 0 & M_S-M_I & \cdots & 0 & 0 \\
+\vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\
+0 & 0 & 0 & \cdots & M_S-M_I & M_I-M_S \\
+M_I & M_I & M_I & \cdots & M_I & M_S 
+\end{vmatrix}&\\
+&\Downarrow&\\
+&\begin{vmatrix}
+M_S-M_I & 0 & 0       &  \cdots & 0 & 0 \\
+0       & M_S-M_I & M_I-M_S &  \cdots & 0 & 0 \\
+0 & 0 & M_S-M_I & \cdots & 0 & 0 \\
+\vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\
+0 & 0 & 0 & \cdots & M_S-M_I & M_I-M_S \\
+M_I & 2M_I & M_I & \cdots & M_I & M_S 
+\end{vmatrix}&
+\end{eqnarray}
+
+(D) iterate through adding column $N-1$ to column $N$
+\begin{eqnarray}
+&\begin{vmatrix}
+M_S-M_I & 0 & 0       &  \cdots & 0 & 0 \\
+0       & M_S-M_I & M_I-M_S &  \cdots & 0 & 0 \\
+0 & 0 & M_S-M_I & \cdots & 0 & 0 \\
+\vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\
+0 & 0 & 0 & \cdots & M_S-M_I & M_I-M_S \\
+M_I & 2M_I & M_I & \cdots & M_I & M_S 
+\end{vmatrix}&\\
+&\Downarrow&\\
+&\begin{vmatrix}
+M_S-M_I & 0 & 0       &  \cdots & 0 & 0 \\
+0       & M_S-M_I & 0 &  \cdots & 0 & 0 \\
+0 & 0 & M_S-M_I & \cdots & 0 & 0 \\
+\vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\
+0 & 0 & 0 & \cdots & M_S-M_I & 0 \\
+M_I & 2M_I & 3M_I & \cdots & (N-1)M_I & M_S +(N-1)M_I
+\end{vmatrix}&
+\end{eqnarray}
+
+The matrix is now block-diagonal and we can take the determinant easily.
+
+\begin{equation}
+\begin{vmatrix}
+M_S & M_I & M_I & M_I & \cdots & M_I & M_I \\
+M_I & M_S & M_I & M_I & \cdots & M_I & M_I \\
+M_I & M_I & M_S & M_I & \cdots & M_I & M_I \\
+M_I & M_I & M_I & M_S & \cdots & M_I & M_I \\
+\vdots & \vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\
+M_I & M_I & M_I & M_I & \cdots & M_S & M_I \\
+M_I & M_I & M_I & M_I & \cdots & M_I & M_S 
+\end{vmatrix}
+= \mathrm{det}\left|M_S-M_I\right|^{N-1}\mathrm{det}\left|M_S+(N-1)M_I\right|
+\end{equation}
+
+So, we have $N-1$ repeated pairs of roots and 1 other pair. The eigenvalues can be easily computed from
+
+\begin{eqnarray}
+\mathrm{det}\left|M_S-M_I\right| & = & (\gamma+s)^2 +\Delta^2 - \omega^2 A_o^2(\kappa_s-2\kappa)^2 = 0 \\
+\Rightarrow s & = & -\gamma \pm \sqrt{\omega^2 A_o^2 (2\kappa - \kappa_s)^2 - \Delta^2} 
+\end{eqnarray}
+
+and 
+
+\begin{eqnarray}
+\mathrm{det}\left|M_S+(N-1)M_I\right| & = & (\gamma+s)^2 + \Delta^2 - \omega^2 A_o^2 (2(N-1)\kappa + \kappa_s)^2  =  0 \\
+\Rightarrow s & = & -\gamma \pm \sqrt{\omega^2 A_o^2 (2(N-1)\kappa + \kappa_s)^2 - \Delta^2} 
+\end{eqnarray}
+
+In particular, we are interested in the values of $A_o$ for which $\mathbb{R}\{s\}\rightarrow 0$. These are 
+
+\begin{eqnarray}
+A_{thr}^2 & = & \frac{\gamma^2 + \Delta^2}{4\omega^2(\kappa-\frac{1}{2}\kappa_s)^2} \\
+          & = & \frac{\gamma\gamma}{4\omega\omega(\kappa-\frac{1}{2}\kappa_s)^2}\left(1 + \frac{(\Delta+\Delta)^2}{(\gamma+\gamma)^2}\right) 
+\end{eqnarray}
+
+and 
+
+\begin{eqnarray}
+A_{thr}^2 & = & \frac{\gamma^2 + \Delta^2}{4\omega^2((N-1)\kappa + \frac{1}{2}\kappa_s)^2} \\
+          & = & \left(\frac{1}{N-1}\right)^2\frac{\gamma\gamma}{4\omega\omega(\kappa + \frac{1}{2(N-1)}\kappa_s)^2}\left( 1 + \frac{(\Delta+\Delta)^2}{(\gamma+\gamma)^2}\right)
+\end{eqnarray}
+
+respectively. I've also written these formula in a suggestive form reminiscent of Equation \ref{equation:3mode Athr}.
+
+In general, the actual value of $A_{thr}$ will differ from this expression, and a guess at a generalization for the collective instability is
+
+\begin{equation}
+(N-1)^2 A_o^2 \geq \frac{\gamma_1 \gamma_2}{4\omega_1\omega_2\kappa_{o12}^2}\left( 1 + \frac{(\Delta_1+\Delta_2)^2}{(\gamma_1+\gamma_2)^2}\right) \ \forall\ \mathrm{modes} \ 1,2 \in \mathrm{set\ of}\ N \ \mathrm{modes}
+\end{equation}
+
+and we should note that $\Delta_1+\Delta_2 = \Omega+\omega_1+\omega_2$, so there is no ambiguity in this formula.
+

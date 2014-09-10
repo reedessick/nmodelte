@@ -1,0 +1,86 @@
+\section*{3mode systems with multiple parents}
+
+Consider the case of multiple parent modes. For linearly resonant modes  all excitations will oscillate at the same frequency ($m\Omega_{\mathrm{orb}}$)  and will have the same angular quantum numbers ($l$ $m$). This means that multiple parents can couple to the same set of resonant 3mode daughters. Therefore  it is of immediate interest to consider multiple parents coherently interacting with the same daughter pair. This situation yields the following equations of motion:
+
+\begin{subequations}
+\begin{align}
+\dot{q}_n + (i\omega_n+ \gamma_n) q_n & = i\omega_n U_n e^{-i m \Omega_\mathrm{orb} t} + 2i\omega_n k_n q_\alpha^\ast q_\beta^\ast \  \forall\  n \\
+\dot{q}_\alpha + (i\omega_\alpha+\gamma_\alpha)q_\alpha & = 2i\omega_\alpha q_\beta^\ast \sum\limits_{n} q_n^\ast \\
+\dot{q}_\beta + (i\omega_\beta+\gamma_\beta)q_\beta & = 2i\omega_\beta q_\alpha^\ast \sum\limits_{n} q_n^\ast 
+\end{align}
+\end{subequations}
+
+where $n$ indexes the parent modes  all of which oscillate at the same linear frequency ($m\Omega_\mathrm{orb}$). If we perform the now standard transformation $q=x e^{-i(\omega+\Delta)t}$  then can simplify these equations to 
+
+\begin{subequations}
+\begin{align}
+\dot{x}_n + (i\Delta_n+\gamma_n)x_n & = i\omega_n U_n + 2i\omega_n k_n x_\alpha^\ast x_\beta^\ast \  \forall\  n \\
+\dot{x}_\alpha + (i\omega_\alpha+\gamma_\alpha)x_\alpha & = 2i\omega_\alpha x_\beta^\ast \sum\limits_{n} x_n^\ast \\
+\dot{x}_\beta + (i\omega_\beta+\gamma_\beta)x_\beta & = 2i\omega_\beta x_\alpha^\ast \sum\limits_{n} x_n^\ast \\
+m\Omega_\mathrm{orb} - \omega_n + \Delta_n & = 0\  \forall\  n\\
+\omega_n - \Delta_n + \omega_\alpha + \omega_\beta - \Delta_\alpha -\Delta_\beta & = 0 \  \forall\  n
+\end{align}
+\end{subequations}
+
+where the last condition is automatically satisfied for all $n$ if it is satisfied for one of them and the penultimate condition holds for all $n$. We notice that we can sum over all $n$ and define an \emph{effective parent mode} as follows.
+
+\begin{subequations}
+\begin{align}
+z & = \sum\limits_{n} x_n \\
+k_z z & = \sum\limits_{n} k_n x_n \\
+& \Rightarrow k_z = \frac{\sum\limits_{n} k_n x_n}{\sum\limits_{n} x_n} \\
+\omega_z k_z & = \sum\limits_{n} \omega_n k_n \\
+& \Rightarrow \omega_z = \frac{\sum\limits_{n} \omega_n k_n}{k_z} = \frac{\sum\limits_{n} \omega_n k_n}{\sum\limits_{n} k_n x_n} \sum\limits_{n} x_n \\
+\omega_z U_z & = \sum\limits_{n} \omega_n U_n \\
+& \Rightarrow U_z = \frac{ \sum\limits_{n} \omega_n U_n}{\omega_z} = \frac{ \sum\limits_{n} \omega_n U_n }{ \sum\limits_{n} x_n} \frac{\sum\limits_{n} k_n x_n}{\sum\limits_{n} \omega_n k_n} \\
+(i\Delta_z+\gamma_z)z & = \sum\limits_{n} (i\Delta_n+\gamma_n)x_n \\
+& \Rightarrow \Delta_z = \mathbb{I}\left\{ \frac{\sum\limits_{n} (i\Delta_n+\gamma_n)x_n}{\sum\limits_{n} x_n} \right\} \\
+& \Rightarrow \gamma_z = \mathbb{R}\left\{ \frac{\sum\limits_{n} (i\Delta_n+\gamma_n)x_n}{\sum\limits_{n} x_n} \right\} \\
+\end{align}
+\end{subequations}
+
+We then write the effective system of equations as
+
+\begin{subequations}
+\begin{align}
+\dot{z}_n + (i\Delta_z+\gamma_z)z & = i\omega_z U_z + 2i\omega_z k_z x_\alpha^\ast x_\beta^\ast \  \forall\  n \\
+\dot{x}_\alpha + (i\omega_\alpha+\gamma_\alpha)x_\alpha & = 2i\omega_\alpha x_\beta^\ast z^\ast \\
+\dot{x}_\beta + (i\omega_\beta+\gamma_\beta)x_\beta & = 2i\omega_\beta x_\alpha^\ast z^\ast \\
+\end{align}
+\end{subequations}
+
+which looks exactly like a simple 3mode system with a single parent. We can therefore immediately quote the stability criterion for the two daughters:
+
+\begin{equation}
+\left|k_z z\right|^2 = \left|\sum\limits_{n}k_n x_n\right|^2 \geq \frac{\gamma_\alpha\gamma_\beta}{4\omega_\alpha\omega_\beta}\left( 1 + \left(\frac{m\Omega_\mathrm{orb} + \omega_\alpha + \omega_\beta}{\gamma_\alpha + \gamma_\beta} \right)^2 \right)
+\end{equation}
+
+Interestingly  we see that the parent's energy is replaced by a weighted coherent sum of all parent's amplitudes. Because the sum is coherent  and because the linear phase of each parent can depend strongly on that parent's detuning  there can be significant \emph{destructive inteference} between neighboring parents. This means that daughters that \emph{are unstable} for a single parent \emph{may be stable} when forced by many parents. Examining the linear amplitudes of each parent  we expect this to be the case when the neighboring amplitudes are not much smaller than the most resonant parent. This means we may get significant destructive interference between parents when we are off-resonance. Numerical simulations appear to support this reasoning.
+
+We can also quote the 3mode steady state solution for this system:
+
+\begin{subequations}
+\begin{align}
+\Delta_n & = \omega_n - m\Omega_\mathrm{orb} \ \forall\ n \\
+\Delta_\alpha & = \frac{m\Omega_\mathrm{orb} + \omega_\alpha + \omega_\beta}{1 + \gamma_\beta/\gamma_\alpha} \\
+\Delta_\beta & = \frac{m\Omega_\mathrm{orb} + \omega_\alpha + \omega_\beta}{1 + \gamma_\alpha/\gamma_\beta} \\
+|z|^2 & = \frac{\gamma_\alpha\gamma_\beta}{4 k_z^2\omega_\alpha\omega_\beta}\left(1 + \left(\frac{m\Omega_\mathrm{orb} + \omega_\alpha + \omega_\beta}{\gamma_\alpha + \gamma_\beta}\right)^2 \right) \\
+A_\alpha^2 & = \frac{\gamma_\beta}{\omega_\beta}\left(\frac{\Delta_z|\Delta_\alpha+\Delta_\beta|+\gamma_z|\gamma_\alpha+\gamma_\beta|}{4k_z^2\omega_z|\gamma_\alpha+\gamma_\beta|}\right) \\
+    & \ \ \ \ \times \left[ 1 + \sqrt{ 1 + \frac{\omega_\alpha\omega_\beta}{\gamma_\alpha\gamma_\beta}\left( \frac{2k_z|\gamma_\alpha+\gamma_\beta|}{\Delta_z|\Delta_\alpha+\Delta_\beta|+\gamma_z|\gamma_\alpha+\gamma_\beta|}\right)^2 (\Delta_z^2 + \gamma_z^2) (\left|z_{lin}\right|^2 - \left|z_{thr}\right|^2) } \right ] \\
+A_b^2 & = \frac{\gamma_\alpha\omega_\beta}{\gamma_\beta\omega_\alpha}A_\alpha^2 \\
+\sin\delta & = \frac{1}{2k_z |z|}\sqrt{ \frac{\gamma_\alpha\gamma_\beta}{\omega_\alpha\omega_\beta} } \\
+\cos\delta & = \frac{1}{2k_z |z|}\sqrt{ \frac{\Delta_\alpha\Delta_\beta}{\omega_\alpha\omega_\beta} } \\
+\sin\delta_z & = \left( 1 + \left( \frac{\gamma_\alpha+\gamma_\beta}{\Delta_\alpha+\Delta_\beta}\right)^2 \right)^{-1/2} \\
+\cos\delta_z & = \left( 1 + \left( \frac{\Delta_\alpha+\Delta_\beta}{\gamma_\alpha+\gamma_\beta}\right)^2 \right)^{-1/2}
+\end{align}
+\end{subequations}
+
+with the additional relations
+
+\begin{equation}
+x_n = \frac{\omega_n U_n + 2\omega_n k_n x_\alpha^\ast x_\beta^\ast}{\Delta_n -i\gamma_n} \ \forall\  n\\
+\end{equation}
+
+We note that the solution for the most resonanat parent mode may not be the solution predicted by a single-parent analysis.
+
+A similar analysis is straightforward for collective daughters forced by many parents, with the same \emph{effective parent} definitions. We note that interference between parents should not affect the order in which we add modes (using the algorithms you've developed), because they rank modes based on criteria independent of the parent's behavior. However, interference can strongly influence which modes are unstable and when.

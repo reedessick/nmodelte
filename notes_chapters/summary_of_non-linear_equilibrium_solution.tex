@@ -1,0 +1,24 @@
+\section*{Summary of non-linear equilibrium solution}
+
+We present a concice summarize of the non-linear equilibria solutions here:
+\begin{subequations}
+\begin{align}
+\Delta_o & = \omega_o - \Omega \\
+\Delta_a & = \frac{\Omega + \omega_a + \omega_b}{1 + \gamma_b/\gamma_a} \\
+\Delta_b & = \frac{\Omega + \omega_a + \omega_b}{1 + \gamma_a/\gamma_b} \\
+A_o^2 & = \frac{\gamma_a\gamma_b}{4\kappa^2\omega_a\omega_b}\left(1 + \left(\frac{\Omega + \omega_a + \omega_b}{\gamma_a + \gamma_b}\right)^2 \right) \\
+A_a^2 & = \frac{\gamma_b}{\omega_b}\left(\frac{\Delta_o|\Delta_a+\Delta_b|+\gamma_o|\gamma_a+\gamma_b|}{4\kappa^2\omega_o|\gamma_a+\gamma_b|}\right) \\
+    & \ \ \ \ \times \left[ 1 + \sqrt{ 1 + \frac{\omega_a\omega_b}{\gamma_a\gamma_b}\left( \frac{2\kappa|\gamma_a+\gamma_b|}{\Delta_o|\Delta_a+\Delta_b|+\gamma_o|\gamma_a+\gamma_b|}\right)^2 (\Delta_o^2 + \gamma_o^2) (A_{lin}^2 - A_{thr}^2) } \right ] \\
+A_b^2 & = \frac{\gamma_a\omega_b}{\gamma_b\omega_a}A_a^2 \\
+\sin\delta & = \frac{1}{2\kappa A_o}\sqrt{ \frac{\gamma_a\gamma_b}{\omega_a\omega_b} } \\
+\cos\delta & = \frac{1}{2\kappa A_o}\sqrt{ \frac{\Delta_a\Delta_b}{\omega_a\omega_b} } \\
+\sin\delta_o & = \left( 1 + \left( \frac{\gamma_a+\gamma_b}{\Delta_a+\Delta_b}\right)^2 \right)^{-1/2} \\
+\cos\delta_o & = \left( 1 + \left( \frac{\Delta_a+\Delta_b}{\gamma_a+\gamma_b}\right)^2 \right)^{-1/2}
+\end{align}
+\end{subequations}
+
+and we remind ourselves that for a given mode, the actual amplitude in equilibrium will look like
+\begin{equation}
+q_j = A_j e^{i\{\delta_j - (\omega_j - \Delta_j)t \}}
+\end{equation}
+and that we cannot determine $\delta_a$ and $\delta_b$ separately, but only constrain their sum (which is equivalent to constraining $\delta$ and $\delta_o$).

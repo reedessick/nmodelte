@@ -1,0 +1,397 @@
+\section*{Preliminaries}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{local vs. global waves}
+
+We follow the treatment in Goodman and Dickson (arXiv:9801289) for defining local vs. global waves. The distinction essentially arrises when the wave is so heavily damped that it loses a significant amount of it's energy within one group tavel time between turning points. If this is the case, the wave should be thought of as local rather than global. This also corresponds to the case when the modes are so closely spaced that their resonance peaks overlap (due to damping).
+
+If the modes are not closely spaced in frequency, and their resonance peaks do not overlap, then they can be thought of as a discrete set of global modes. We can check this by making sure that the damping rates are sufficiently small that the mode does not lose much energy during one group travel time.
+
+Following Goodman and Dickson, we have that 
+
+\begin{eqnarray}
+t_g & = & 2 \int\limits_{r_{min}}^{r_{max}} \frac{\mathrm{d}r}{|v_g|} \\
+& \approx & 2 \int\limits_{0}^{r_c} \left|\frac{\partial k_r}{\partial \omega}\right| \mathrm{d}r
+\end{eqnarray}
+
+and we note that, in the WKB approximation used, we have 
+
+\begin{equation}
+\int\limits_{r_{min}}^{r_{max}} k_r \mathrm{d}r \sim n \in 1,2,3,4...
+\end{equation}
+
+Therefore, we expect the frequency spacing to be such that 
+
+\begin{equation}
+\left|\omega_{l,n+1} - \omega_{l,n}\right| = 2\pi t_g^{-1}
+\end{equation}
+
+which leads us to the approximate group travel time for an assymptotic approximation to high-order gmodes
+
+\begin{equation}
+t_g = \frac{2\pi n^2}{\alpha l}
+\end{equation}
+
+From this, and the approximation for the damping rate (due to radiative diffusion), we obtain the criterion for a mode to be \emph{local}
+
+\begin{eqnarray}
+1 & \leq & \gamma t_g \\
+  & \leq & c \omega_o^3 \omega^{-2} l(l+1) t_g \\
+  & \leq & 2\pi \frac{c \omega_o^3}{\alpha^3} \frac{n^4}{l^2} (1+l)
+\end{eqnarray}
+
+which is approximately
+
+\begin{equation}
+n \geq 1895 \left(\frac{l^2}{1+l}\right)^{1/4}
+\end{equation}
+
+for a sun-like star. We note that typical linearly-resonant g-modes have $(n,l)\sim(200,2)$, and are far from this criterion. However, low-$l$ daughter and granddaughter modes may approach this limit. If they are dynamically relevant, then we may need to modify our model to account for these local modes.
+
+We wish to compare this result with that quoted in the literature (Goodman and Dickson (1998)). We have
+
+\begin{subequations}
+\begin{align}
+t_g \gamma & = \left(\frac{2\pi}{\alpha}\frac{n^2}{l}\right) \left(c \omega_o^3 l(l+1) \omega^{-2} \right) \\
+           & = \left(\frac{2\pi}{\alpha}\frac{n^2}{l}\right) \left(c \omega_o^3 l(l+1) \left(\frac{\alpha l}{n} \right)^{-2} \right) \\
+           & = \left(\frac{2\pi c \omega_o^3}{\alpha^3}\right)\left(\frac{l+1}{l^2}\right) n^4 \\
+           & = \left(\frac{c \omega_o^3 \alpha}{(2\pi)^3} (1dy)^4\right) l^2 (l+1) \left( \frac{P}{dy}\right)^4 \\
+           & \sim \left(\frac{l^2(l+1)}{12} \right) \left( \frac{P}{11.6975 dy} \right)^4
+\end{align}
+\end{subequations}
+
+and we see that this matches quite well with the Goodman and Dickson result, which has a characterisitc mode-period of 11.6 days (compared to our 11.6975 days).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{non-linear wave breaking}
+
+A wave will ``break'' when
+
+\begin{equation}
+k_r \xi_r \geq 1
+\end{equation}
+
+Both $k_r$ and $\xi_r$ vary as a function of radius, and we should expect a mode to begin breaking if this condition is met for any particular radius. Therefore, the quantity which is interesting to compute is
+
+\begin{equation}
+\sup_{\forall r} \left\{k_r \xi_r\right\} \geq 1
+\end{equation}
+
+Following the formulae in Weinberg (2012) Appendix A, we have that
+
+\begin{eqnarray}
+k_r & = & \frac{\Lambda N}{\omega r} \\
+\Lambda^2 & = & l(l+1) \\
+N/r & \approx & \frac{98 \omega_o}{R} \left| r < 0.05 R \right. \\
+\end{eqnarray}
+
+and the mode shape is given by
+
+\begin{eqnarray}
+\xi_r & = & A\sin\phi \\
+\phi(r) & = & \int_0^r k_r \mathrm{d}r + \pi/4 \ (WKB\ approx) \\
+A^2 & = & \left(\frac{E \Delta P}{2\pi^2}\right)\frac{1}{\rho N r^3} \\
+E & = & Eo |q|^2 \\
+\Delta P & = & \frac{2\pi^2}{\int_0^{r_c} N \mathrm{d} \log r} \approx \frac{1.27}{\omega_o} \\
+\rho & \approx & 26\frac{M}{R^3}
+\end{eqnarray}
+
+Putting this all together, we obtain
+
+\begin{eqnarray}
+k_r \xi_r & = & \frac{\Lambda N}{\omega r} \sqrt{\frac{E_o \Delta P}{2 \pi ^2 \rho N r^3}} |q| \\
+& = & \frac{\Lambda}{\omega}\frac{98\omega_o}{R} \sqrt{ \frac{GM^2}{R} \frac{1.27}{\omega_o} \frac{1}{2\pi^2} \frac{R^3}{26M} \frac{R}{98 \omega_o} } \frac{|q|}{r^2} \\
+& = & 98 \sqrt{\frac{1.27}{2\cdot26\cdot98\pi^2}} \Lambda \frac{\omega_o}{\omega}\left(\frac{R}{r}\right)^2 |q| \\
+& = & 98^3 \sqrt{\frac{1.27}{2\cdot26\cdot98\pi^2}} \left(\frac{\omega_o}{\omega}\right)^3 \Lambda^3 \left(k_r r\right)^{-2} |q| 
+\end{eqnarray}
+
+We assume that the supremum is reached near the inner turning point, where $k_r r_{in} \sim \Lambda$, which yields
+
+\begin{eqnarray}
+\sup\left\{k_r \xi_r\right\} & \sim & 98^3 \sqrt{\frac{1.27}{2\cdot26\cdot98\pi^2}} \left(\frac{\omega_o}{\omega}\right)^3 \Lambda |q|\\
+& \sim & 4730 \left(\frac{\omega_o}{\omega}\right)^3 \Lambda |q|
+\end{eqnarray}
+
+Therefore, we claim waves will begin to break near their inner turning point if 
+
+\begin{equation}
+4730 \left(\frac{\omega_o}{\omega}\right)^3 \Lambda |q| \geq 1
+\end{equation}
+
+where there is some wiggle room in the exact threshold used, possibly by an order of magnitude. A more careful analysis via the Airy equation and a WKB approximation would suffice to determine a more exact requirement. However, this condition is somewhat heuristic anyway and a more rigorous calculation may not be warranted. 
+
+We now compute the approximate scaling relation for when modes will break using their linear amplitude:
+
+\begin{equation}
+|q| = \frac{\omega}{\sqrt{ (\omega-\Omega)^2 + \gamma^2}} U \propto \frac{\omega}{\sqrt{ (\omega-\Omega)^2 + \gamma^2}} \left(\frac{\omega_o}{\Omega_{\mathrm{orb}}}\right){-2} \left(\frac{\omega_o}{\omega}\right)^{-11/6}
+\end{equation}
+
+where the dependence on $\Omega_{\mathrm{orb}}$ comes from a keplerian orbit and $l=2$ modes. The factor of $\omega^{-11/6}$ comes from the overlap integral between the perturbing tidal potential and the mode shapes. Inserting this into our condition, we obtain
+
+\begin{eqnarray}
+1 & \leq & 4730 \Lambda \left(\frac{\omega_o}{\omega}\right)^3 \left(\frac{\omega_o}{\Omega_{\mathrm{orb}}}\right){-2} \left(\frac{\omega_o}{\omega}\right)^{-11/6} \frac{\omega}{\sqrt{ (\omega-\Omega)^2 + \gamma^2}} \\
+  & \leq & 4730 \Lambda \left(\frac{\omega_o}{\omega}\right)^{-5/6} m^{-2} \frac{\omega}{\sqrt{ (\omega-\Omega)^2 + \gamma^2}}
+\end{eqnarray}
+
+where $m$ is the azimuthal quantum number of the mode ($|m| \leq l$). Now, in the limit of large detuning, we expect
+
+\begin{equation}
+\frac{\omega}{\sqrt{ (\omega-\Omega)^2 + \gamma^2}} \rightarrow \frac{\omega}{\Delta\omega} \sim \frac{\alpha l /n}{\alpha l /n^2} = n = \frac{\alpha l}{2\pi} P
+\end{equation}
+
+in which case, the wave breaking criterion has the correct period dependence (in agreement with Goodman and Dickson).
+
+\begin{equation}
+1 \leq constant \Lambda P^{1/6}
+\end{equation}
+
+However, if we're in the limit of small detuning, near resonance, we have
+
+\begin{equation}
+\frac{\omega}{\sqrt{ (\omega-\Omega)^2 + \gamma^2}} \rightarrow \frac{\omega}{\gamma} = \frac{1}{c\Lambda^2}\left(\frac{\omega}{\omega_o}\right)^3
+\end{equation}
+
+which yields the following wave-breaking condition
+
+\begin{equation}
+1 \leq constant \Lambda ^{-1} P^{-23/6}
+\end{equation}
+
+We note that the Goodmand and Dickson result agrees with the limit of large detuning. This is because they take a harmonic average over several resonant peaks, which will favor lower dissapation rates (lower amplitudes). These lower amplitudes correspond to off-resonant conditions, when the mode amplitude is diffusion dominated. Therefore, their ``local'' calculation has the same scaling as our ``global'' calculation in the limit of detuning dominated mode amplitudes.
+
+Barker and Ogilvie (2010) provide an equation for wave breaking which the observe to agree with their numerical simulations. When we compute the scaling relation for our result (assuming the limit of large detuning), we obtain
+
+\begin{subequations}
+\begin{align}
+k_r \xi_r & = f^{5/2} \sqrt{\frac{h}{2\pi^2 k}} \left(\frac{\omega_o}{\omega}\right)^3 \sqrt{l(l+1)} |q| \\
+          & \sim 4729.5 \left(\frac{f}{98}\right)^{5/2} \left(\frac{\omega_o}{\omega}\right)^3 \sqrt{l(l+1)} |q| \\
+& \text{where} \\
+N/r & = f\omega_o/R \\
+\Delta P & = h/\omega_o \\
+\rho & = k M/R^3 \\
+\end{align}
+\end{subequations}
+
+For a linearly driven mode off resonance, we have
+
+\begin{subequations}
+\begin{align}
+|q| = \frac{\omega}{\sqrt{\Delta^2 + \gamma^2}} U & \approx \frac{2\omega}{\Delta \omega} \hat{U} \frac{M^\prime}{M^\prime + M} \left( \frac{P_\mathrm{orb}}{10dy} \right)^{-2} \left(\frac{P}{dy}\right)^{-11/6} \\
+    & \approx \frac{\alpha l}{\pi}(1dy) \left(\frac{P}{dy}\right) \hat{U}  \frac{M^\prime}{M^\prime + M} \left( \frac{m P}{10dy} \right)^{-2} \left(\frac{P}{dy}\right)^{-11/6} \\
+    & \approx 3.92\cdot10^{-7} \left(\frac{\hat{U}}{10^{-8}}\right)\left(\frac{l}{2}\right) \left( \frac{m}{2}\right)^{5/6} \left(\frac{M^\prime}{M_{jup}}\right)\left(\frac{M_\odot}{M}\right)\left(\frac{P_\mathrm{orb}}{dy}\right)^{-17/6}
+\end{align}
+\end{subequations}
+
+Combining this with our result for $k_r\xi_r$, we have 
+
+\begin{subequations}
+\begin{align}
+k_r\xi_r & = \left( 4729.5 \left(\frac{f}{98}\right)^{5/2} \left(\frac{\omega_o}{\omega}\right)^3 \sqrt{l(l+1)}\right) |q| \\
+& \approx \left(897382.4\right)\left(\frac{f}{98}\right)^{5/2} \sqrt{\frac{l(l+1)}{6}} \left(\frac{M}{M_\odot}\right)^{3/2} \left(\frac{R}{R_\odot}\right)^{-9/2} \left(\frac{P_\mathrm{orb}}{dy}\right)^3 |q| \\
+& \approx (0.3517951)\left(\frac{\hat{U}}{10^{-8}}\right) \left(\frac{f}{98}\right)^{5/2} \left(\frac{R_\odot}{R}\right)^{9/2} \left(\frac{M^\prime}{M_{jup}}\right) \left(\frac{M}{M_\odot}\right)^{1/2} \left(\frac{m}{2}\right)^{5/6} \sqrt{\frac{l^3(l+1)}{24}} \left(\frac{P_\mathrm{orb}}{dy}\right)^{1/6} 
+\end{align}
+\end{subequations}
+
+where $\omega_o^2 = GM/R^3 \sim 6.3\cdot10^{-4} [rad/sec]$ for the sun. We note that our $\hat{U}\sim G^{1/2}$ from Barker and Ogilvie, and our $f\sim C$ from Barker and Ogilvie. We therefore see that the scaling is matches the result from Barker and Ogilvie for all terms except $M/M_\odot$, and this is because we have included the dependence on $M/M_\odot$ from $\omega_o$. If we neglect this dependence, then we obtain exactly the same scaling as Barker and Ogilvie. Furthermore, if we write our wave breaking criterion as $k_r\xi_r\geq1$, then we have
+
+\begin{subequations}
+\begin{align}
+(0.3517951)\left(\frac{\hat{U}}{10^{-8}}\right) \left(\frac{f}{98}\right)^{5/2} \left(\frac{R_\odot}{R}\right)^{9/2} \left(\frac{M^\prime}{M_{jup}}\right) \left(\frac{M}{M_\odot}\right)^{1/2} \left(\frac{m}{2}\right)^{5/6} \sqrt{\frac{l^3(l+1)}{24}} \left(\frac{P_\mathrm{orb}}{dy}\right)^{1/6} & \geq 1 \\
+\Rightarrow \left(\frac{M^\prime}{M_{jup}}\right) \left(\frac{P_\mathrm{orb}}{dy}\right)^{1/6} & \geq 2.84256
+\end{align}
+\end{subequations}
+
+where we've dropped most of the scalings. This agrees quite will with the Barker and Ogilvie result, which has a right-hand-side of $3.3$ in their 2010 paper (2D simulations), and a right-hand-side between $1.8$ and $7.2$ (depending on the solar model) in thier 2011 paper (3D simulations).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{equations of motion}
+
+The general set of amplitude equations we've derived for stellar eigenmodes are
+\begin{equation}\label{eq:general_amplitude_eqn's}
+\dot{q}_a + (i\omega_a + \gamma_a)q_a = i\omega_a U_a(t) + i\omega_a \sum_b U_{ab}(t) q_b^\ast + i\omega_a \sum_{b,c} \kappa_{abc} q_b^\ast q_c^\ast
+\end{equation}
+
+These are difficult to solve for an arbitrary number of modes, so we focus on a simple system consisting of only 3 modes: 1 parent and 2 (nearly subharmonically resonant) daughters. In this case, the equations would simplify to
+\begin{subequations}\label{eq:3mode_amplitude_eqn's}
+\begin{align}
+\dot{q}_0 + (i\omega_0 + \gamma_0)q_0 & = i\omega_0 \left( U_0(t) + \sum_{i=0,1,2} U_{0i} q_i^\ast + \sum_{i,j=0,1,2} \kappa_{0ij} q_i^\ast q_j^\ast \right) \,,\\
+\dot{q}_1 + (i\omega_1 + \gamma_1)q_1 & = i\omega_1 \left( U_1(t) + \sum_{i=0,1,2} U_{1i} q_i^\ast + \sum_{i,j=0,1,2} \kappa_{1ij} q_i^\ast q_j^\ast \right) \,,\\
+\dot{q}_2 + (i\omega_2 + \gamma_2)q_2 & = i\omega_2 \left( U_2(t) + \sum_{i=0,1,2} U_{2i} q_i^\ast + \sum_{i,j=0,1,2} \kappa_{2ij} q_i^\ast q_j^\ast \right) \,,
+\end{align}
+\end{subequations}
+where $(\ast)$ denotes complex conjugations.
+
+We can make the further approximations that the non-linear tidal driving cancels exactly with the 3mode couplings to the equilibrium tide (this is typically true to better than $10^{-5}$) and that the linear tidal driving is only significant for the parent mode ($U_a = U\cdot\delta_{a,0}$). For simplicity, we also assume that the tidal driving is monochromatic and that the 3mode coupling coefficients have a simple structure ($\kappa_{abc} = \kappa |\epsilon_{abc}|$). This means (\ref{eq:3mode_amplitude_eqn's}) can be written explicitly as
+\begin{subequations}\label{eq:simplified_3mode_amplitude_eqn's}
+\begin{align}
+\dot{q}_0 + (i\omega_0 + \gamma_0)q_0 & = i\omega_0 ( U e^{-i\Omega t} + 2 \kappa q_1^\ast q_2^\ast) \,,\\
+\dot{q}_1 + (i\omega_1 + \gamma_1)q_1 & = 2 i\omega_1 \kappa q_0^\ast q_2^\ast \,,\\
+\dot{q}_2 + (i\omega_2 + \gamma_2)q_2 & = 2 i\omega_2 \kappa q_0^\ast q_1^\ast \,.
+\end{align}
+\end{subequations}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Derivation of Stellar Hamiltonian for these coordinates}
+
+We begin with 
+\begin{equation}
+\frac{\partial H}{\partial p_a} = \dot{q}_a = -i\omega_a q_a + i\omega_q \sum_{b,c} \kappa_{abc} q_b^\ast q_c^\ast
+\end{equation}
+
+Direct integration (for all $a$) yields
+
+\begin{equation}
+H = f(q_d) + \sum_{a} -i\omega_a q_a p_a +i\omega_a \frac{1}{3}\sum_{b,c} q_b^\ast q_c^\ast p_a
+\end{equation}
+
+where $f(q_d)$ is an undetermined function of the generalized coordinates only. Demanding that $H\in\mathbb{R}$, we are forced to associate 
+
+\begin{equation}
+p_a = \frac{1}{-i\omega_a} q_a^\ast
+\end{equation}
+
+and then we immediately have
+\begin{eqnarray}
+-\frac{\partial H}{\partial q_a} = \dot{p}_a & = & i\omega_a p_a - \frac{\partial f}{\partial q_a} \\
+\Rightarrow  \frac{1}{-i\omega_a} \dot{q}_a^\ast & = & -q_a^\ast - \frac{\partial f}{\partial q_a} \\              
+                                  \dot{q}_a^\ast & = & i\omega_a q_a^\ast + i\omega_a \frac{\partial f}{\partial q_a} \\
+\end{eqnarray}
+
+Demanding that this equation have the proper form yields
+\begin{eqnarray}
+\frac{\partial f}{\partial q_a} & = & - \sum_{b,c}\kappa_{abc} q_b q_c \\
+\Rightarrow f & = & -\frac{1}{3}\sum_{a,b,c}\kappa_{abc} q_a q_b q_c \\
+\end{eqnarray}
+
+Inserting this into the Hamiltonian allows us to write
+\begin{equation}
+H = \sum_{a} -i\omega_q q_a p_a - \frac{1}{3} \sum_{a,b,c} \kappa_{abc} \left( q_a q_b q_c + (-i\omega_a p_a)(-i\omega_b p_b)(-i\omega_c p_c)\right)
+\end{equation}
+
+and if we write this in terms of mode amplitudes, we have
+\begin{eqnarray}
+H & = & \sum_{a} q_a q_a^\ast - \frac{1}{3} \sum_{a,b,c} \kappa_{abc} \left( q_a q_b q_c + (q_a q_b q_c)^\ast \right) \\
+  & = & \sum_{a} |q_a|^2 - \frac{2}{3} \sum_{a,b,c} \kappa_{abc} \mathbb{R}\{ q_a q_b q_c \} \\
+\end{eqnarray}
+
+From this expression, we can immediately identify
+\begin{itemize}
+  \item{the energy associated with mode $a$: $E_a = |q_a|^2$}
+  \item{the energy associate with a particular coupling $\kappa_{\alpha\beta\gamma}$: $E_{\alpha\beta\gamma} = -\frac{1}{3}\sum_{a,b,c} \kappa_{abc} (q_a q_b q_c + c.c.) \delta_{a\alpha} \delta_{b\beta} \delta_{c\gamma}$}
+  \item{and from straightforward substitudtion, we find that $\mathrm{d}H/\mathrm{d}t = -2 \sum_{a} \gamma_a E_a$}
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Derivation of interaction Hamiltonian and interplay with $H_\ast$}
+
+We begin by postulating the form of the interaction Hamiltonian and the stellar Hamiltonian in our system of coordinates
+
+\begin{equation}
+H_{int} + H_{\ast} = \sum_{\alpha} \left[ \frac{1}{2} q_{\alpha} q_{\alpha}^\ast - U_{\alpha}e^{-i m_\alpha \phi} q_\alpha^\ast \right] - \frac{1}{2}\sum_{\alpha,\beta} \left[ U_{\alpha\beta}e^{-i(m_\alpha+m_\beta)\phi}q_\alpha^\ast q_\beta^\ast \right] - \frac{1}{3}\sum_{\alpha,\beta,\gamma} \left[\kappa_{\alpha\beta\gamma} q_\alpha^\ast q_\beta^\ast q_\gamma^\ast \right] + cc
+\end{equation}
+
+and note that with $p_\alpha \equiv q_\alpha^\ast/(-i\omega_\alpha)$ these give the correct equations of motion. We also note that angular momentum conservation implies the $\phi$ coefficient in the exponential of the non-linear tidal driving term. Futhermore, these equations of motion are (explicitly)
+
+\begin{equation}
+\dot{q}_\alpha = i\omega_\alpha q_\alpha + i\omega_\alpha U_\alpha e^{-im_\alpha \phi} + \sum_\beta U_{\alpha\beta}e^{-i(m_\alpha+m_\beta)\phi}q_\beta^\ast + i\omega_\alpha \sum_{\beta,\gamma} \kappa_{\alpha\beta\gamma} q_\beta^\ast q_\gamma^\ast
+\end{equation}
+
+However, we also know that the non-linear driving terms cancel to \emph{high} precision with the 3mode couplings to the equilibrium tide. Writing this explicitly, we have
+
+\begin{equation}
+\dot{q}_\alpha = i\omega_\alpha q_\alpha + i\omega_\alpha U_\alpha e^{-im_\alpha \phi} + i\omega_\alpha \sum_{\beta,\gamma\in\mathrm{dyn}} \kappa_{\alpha\beta\gamma} q_\beta^\ast q_\gamma^\ast + i\omega_\alpha \sum_\beta \left[ U_{\alpha\beta}e^{-i(m_\alpha+m_\beta)\phi} + 2 \sum_{\gamma\in\mathrm{eq}}  \kappa_{\alpha\beta\gamma} q_\gamma^\ast\right] q_\beta^\ast
+\end{equation}
+
+where we claim that
+
+\begin{equation}\label{equation: Uab +klin cancellation}
+U_{\alpha\beta}e^{-i(m_\alpha+m_\beta)\phi} + 2 \sum_{\gamma\in\mathrm{eq}}  \kappa_{\alpha\beta\gamma} q_\gamma^\ast \approx 0\ \forall\ \{\alpha,\beta\}
+\end{equation}
+
+Rather, we claim that this term is very small compared to other terms in this equation and can therefore be neglected [Nevin's exoplanet paper]. However, we also note that we can write $H_{int}+H_\ast$ in the following way.
+
+\begin{eqnarray}\label{equation:verbose Hint+H*}
+H_{int}+H_{\ast}  & = & \sum_{\alpha\in\mathrm{eq}} \left[\frac{1}{2} q_\alpha q_\alpha^\ast - U_\alpha e^{-im_\alpha\phi}q_\alpha^\ast\right] + \sum_{\alpha\in\mathrm{dyn}} \left[\frac{1}{2} q_\alpha q_\alpha^\ast - U_\alpha e^{-im_\alpha\phi}q_\alpha^\ast\right] \\
+                  &  & - \frac{1}{2} \sum_{\alpha,\beta\in\mathrm{eq}} \left[ U_{\alpha\beta}e^{-i(m_\alpha+m_\beta)\phi}q_\alpha^\ast q_\beta^\ast \right] - \frac{1}{2}\sum_{\alpha,\beta\in\mathrm{dyn}} \left[ U_{\alpha\beta}e^{-i(m_\alpha+m_\beta)\phi}q_\alpha^\ast q_\beta^\ast \right] \\
+                  &  & - \sum_{\alpha\in\mathrm{dyn}\cap\beta\in\mathrm{eq}} \left[ U_{\alpha\beta}e^{-i(m_\alpha+m_\beta)\phi}q_\alpha^\ast q_\beta^\ast \right] \\
+                  &  & -\frac{1}{3}\sum_{\alpha,\beta,\gamma\in\mathrm{eq}} \left[\kappa_{\alpha\beta\gamma}q_\alpha^\ast q_\beta^\ast q_\gamma^\ast \right] - \frac{1}{3}\sum_{\alpha,\beta,\gamma\in\mathrm{dyn}} \left[\kappa_{\alpha\beta\gamma}q_\alpha^\ast q_\beta^\ast q_\gamma^\ast \right] \\
+                  &  & -\sum_{\alpha\in\mathrm{eq}\cap\beta,\gamma\in\mathrm{dyn}} \left[\kappa_{\alpha\beta\gamma}q_\alpha^\ast q_\beta^\ast q_\gamma^\ast \right] -\sum_{\alpha\in\mathrm{dyn}\cap\beta,\gamma\in\mathrm{eq}} \left[\kappa_{\alpha\beta\gamma}q_\alpha^\ast q_\beta^\ast q_\gamma^\ast \right] + cc
+\end{eqnarray}
+
+where we've broken sums into separate ranges: $\mathrm{eq}$ and $\mathrm{dyn}$ tides. Now comes the reasonable approximation stage. We assume the following
+
+\begin{enumerate}
+  \item{$U_{\alpha\beta} \neq 0$ only when $\alpha,\beta\in\mathrm{dyn}$}
+  \item{$\kappa_{\alpha\beta\gamma} \neq 0$ only when $\alpha,\beta\in\mathrm{dyn}\cap\gamma\in\mathrm{dyn}\oplus\mathrm{eq}$}
+\end{enumerate}
+
+These approximations are based on the expected mode shapes and resulting overlap integrals. However, they may not be strictly true. Furthermore, we may not need them to be strictly true, but rather to have these parameters \emph{very small} when these conditions are not satisfied. Applying these approximations allows us to simplify Equation \ref{equation:verbose Hint+H*} significantly to
+
+\begin{eqnarray}\label{equation: concise Hint+H*}
+H_{int}+H_{\ast}  & = & \sum_{\alpha\in\mathrm{eq}} \left[\frac{1}{2} q_\alpha q_\alpha^\ast - U_\alpha e^{-im_\alpha\phi}q_\alpha^\ast\right] + \sum_{\alpha\in\mathrm{dyn}} \left[\frac{1}{2} q_\alpha q_\alpha^\ast - U_\alpha e^{-im_\alpha\phi}q_\alpha^\ast\right] \\
+                  &   & -\frac{1}{3}\sum_{\alpha,\beta,\gamma\in\mathrm{dyn}} \left[\kappa_{\alpha\beta\gamma}q_\alpha^\ast q_\beta^\ast q_\gamma^\ast \right] \\
+                  &   & -\frac{1}{2} \sum_{\alpha,\beta\in\mathrm{dyn}} \left[ U_{\alpha\beta}e^{-i(m_\alpha+m_\beta)\phi} + 2\sum_{\gamma\in\mathrm{eq}} \kappa_{\alpha\beta\gamma}q_\gamma^\ast\right]q_\alpha^\ast q_\beta^\ast + cc\\
+                  & = & \sum_{\alpha\in\mathrm{eq}\oplus\mathrm{dyn}} \left[\frac{1}{2} q_\alpha q_\alpha^\ast - U_\alpha e^{-im_\alpha\phi}q_\alpha^\ast\right] -\frac{1}{3}\sum_{\alpha,\beta,\gamma\in\mathrm{dyn}} \left[\kappa_{\alpha\beta\gamma}q_\alpha^\ast q_\beta^\ast q_\gamma^\ast \right] + cc
+\end{eqnarray}
+
+and we can recognize the surviving terms as the \emph{linear} result plus the \emph{3mode coupling} term from \emph{dynamical modes only}! This is good news, because this is what we simulate.
+
+Now, we note that a ``traditional'' computation of the back-reaction of tidal interactions on the orbit would involve
+
+\begin{eqnarray}
+a_D & = & -\frac{1}{\mu}\frac{\partial H_{int}}{\partial D} \\
+a_\phi & = & -\frac{1}{\mu D} \frac{\partial H_{int}}{\partial \phi}
+\end{eqnarray}
+
+and we will \emph{not} be able to exploit the cancellation described in Equation \ref{equation: Uab +klin cancellation}. Rather, we will have to compute either $U_\alpha\beta$ or $\kappa_{\alpha\beta\mathrm{eq}}q_\mathrm{eq}^\ast$ to folow that route. This is because the canellation is between one term in $H_{int}$ and one term in $H_\ast$, while these partial derivatives will only act on terms in $H_{int}$. 
+
+However, we're really interested in quantities like $\partial_t D$ and $\partial_t H_{orb}$, which will describe the evolution of the orbital system (orbital separation, etc). Conveniently, we have
+
+\begin{equation}
+H_{tot} = H_{orb} + H_{int} + H_{\ast}
+\end{equation}
+
+and, because the system is autonomous (isolated), we have
+
+\begin{eqnarray}
+\frac{\mathrm{d}}{\mathrm{d}t} H_{tot} = \partial_t H_{tot} & = & 0 \\
+\Rightarrow \frac{\mathrm{d}}{\mathrm{d}t} H_{orb} + \frac{\mathrm{d}}{\mathrm{d}t} \left( H_{int} + H_\ast \right) & = & 0 \\
+\frac{\mathrm{d}}{\mathrm{d}t} H_{orb} & = & -\frac{\mathrm{d}}{\mathrm{d}t} \left( H_{int} + H_\ast \right)
+\end{eqnarray}
+
+and the RHS of this equation will allow us to exploit the cancellation from Equation \ref{equation: Uab +klin cancellation}. Furthermore, this allows us to compute $\partial_t H_{orb}$ from integration data from they dynamical tide alone.\footnote{Assuming the equilibrium tide does not contribute much damping (may or may not be true).}
+
+For the sake of masochism, we write the full expression explicitly in Equatoin \ref{equation: dHorb/dt}.
+
+\begin{eqnarray}\label{equation: dHorb/dt}
+\frac{\mathrm{d}}{\mathrm{d}t} H_{orb} & = &  \sum_{\alpha\in\mathrm{eq}\oplus\mathrm{dyn}} \left[ \frac{1}{2}\left(\dot{q}_\alpha q_\alpha^\ast + q_\alpha \dot{q}_\alpha^\ast\right)  - U_\alpha e^{-im_\alpha\phi} \left(-im_\alpha\dot{\phi}q_\alpha^\ast + \dot{q}_\alpha^\ast\right) \right] \\
+                                       &   & - \sum_{\alpha,\beta,\gamma\in\mathrm{dyn}} \left[\kappa_{\alpha\beta\gamma}q_\alpha^\ast q_\beta^\ast \dot{q}_\gamma^\ast \right] + cc
+\end{eqnarray}
+
+\textcolor{red}{THIS IS NOT TRUE BECAUSE THE TIME DERIVATIVE OF THE TOTAL HAMILTONIAN IS NOT ZERO}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Cannonical transformation from out decomposition to a ``standard'' one}
+
+Upon first inspection, it might be more natural to write down the stellar Hamiltonian as
+
+\begin{equation}
+H_{\ast} = \sum_{\alpha} \frac{1}{2}\left( p_{\alpha}^2 + \omega_{\alpha}^2 a_{\alpha}^2 \right) - \sum_{\alpha\beta\gamma} k_{\alpha\beta\gamma} a_{\alpha} a_{\beta} a_{\gamma}
+\end{equation}
+
+where $p_{\alpha} = \dot{a}_{\alpha}$. Now, this means that the lagrangian displacement vectors are
+
+\begin{equation}
+\begin{bmatrix}\xi \\ \dot{\xi}\end{bmatrix}=\sum_{\alpha} \begin{bmatrix} a_{\alpha}\xi_{\alpha} \\ \dot{a}_{\alpha}\xi_{\alpha} \end{bmatrix}
+\end{equation}
+
+And we can therefore compare this with our decomposition and integrate over all space to pick off a single mode
+
+\begin{equation}
+\begin{bmatrix} a_{\alpha} \\ \dot{a}_{\alpha} \end{bmatrix}
+=
+\begin{bmatrix} q_{\alpha} + q_{\bar{\alpha}} \\ -i\omega_{\alpha}\left(q_{\alpha} - q_{\bar{\alpha}} \right) \end{bmatrix}
+\end{equation}
+
+which defines the transformation. We can apply the reality constraints on $q_{\alpha}$. This should also define the transformation between $k_{\alpha\beta\gamma} \leftrightarrow \kappa_{\alpha\beta\gamma}$.
+

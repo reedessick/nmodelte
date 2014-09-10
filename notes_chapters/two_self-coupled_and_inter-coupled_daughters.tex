@@ -1,0 +1,27 @@
+\section*{Two self-coupled and inter-coupled daughters}
+
+With the appropriate assumptions (the only non-vanishing elements of $\kappa_{abc}$ are $\kappa_{012}=\kappa_{011}=\kappa_{022}$ and the permutations), the equations reduce to
+\begin{subequations}
+\begin{align}
+\dot{q}_0 + (i\omega_0 + \gamma_0) q_0 = & i\omega_0 U_0 e^{-i\Omega t} + i\omega_0 \kappa \left( 2 q_1^\ast q_2^\ast + (q_1^\ast)^2 + (q_2^\ast)^2 \right) \\
+                                       = & i\omega_0 U_0 e^{-i\Omega t} + i\omega_0 \kappa \left(q_1^\ast + q_2^\ast\right)^2 \\
+\dot{q}_1 + (i\omega_1 + \gamma_1) q_1 = & 2i\omega_1 \kappa \left( q_0^\ast q_1^\ast + q_0^\ast q_2^\ast \right) \\
+\dot{q}_2 + (i\omega_2 + \gamma_2) q_2 = & 2i\omega_2 \kappa \left( q_0^\ast q_1^\ast + q_0^\ast q_2^\ast \right)
+\end{align}
+\end{subequations}
+
+If we define $q_{\pm} = q_1 \pm q_2$, $\omega_{\pm} = \omega_1 \pm \omega_2$, and $\gamma_{\pm} = \gamma_1 \pm \gamma_2$, then these equations become
+\begin{subequations}
+\begin{align}
+\dot{q}_0 +(i\omega_0 + \gamma_0) q_0 = & i\omega_0 U_0 e^{-i\Omega t} + i\omega_0 \kappa (q_{+}^\ast)^2 \label{subeq:two_modes_p} \\
+\dot{q}_{+} + (i\omega_{+} + \gamma_{+}) q_{+} + (i\omega_{-} + \gamma_{-}) q_{-} = & 2i\omega_{+}\kappa q_0^\ast q_{+}^\ast \label{subeq:two_modes_d+} \\
+\dot{q}_{-} + (i\omega_{-} + \gamma_{-}) q_{+} + (i\omega_{+} + \gamma_{+}) q_{-} = & 2i\omega_{-}\kappa q_0^\ast q_{+}^\ast \label{subeq:two_modes_d-}
+\end{align}
+\end{subequations}
+
+If $\omega_{-} = \gamma_{-} = 0$, then $q_{-}$ decouples from the rest of the system and decays exponentially. This means that $q_{-} \rightarrow 0$ and $q_{+} \rightarrow 2 q_1 = 2 q_2$ in equilibrium. We then see that equations (\ref{subeq:two_modes_p}) and (\ref{subeq:two_modes_d+}) are identical to (\ref{subeq:single_mode_p}) and (\ref{subeq:single_mode_d}). The equilibrium solution follows immediately from (\ref{eq:single_mode_summary}).
+
+However, if $\omega_{-} \neq 0$ and/or $\gamma_{-} \neq 0$, then the solution is much harder. We note that if this is the case, then $q_{-} = 0$ is inconsistent with any form of meaningful non-linear equilibirum. $q_{+}$ will decouple from $q_0$ and either grow or decay exponentially (without oscillation). This means that the linear combinations $q_{\pm}$ don't reduce the dimensionality of the system and may not be more useful than the original equations.
+
+\textbf{Is there something more general that I can say about this? Can I solve for the general equilibrium?}
+

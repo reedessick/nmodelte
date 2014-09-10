@@ -1,0 +1,426 @@
+\subsection*{N daughter modes, all coupled to a single parent and inter-coupled equally with eachother}
+
+\begin{subequations}
+\begin{align}
+\dot{q}_0 + (i\omega_0 + \gamma_0)q_0 = & i\omega_0 U_0 e^{-i\Omega t} + i\omega_0 \kappa \sum_{j=1}^N \sum_{k=1, k\neq j}^N q_j^\ast q_k^\ast \\
+\dot{q}_j + (i\omega_j + \gamma_j)q_j = & 2i\omega_j \kappa q_0^\ast \sum_{k =1,k\neq j}^N q_k^\ast
+\end{align}
+\end{subequations}
+
+If we make the standard substitution $q_j = x_j e^{-i(\omega_j - \Delta_j)t}$, then we see that the only way to cancel the time dependences is if $\Delta_0 = \omega_0 - \Omega$ for the parent mode and $\Delta_d = (1/2)\Omega + \omega_d$ for {\em all} daughter modes. We then set $\dot{x}_j = 0$ and arrive at
+
+\begin{subequations}
+\begin{align}
+(i\Delta_0 + \gamma_0) x_0 = & i\omega_0 U_0 + i\omega_0\kappa \sum_{j=1}^N \sum_{k=1, k \neq j}^N x_j^\ast x_k^\ast \\
+(i\Delta_j + \gamma_j) x_j = & 2i\omega_j\kappa x_0^\ast \sum_{k=1 , k \neq j}^N x_k^\ast
+\end{align}
+\end{subequations}
+
+Now, if we focus on two of the daughter modes (we tacitly assume $N\geq2$), say modes $j$ and $k$, we have
+
+\begin{subequations}
+\begin{align}
+(i\Delta_j + \gamma_j) x_j = & 2i\omega_j\kappa x_0^\ast \sum_{m=1, m\neq j}^N x_m^\ast \\
+                           = & 2i\omega_j\kappa x_0^\ast x_k^\ast + 2i\omega_j\kappa x_0^\ast \sum_{m=1, m\neq j,k}^N x_m^\ast \\
+(i\Delta_k + \gamma_k) x_k = & 2i\omega_k\kappa x_0^\ast x_j^\ast + 2i\omega_k\kappa x_0^\ast \sum_{m=1, m\neq j,k}^N x_m^\ast \\
+\Rightarrow \frac{i\Delta_j + \gamma_j}{\omega_j} x_j - 2i\kappa x_0^\ast x_k^\ast & = \frac{i\Delta_k + \gamma_k}{\omega_k} x_k - 2i\kappa x_0^\ast x_j^\ast \\
+            \frac{i\Delta_j + \gamma_j}{\omega_j} x_j + 2i\kappa x_0^\ast x_j^\ast & = \frac{i\Delta_k + \gamma_k}{\omega_k} x_k + 2i\kappa x_0^\ast x_k^\ast \label{subeq:Nd_universality}
+\end{align}
+\end{subequations}
+
+We notice that the LHS of (\ref{subeq:Nd_universality}) depends only on parameters assoicated with modes $j$ and $0$, while the RHS depends only on modes $k$ and $0$. This relation holds for any pair of daughter modes, and there is no reason to believe that the daughters' frequencies and damping rates are identical\footnote{This derivation depends critically on the equality of all the 3 mode coupling coefficients. If these coupling coefficients are required to be nearly identical, it does suggest that the mode shapes are similar for all daughter modes. This in turn suggest similar frequencies and damping rates, so the ``arbitrariness'' of these parameters should be taken with a grain of salt.}, so we conclude that this function of modes $j$ and $0$ must equal a constant for all daughter modes $x_j$.
+\begin{equation}
+\frac{i\Delta_j + \gamma_j}{\omega_j} x_j + 2i\kappa x_0^\ast x_j^\ast  = \textsc{constant} = 2i\kappa x_0^\ast \sum_{k=1}^{N} x_k^\ast
+\end{equation}
+
+If we again define $D_i = \Delta_i/\omega_i$ and $\Gamma_i = \gamma_i/\omega_i$, then we can write this a bit cleaner as
+\begin{equation} \label{eq:Nd_universality}
+\left( D_j - i\Gamma_j \right ) x_j + 2\kappa x_0^\ast x_j^\ast = \textsc{constant}^\prime = A e^{i\delta}
+\end{equation}
+
+This essentially allows us to reduce the system of $N+1$ complex equations to a system of $2$ complex equations for the parameters $A_0$, $\delta_0$, $A$, and $\delta$.
+
+Furthermore, if we define $x_j = A_j e^{i\delta_j}$ and
+\begin{equation}
+\cos\beta = \frac{D_j}{\sqrt{D_j^2 + \Gamma_j^2}},\ \mathrm{and}\ \sin\beta = \frac{\Gamma_j}{\sqrt{D_j^2 + \Gamma_j^2}}
+\end{equation}
+
+we have
+\begin{subequations}
+\begin{align}
+\sqrt{D_j^2 + \Gamma_j^2} e^{-i\beta} e^{i\delta_j} + 2\kappa A_0 e^{-i\delta_0} e^{-i\delta_j} = & \frac{A}{A_j} e^{i\delta} \\
+                                                                                                = & \alpha_j e^{i\delta} \\
+\alpha_j e^{-i(\delta_j - \delta)} = & \sqrt{D_j^2 + \Gamma_j^2} e^{-i\beta} + 2\kappa A_0 e^{-2i\delta_0} e^{-i\delta_j} \\
+ & \\
+\Rightarrow \alpha_j^2  = & D_j^2 + \Gamma_j^2 + 4\kappa^2 A_0^2 + 4\kappa A_0 \cos\left(\beta - \delta_0 -2\delta_j\right) \label{subeq:a_j} \\
+e^{-i\delta_j} = & \frac{\alpha_j}{4\kappa A_0} e^{i(\delta + \delta_0)} \pm \sqrt{ \left( \frac{\alpha_j}{4\kappa A_0} e^{i(\delta + \delta_0)} \right)^2 - \frac{\sqrt{D_j^2 + \Gamma_j^2}}{\kappa A_0} e^{i(\delta_0 - \beta)} } \label{subeq:d_j}
+\end{align}
+\end{subequations}
+
+We see that (\ref{subeq:d_j}) determines $\delta_j$ up to a sign ambiguity which should be resolved by recognizing that $\alpha_j \geq 0, in \mathbb{R}$. However, the explicit solution is non-trivial. Nevertheless, we should be able to solve for $\delta_j$ using (\ref{subeq:d_j}), and from that we can solve for $\alpha_j$ for all daughter modes. We not turn out attention to the parent equation and assume the $\delta_j$ and $\alpha_j$ are known constants, although they will depend implicitly on $A_0$, $\delta_0$, and $\delta$.
+
+The parent equation is given by
+\begin{subequations}
+\begin{align}
+(iD_0 + \Gamma_0) A_0 e^{i\delta_0} = & i U_0 + i \kappa \sum_{j=1}^N \sum_{k=1, k\neq j}^N A_j A_k e^{-i(\delta_j + \delta_k)} \\
+                                     = & i U_0 + i \frac{1}{2} \sum_{j=1}^N \left( A_j \cdot 2\kappa e^{-i\delta_j} \sum_{k=1,k\neq j}^N A_k e^{-i\delta_k} \right) 
+\end{align}
+\end{subequations}
+
+while the daughter equations can be written as
+\begin{equation}
+\left( D_j - i\Gamma_j\right)\frac{A_j}{A_0} e^{i\delta_0} = 2\kappa e^{-i\delta_j} \sum_{k=1,k\neq j}^N A_k e^{-i\delta_k}
+\end{equation}
+
+This means that we can write the parent equation as
+\begin{subequations}
+\begin{align}
+(D_0 - i \Gamma_0) A_0^2 = & A_0 U_0 e^{-i\delta_0} + \frac{1}{2}\sum_{j=1}^N {\left(D_j -i\Gamma_j\right)A_j^2 } \\
+                         = & A_0 U_0 e^{-i\delta_0} + \frac{1}{2}\sum_{j=1}^N \left(D_j - i \Gamma_j\right) \frac{A^2}{\alpha_j^2}
+\end{align}
+\end{subequations}
+
+We note that this equation allow depends on the daughter amplitudes through $\alpha_j$, and doesn't depend explicitly on their phases $\delta_j$. However, we still have to close the system, which we can do through one of the daughter equations, say mode $j$:
+\begin{equation}
+\left( D_j - i\Gamma_j\right)\frac{A}{\alpha_j} = 2\kappa A_0 e^{-i(\delta_0 + \delta_j)} \sum_{k=1,k\neq j}^N A_k e^{-i\delta_k}
+\end{equation}
+
+\textbf{alternatively, we can use (\ref{eq:Nd_universality}) to try to solve for $A_j^2$ and then substitute into the modified parent equation. I haven't had much luck yet, but it could be a solution method.}
+
+\textbf{We haven't really reduced the number of equations in a helpful way because we still have a dependence in the daughter equations on $e^{-i(\delta_{jk})}$. If we can solve for that from my solution for the daughter equations (which I kinda have), then we can close the system to only 4 real parameters: $A$, $A_0$, $\delta$, and $\delta_0$. These equations will be horrible, but at least it is a step in the right direction.}
+
+\textbf{If I can somehow work these equations down to two functions of two variables, then it is straightforward to numerically solve for the solution (eg: Newton's method). Unfortunately, I'm not at that point. Alternatively, I can look into root-finding algorithms, but those might be complicated and more trouble than they're worth.}
+
+We note that we can write the ``universality relation'' using matrix notation as
+
+\begin{equation}
+(D_j -i\Gamma_j)x_j + 2\kappa x_0^\ast x_j^\ast = z
+\end{equation}
+
+\begin{equation}
+\left( 
+\begin{bmatrix}
+D_j & \Gamma_j \\
+-\Gamma_j & D_j \\
+\end{bmatrix}
++ 2\kappa \begin{bmatrix}
+\R{x_0} & \I{x_0} \\
+-\I{x_0} & \R{x_0} \\
+\end{bmatrix}
+\begin{bmatrix}
+1 & 0 \\
+0 & -1 \\
+\end{bmatrix}
+\right)
+\begin{bmatrix}
+\R{x_j} \\
+\I{x_j} \\
+\end{bmatrix}
+= 
+\begin{bmatrix}
+\R{z} \\
+\I{z} \\
+\end{bmatrix}
+\end{equation}
+
+where $z$ is the ``universality'' constant for the system. This allows us to immediately solve for any daughter mode's amplitude given $z$ through
+
+\begin{equation}
+\begin{bmatrix}
+\R{x_j} \\
+\I{x_j} \\
+\end{bmatrix}
+=
+\begin{bmatrix}
+D_j + 2\kappa\R{x_0}      &   \Gamma_j - 2\kappa\I{x_0} \\
+-\Gamma_j -2\kappa\I{x_0} &   D_j - 2\kappa\R{x_0} \\
+\end{bmatrix}^{-1}
+\begin{bmatrix}
+\R{z} \\
+\I{z} \\
+\end{bmatrix}
+\end{equation}
+
+assuming the matrix is invertable\footnote{If the matrix is not invertible, this solution breaks down. Of course, this solution is for non-trivial daughter mode amplitudes, as we assume the daughter modes are non-zero.}. Now, using any one of the daughter equations, we have
+
+
+\begin{equation}
+(D_j -i\Gamma_j)x_j = 2\kappa x_0^\ast \sum_{k=1,k\neq j}^{N} x_k^\ast
+\end{equation}
+
+\begin{equation}
+\begin{bmatrix}
+D_j & \Gamma_j \\
+-\Gamma_j & D_j \\
+\end{bmatrix}
+\left[x_j \right]
+- 2\kappa
+\begin{bmatrix}
+\R{x_0} & \I{x_0} \\
+-\I{x_0} & \R{x_0} \\
+\end{bmatrix}
+\begin{bmatrix}
+1 & 0 \\
+0 & -1 \\
+\end{bmatrix}
+\sum_{k=1,k\neq j}^{N}\left[x_k\right]
+\end{equation}
+
+We also know that
+
+\begin{equation}
+\begin{bmatrix}
+D_j & \Gamma_j \\
+-\Gamma_j & D_j \\
+\end{bmatrix}
+\left[x_j \right]
+=
+\left[z\right] 
+- 2\kappa
+\begin{bmatrix}
+\R{x_0} & \I{x_0} \\
+-\I{x_0} & \R{x_0} \\
+\end{bmatrix}
+\begin{bmatrix}
+1 & 0 \\
+0 & -1 \\
+\end{bmatrix}
+\left[x_j\right]
+\end{equation}
+
+which means we can write
+\begin{equation}
+\left[z\right] 
+- 2\kappa
+\begin{bmatrix}
+\R{x_0} & \I{x_0} \\
+-\I{x_0} & \R{x_0} \\
+\end{bmatrix}
+\begin{bmatrix}
+1 & 0 \\
+0 & -1 \\
+\end{bmatrix}
+\sum_{k=1}^{N}\left[x_k\right]
+\end{equation}
+
+Immediately, we note that this involves all daughter modes in a symmetric manner. If we substitute our solution for the daughter modes in terms of $z$, then we have
+\begin{equation}
+\left( \mathbf{1}
+- 2\kappa
+\begin{bmatrix}
+\R{x_0} & -\I{x_0} \\
+-\I{x_0} & -\R{x_0} \\
+\end{bmatrix}
+\sum_{k=1}^{N}
+\begin{bmatrix}
+D_k + 2\kappa\R{x_0}  & \Gamma_k - 2\kappa\I{x_0} \\
+-\Gamma_k - 2\kappa\I{x_0} & D_k - 2\kappa\R{x_0} \\
+\end{bmatrix}^{-1}
+\right) \left[z\right]
+= 0
+\end{equation}
+
+which sort-of looks like an eigenvalue equation for $z$ with the constraint that the eigenvalue is 1\footnote{This can be derived more quickly if we use the definition of $z$ from above.}. This means that knowledge of $x_0$ will allow us to compute $z$, and from that $x_j$. Furthermore, we can write the parent equation as
+\begin{equation}
+(D_0 - i \Gamma_0)A_0^2 - U_0 e^{-i\delta_0} A_0 = \frac{1}{2} \sum_{k=1}^{N} \left[ (D_k - i\Gamma_k)A_k^2\right]
+\end{equation}.
+
+\textbf{JUST USE THE REGULAR PARENT EQUATION, WHICH IS LINEAR IN PARENT AMPLITUDE ALTHOUGH THE DAUGHTER TERMS ARE MORE COMPLICATED. IT SHOULD BE MUCH EASIER TO SOLVE FOR THE PARENT AMPLITUDE, AND IT MIGHT EVEN BE ANALYTICALLY TRACTABLE?}
+
+It should then be straightfoward to numerically solve for a self-consistent solution. We first propose an ansatz for $x_0$, and use that to compute $z$, which we use to compute $x_j$. We then sum the weighted $x_j$ and can use this to correct the estimate of $x_0$. Iteration will hopefully produce convergence\footnote{However, there may be problems if the atrix inverses don't vanish or if the matrix coefficient of $z$ is singular. Here there be monsters.}
+
+\textbf{Preliminary simulations suggest that there could be more complicated dynamics that do not obey the steady state postulate. This would imply that a solution does not exist for these equations.}
+
+\subsection*{N daughter modes, all coupled to a single parent and inter-coupled equally with eachother, with a general self-coupling}
+
+We begin with the following set of equations:
+
+\begin{subequations}
+\begin{align}
+\dot{q}_0 + (i\omega_0 + \gamma_0) q_0 = & i\omega_0 U_0 e^{-i\Omega t} + i\omega_0 \sum_{k=1}^{N} \kappa_k \left(q_k^\ast\right)^2 +i\omega_0 \kappa \sum_{k=1}^{N}\sum_{j=1, j\neq k}^{N} q_j^\ast q_k^\ast \\
+\dot{q}_j + (i\omega_j + \gamma_j) q_j = & 2i\omega_j \kappa q_0^\ast \sum_{k\neq j}^{N} q_k^\ast + i\omega_j \kappa_j q_0^\ast q_j^\ast
+\end{align}
+\end{subequations}
+
+and define the tranformations
+
+\begin{subequations}
+\begin{align}
+q_j = x_j e^{-i(\omega_j - \Delta_j)t} \ \ \mathrm{where}\ & \omega_0 - \Delta_0 = \Omega \\
+                                                           & \omega_j - \Delta_j = -\frac{1}{2}\Omega
+\end{align}
+\end{subequations}
+
+which will remove any time dependence from the equations of motion. We should note that these definitions of the detunings are required if there is more than one coupling in the network. However, if there is only a single coupling, then we have more freedom in the choice of $\Delta_j$, and this can affect the solution's existence. We then define 
+
+\begin{subequations}
+\begin{align}
+D_i \equiv & \frac{\Delta_i}{\omega_i} \\
+\Gamma_i \equiv & \frac{\gamma_i}{\omega_i}
+\end{align}
+\end{subequations}
+
+Assuming constant amplitude solutions ($\dot{x}_j=0$), we can describe our system as
+
+\begin{subequations}
+\begin{align}
+(D_0 -i\Gamma_0)x_0 = & U_0 + \sum_{k=1}^{N} \kappa_k \left(x_k^\ast\right)^2 + \kappa \sum_{k=1}^{N}\sum_{j=1, j\neq k}^{N} x_k^\ast x_j^\ast \\
+(D_k -i\Gamma_k)x_k = & \left( \kappa_k - 2\kappa \right) x_0^\ast x_k^\ast + 2\kappa x_0^\ast \sum_{k=1}^{N} x_k^\ast \\
+\end{align}
+\end{subequations}
+
+We note that we can write the individual daughter modes as all equal to the \emph{same} complex constant as follows.
+
+\begin{subequations}
+\begin{align}
+(D_k -i\Gamma_k)x_k - \left( \kappa_k - 2\kappa \right) x_0^\ast x_k^\ast = &\ \textsc{constant} = z\\
+                                                            \Rightarrow z = & 2\kappa x_0^\ast \sum_{k=1}^{N} x_k^\ast
+\end{align}
+\end{subequations}
+
+Therefore, knowledge of $z$ and $x_0$ will allow us to compute the daughter amplitudes. We can do this explicitly by representing the daughter amplitude as a vector of real and imaginary parts.
+
+\begin{equation}
+x_j = \R{x_j} + i\I{x_j} \leftrightarrow \begin{bmatrix}\R{x_j} \\ \I{x_j}\\ \end{bmatrix}
+\end{equation}
+
+Complex conjugation can be represented by the pauli matrix $\sigma_z$, and the equation for each daughter mode can be written as 
+
+\begin{equation}
+\begin{bmatrix}
+\R{x_j} \\
+\I{x_j} \\
+\end{bmatrix}
+= 
+\begin{bmatrix}
+D_j + (2\kappa -\kappa_j)\R{x_0}        & \Gamma_j - (2\kappa - \kappa_j)\I{x_0} \\
+-\Gamma_j - (2\kappa - \kappa_j)\I{x_0} & D_j - (2\kappa -\kappa_j)\R{x_0} \\
+\end{bmatrix}^{-1}
+\begin{bmatrix}
+\R{z} \\
+\I{z} \\
+\end{bmatrix}
+\end{equation}
+
+Now, $z$ is defined in terms of daughter mode amplitudes, and substituing this solution for each daughter mode yields a consistency relation for $z$.
+
+\begin{equation}
+\left(\mathbf{1} - 2\kappa
+\begin{bmatrix}
+\R{x_0} & -\I{x_0} \\
+-\I{x_0} & -\R{x_0} \\
+\end{bmatrix}
+\sum_{j=1}^{N} 
+\begin{bmatrix}
+D_j + (2\kappa -\kappa_j)\R{x_0}        & \Gamma_j - (2\kappa - \kappa_j)\I{x_0} \\
+-\Gamma_j - (2\kappa - \kappa_j)\I{x_0} & D_j - (2\kappa -\kappa_j)\R{x_0} \\
+\end{bmatrix}^{-1}
+\right)
+\begin{bmatrix}
+\R{z} \\
+\I{z} \\
+\end{bmatrix}
+= 0
+\end{equation}
+
+Now, we have reduced the $N$ complex equations to the self-consistent solution of 2 equations: the consistency relation for $z$ and the parent amplitude equation. This is possible because of the symmetry in how the daughter modes are coupled, which allows us to combine their behavior in the constant $z$. We note that the consistency relation constrains the phase of $z$, so the only real free parameter is the amplitude. This means we should expect 3 unknowns.
+
+Let us consider this consistency relation more closely. Explicitly taking the matrix inverse yields
+
+\begin{equation}
+\left(\mathbf{1} - 2\kappa
+\begin{bmatrix}
+\R{x_0} & -\I{x_0} \\
+-\I{x_0} & -\R{x_0} \\
+\end{bmatrix}
+\sum_{k=1}^{N}
+\frac{1}{D_k^2 + \Gamma_ik^2 - (2\kappa -\kappa_k)^2 \left(\R{x_0}^2 + \I{x_0}^2\right)}
+\begin{bmatrix}
+D_k - (2\kappa -\kappa_k)\R{x_0}        & - \Gamma_k - (2\kappa - \kappa_k)\I{x_0} \\
+\Gamma_k + (2\kappa - \kappa_k)\I{x_0}  & D_k + (2\kappa -\kappa_k)\R{x_0} \\
+\end{bmatrix}
+\right)
+\begin{bmatrix}
+\R{z} \\
+\I{z} \\
+\end{bmatrix}
+= 0
+\end{equation}
+
+Distribution the prefactor through the summation yields
+
+\begin{equation}
+\begin{bmatrix}
+1 - \alpha + \xi & \beta \\
+\beta            & 1 + \alpha + \xi \\
+\end{bmatrix}
+\begin{bmatrix}
+\R{z} \\
+\I{z} \\
+\end{bmatrix}
+= 0
+\end{equation}
+
+where we have defined
+
+\begin{subequations}
+\begin{align}
+\alpha\equiv & \sigma \R{x_0} - \rho \I{x_0} \\
+\beta\equiv  & \sigma \I{x_0} + \rho \R{x_0} \\
+\sigma\equiv & \sum_{k=1}^N \frac{2\kappa D_k}{D_k^2 + \Gamma_k^2 - (2\kappa - \kappa_k)^2 A_{0}^2} \\
+\rho\equiv   & \sum_{k=1}^N \frac{2\kappa \Gamma_k}{D_k^2 + \Gamma_k^2 - (2\kappa - \kappa_k)^2 A_{0}^2} \\
+\xi\equiv    & \sum_{k=1}^N \frac{2\kappa (2\kappa-\kappa_k) A_0^2}{D_k^2 + \Gamma_k^2 - (2\kappa - \kappa_k)^2 A_{0}^2}
+\end{align}
+\end{subequations}
+
+For non-trivial $z$, we require the determinant of this matrix to vanish, which requires
+
+\begin{equation}\label{equation:just A0 consistency}
+(1+\xi)^2 = \alpha^2 + \beta^2 = \left(\sigma^2 + \rho^2\right) A_0^2
+\end{equation}
+
+which depends only on the system parameters and $A_0$. Assuming this is satisfied, it also defines $z$ up to a scalar constant ($\zeta$)
+
+\begin{equation}
+z = \zeta \begin{bmatrix}\beta \\ 1 + \xi - \alpha \\ \end{bmatrix}
+\end{equation}
+
+This means that a solution to (\ref{equation:just A0 consistency}) \emph{must} exist for a constant amplitude solution to exist. Because (\ref{equation:just A0 consistency}) depends only on the system parameters and $A_0$, we can determine whether a constant-amplitude solution is possible immediately given the system parameters.
+
+Knowledge of $A_0$ yields $z$ up to a multiplicative factor, which in turns yields all daughter modes $x_{k\neq0}$ up to the same multiplicative factor. This means we are left with the complex parent equation, which depends on $\zeta$ and $\delta_0=\tan^-1 \left(\I{x_0}/\R{x_0}\right)$. This should close the system of equations and provide possible solutions for each value of $A_0$ that satisfies (\ref{equation:just A0 consistency}). However, this says nothing about the sability of such solutions or whether they are dynamically favored and/or accessible.
+
+\subsubsection{Existence of a constant amplitude solution (and critical behavior?)}
+
+To explore this behavior further, we investigate a simple 3-mode system with two couplings. This shows that the driving factor determining whether there is a constant-amplitude solution is the daughter detunings.
+
+For the 3-mode system with one parent (mode 0) and two daughters (modes 1 and 2), the consistency relation becomes
+
+\begin{subequations}\label{equation:3mode A0 consistency}
+\begin{align}
+\left( 1 + \frac{2\kappa (2\kappa-\kappa_1) A_0^2}{D_1^2 + \Gamma_1^2 - (2\kappa - \kappa_1)^2 A_{0}^2} \right.&\left. + \frac{2\kappa (2\kappa-\kappa_2) A_0^2}{D_2^2 + \Gamma_2^2 - (2\kappa - \kappa_2)^2 A_{0}^2} \right)^2 \\ 
+= & A_0^2 \left[ \left( \frac{2\kappa D_1}{D_1^2 + \Gamma_1^2 - (2\kappa - \kappa_1)^2 A_{0}^2} + \frac{2\kappa D_2}{D_2^2 + \Gamma_2^2 - (2\kappa - \kappa_2)^2 A_{0}^2} \right)^2 \right. \\ 
+ & \left. + \left( \frac{2\kappa \Gamma_1}{D_1^2 + \Gamma_1^2 - (2\kappa - \kappa_1)^2 A_{0}^2} + \frac{2\kappa \Gamma_2}{D_2^2 + \Gamma_2^2 - (2\kappa - \kappa_2)^2 A_{0}^2} \right)^2 \right]
+\end{align}
+\end{subequations}
+
+Now, if $\kappa_1=\kappa_2=0$, then there is only one coupling in the network and there is freedom in selecting the daughter detunings: $\Delta_j\neq \Omega/2 + \omega_j$. As it turns out, this freedom is enough to guarantee that a solution exist for $A_0$, and we explicitly found this solution in Section \ref{section:derivation of non-linear equilibrium}.
+However, if $\kappa_1\neq0$ or $\kappa_2\neq0$, then this freedom goes away and we are forced to adopt the detunings $\Delta_j = \Omega/2 + \omega_j$. This means it is much less likely that a solution of (\ref{equation:3mode A0 consistency}) exists. Regardless of this, we expect a constant amplitude solution to exist as $\Delta_j \rightarrow 0$ because the time dependence cancels automatically.
+
+Inspired by this observation, we played with some realistic system parameters and changed the daughters' natural frequencies by hand to adjust the $\Delta_j$. Specifically, we set $\Delta_1=\Delta_2=\Delta$, and varied the single parameters $\Delta$. This produced some interesing effects.
+
+
+\begin{itemize}
+  \item{We can watch the existence of a solution appear and disappear as we tweak the detunings.}
+  \item{There appears to be some critical $\Delta_c$, below which a solution exists. This is determined by the $\Gamma_j$ parameters.}
+  \item{Near $\Delta_c$, we observe \emph{large} fluctuations in amplitude, which may be many harmonics beating coherently but this has not been verified.}
+\end{itemize}
+
+For the AA-AB system, there is always a solution to the amplitude-only consistency relation. However, if the $\Delta_j$ are large, then the corresponding amplitude $A_0$ will be large. This behavior is typically determined by the location of poles in the consistency equation: $(2\kappa -\kappa_k)^2 A_0^2 \rightarrow D_k^2 + \Gamma_k^2$. For the AB case, the detunings can shuffle a bit to make both small, which allows $A_0$ to be reasonable. If the $\Delta$ are forced to be large, then $A_0$ will also be large.
+
+The existence of a solution will also depend on the remaining parameters, $\zeta$ and $\delta_0$. Just because a solution exists for $A_0$ does not mean a solution exists for $\zeta$ and/or $\delta_0$. Furthermore, if such a solution does exist, it may not be stable (an attractor). 
+
+At this point we deem further investigations unproductive and leave it at that. However, there are pretty pictures to be had here.
+
+
+\textbf{Further discuss criticality in the AA-AB system when mode parameters are identical} $\Rightarrow\Delta_c$\textbf{. Analytically predict }$\Delta_c$.
+

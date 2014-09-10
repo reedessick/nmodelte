@@ -1,0 +1,124 @@
+\section*{Single self-coupled daughter}
+
+In this system, under similar assumptions to the 3mode inter-coupled system, the equations reduce to:
+
+\begin{subequations}
+\begin{align}
+\dot{q}_0 + (i\omega_0 + \gamma_0) q_0 = & i\omega_0 U_0 e^{-i\Omega t} + i\omega_0 \kappa (q_1^\ast)^2 \label{subeq:single_mode_p} \\
+\dot{q}_1 + (i\omega_1 + \gamma_1) q_1 = & 2i\omega_1 \kappa q_0^\ast q_1^\ast \label{subeq:single_mode_d} 
+\end{align}
+\end{subequations}
+
+where there is only a single self-coupled daughter mode (the only non-vanishing element of $\kappa_{abc}$ is $\kappa_{011}=\kappa$ and the appropriate perumutations). If we make the substitution $q_j = x_j e^{-i(\omega_j - \Delta_j)t}$, then these equations become
+
+\begin{subequations}
+\begin{align}
+\dot{x}_0 + (i\Delta_0 + \gamma_0) x_0 = & i\omega_0 U_0 e^{-i(\Omega - \omega_0 + \Delta_0) t} + i\omega_0 \kappa (x_1^\ast)^2 e^{i(\omega_0 + 2\omega_1 - \Delta_0 - 2\Delta_1)t} \\
+\dot{x}_1 + (i\Delta_1 + \gamma_1) x_1 = & 2i\omega_1 \kappa x_0^\ast x_1^\ast e^{i(\omega_0 + 2\omega_1 - \Delta_0 -2\Delta_1) t}
+\end{align}
+\end{subequations}
+
+If we set $\Omega - \omega_0 + \Delta_0 = \omega_0 + 2\omega_1 - \Delta_0 - 2\Delta_1 = 0$, this uniquely determines both $\Delta_0$ and $\Delta_1$.
+\begin{subequations}
+\begin{align}
+\Delta_0 = & \omega_0 - \Omega \\
+\Delta_1 = & \omega_1 + \frac{1}{2} \Omega
+\end{align}
+\end{subequations}
+
+As before, we can then look for a stationary solution for the $x_j$, and solve the algebraic condition
+\begin{subequations}
+\begin{align}
+(i\Delta_0 + \gamma_0) x_0 = & i\omega_0 U_0 + i\omega_0 \kappa (x_1^\ast)^2 \label{single_mode_p} \\
+(i\Delta_1 + \gamma_1) x_1 = & 2i\omega_1 \kappa x_0^\ast x_1^\ast \label{single_mode_d}
+\end{align}
+\end{subequations}
+
+Writing $x_j = A_j e^{i\delta_j}$, we can write (\ref{single_mode_d}) in terms of it's real and imaginary parts, which allows us to determine $A_0$ and $\delta_0 + 2\delta_1$.
+\begin{subequations}
+\begin{align}
+(\Delta_1 - i \gamma_1) A_1 e^{i\delta_1} = & 2\omega_1\kappa A_0 A_1 e^{-i(\delta_0 + 2\delta_1)} \\
+\Rightarrow \Delta_1 = & 2\omega_1 A_0 \cos\left(\delta_0 + 2\delta_1\right) \\
+\Rightarrow \gamma_1 = & 2\omega_1 A_0 \sin\left(\delta_0 + 2\delta_1\right)
+\end{align}
+\end{subequations}
+We note that these equations require $\sin(\delta_0 + 2\delta_1) \geq 0$. This tells us which quadrant to choose for $\delta_0 + 2\delta_1$. Therefore,
+\begin{subequations}
+\begin{align}
+\tan\left(\delta_0 + 2\delta_1\right) = & \frac{\gamma_1}{\Delta_1} \label{subeq:single_mode_tan_d}\\
+A_0 = & \frac{\Delta_1}{2\omega_1\kappa \cos \left( \delta_0 + 2\delta_1 \right) } \\
+    = & \frac{\Delta_1}{2\omega_1\kappa} \left( \frac{ \sqrt{\gamma_1^2 + \Delta_1^2}}{\Delta_1} \right) \\
+    = & \frac{\sqrt{\Delta_1^2 + \gamma_1^2}}{2\omega_1\kappa}
+\end{align}
+\end{subequations}
+
+Combining these with (\ref{single_mode_p}) allows us to solve for $A_1$ and separate the phases.
+\begin{subequations}
+\begin{align}
+(\Delta_0 - i\gamma_0) A_0 = & \omega_0 U_0 e^{-i\delta_0} + \omega_0\kappa A_1^2 e^{-i(\delta_0 + 2\delta_1)} \\
+\Rightarrow \Delta_0 A_0 = & \omega_0 U_0 \cos\delta_0 + \omega_0\kappa A_1^2 \cos(\delta_0 + 2\delta_1) \label{subeq:single_mode_p_decomp_r}\\
+\Rightarrow \gamma_0 A_0 = & \omega_0 U_0 \sin\delta_1 + \omega_1\kappa A_1^2 \sin(\delta_0 + 2\delta_1) \label{subeq:single_mode_p_decomp_i} 
+\end{align}
+\end{subequations}
+
+We can combine (\ref{subeq:single_mode_p_decomp_r}) and (\ref{subeq:single_mode_p_decomp_i}) and use (\ref{subeq:single_mode_tan_d}) to obtain
+\begin{subequations}
+\begin{align}
+\frac{A_0}{\omega_0 U_0}\left(\gamma_0 \Delta_1 - \gamma_1 \Delta_0 \right) = & \Delta_1 \sin\delta_0 - \gamma_1 \cos\delta_0 \\
+\Rightarrow \frac{\Delta_1}{\sqrt{\Delta_1^2 + \gamma_1^2}}\sin\delta_0 - \frac{\gamma_0}{\sqrt{\Delta_1^2 + \gamma_1^2}}\cos\delta_0 = & \frac{A_0}{\omega_0 U_0}\left(\frac{\gamma_1\Delta_0 - \gamma_0\Delta_1}{\sqrt{\Delta_1^2 + \gamma_1^2}}\right) \\
+\sin(\delta_0) \cos(\delta_0 + 2\delta_1) - \cos(\delta_0)\sin(\delta_0 + 2\delta_1) = & \\
+\sin(\delta_0 - (\delta_0 + 2\delta_1)) = & \\
+\Rightarrow \sin(2\delta_1) = & \frac{\gamma_1\Delta_0 - \gamma_0\Delta_1}{2\omega_1\omega_0\kappa U_0}
+\end{align}
+\end{subequations}
+
+where we've used the solution for $A_0$ in the last line. Furthermore, we can then solve for $A_1$. We note that this also places a constraint on $U_0$ for an equilibrium to exist.
+\begin{equation}
+U_0 \geq \left| \frac{\gamma_1 \Delta_0 - \gamma_0 \Delta_1}{2\omega_0\omega_1\kappa} \right| 
+\end{equation}
+
+We also obtain
+\begin{equation}
+A_1^2 = \frac{\Delta_0}{\Delta_1}\left(\frac{\Delta_1^2 + \gamma_1^2}{2\omega_0\omega_1\kappa^2}\right) - \frac{U_0}{\omega_0 \Delta_1 \kappa}\cos\delta_0
+\end{equation}
+We choose $\delta_0$ so that $A_1 \geq 0$.
+
+We can ``simplify'' $\cos\delta_0$ by exploiting the following trig identity.
+\begin{subequations}
+\begin{align}
+\tan(\alpha + \beta) = & C \\
+\frac{\tan\alpha + \tan\beta}{1 - \tan(\alpha) \tan(\beta)} = & \\
+\Rightarrow \tan\alpha + \tan\beta = & C(1-tan(\alpha)\tan(\beta)) \\
+(1+C\tan\beta) \tan\alpha = & C - \tan\beta \\
+\tan\alpha = & \frac{C - tan\beta}{1 + C\tan\beta} \\ 
+\Rightarrow \cos\alpha = & \frac{1+C\tan\beta}{\sqrt{\left(1+C\tan\beta\right)^2 + \left(C -\tan\beta\right)^2}} \\
+                       = & \frac{1+C\tan\beta}{\sqrt{1+C^2\tan^2\beta + C^2 + \tan^2\beta}} \\
+                       = & \frac{1+C\tan\beta}{\sqrt{\left(1+C^2\right)\left(1+\tan^2\beta\right)}} \\
+                       = & \frac{1+C\tan\beta}{\sqrt{1+C^2}}\left| \cos\beta \right| \\
+\end{align}
+\end{subequations}
+This means that we can write
+\begin{subequations}
+\begin{align}
+\cos\delta_0 = & \frac{1+(\gamma_1/\Delta_1)\tan(2\delta_1)}{\sqrt{1+(\gamma_1/\Delta_1)^2}}\left| \cos(2\delta_1) \right| \\
+             = & \frac{\Delta_1 + \gamma_1\tan(2\delta_1)}{\sqrt{\Delta_1^2 + \gamma_1^2}}\left|\cos(2\delta_1)\right| \\
+             = & \pm \frac{\Delta_1 \cos(2\delta_1) + \gamma_1 \sin(2\delta_1) }{\sqrt{\Delta_1^2 + \gamma_1^2}} \mathrm{sign}
+\end{align}
+\end{subequations}
+where the $\pm = \mathrm{sign}(\cos(2\delta_1))$. We therefore choose the sign to make $A_1 \geq 0$.
+
+\subsubsection*{summary of single self-coupled daughter mode}
+We summarize the solution in it's entirety below.
+\begin{subequations}\label{eq:single_mode_summary}
+\begin{align}
+\Delta_0 = & \omega_0 - \Omega \\
+\Delta_1 = & \omega_1 + \frac{1}{2}\Omega \\
+A_0 = & \frac{\sqrt{\Delta_1^2 + \gamma_1^2}}{2\omega_1\kappa} \\
+A_1 = & \left[ \frac{\Delta_0}{\Delta_1}\left(\frac{\Delta_1^2 + \gamma_1^2}{2\omega_0\omega_1\kappa^2}\right) - \frac{U_0}{\omega_0 \Delta_1 \kappa}\cos\delta_0 \right]^{1/2} \\
+\tan(\delta_0 + 2\delta_0) = & \frac{\gamma_1}{\Delta_1} \\
+\sin(2\delta_1) = & \frac{\gamma_1\Delta_0 - \gamma_0\Delta_1}{2\omega_1\omega_0\kappa U_0} & \\
+& \mathrm{with\ the\ constraints\ that\ } \sin(\delta_0 + 2\delta_1) \geq 0 \\
+& \mathrm{and\ } U_0 \geq \left| \frac{\gamma_1\Delta_0 - \gamma_0\Delta_1}{2\omega_0\omega_1\kappa}\right| \\
+\end{align}
+\end{subequations}
+
