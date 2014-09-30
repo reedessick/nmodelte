@@ -400,9 +400,11 @@ def compute_S(E):
 
   weights = E / np.outer(np.ones(len(E),float), np.sum(E, axis=0))
 
-  weights = weights[weights>0] ### keep only the positive-defininte terms
+  logweights = np.zeros_like(weights, float)
+  truth = weights > 0
+  logweights[truth] = np.log(weights[truth])
 
-  return -np.sum( weights*np.log(weights) , axis=0 )
+  return -np.sum( weights*logweights , axis=0 )
 
 ##################################################
 def compute_ddt_P_E_q(t_P, q, system, Eo=1.):
