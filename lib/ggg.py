@@ -175,6 +175,55 @@ def all_possible_partners(mode1, mode2, min_w, max_w, alpha, c, wo):
   return modes
 
 ##################################################
+def fast_collective_instability(parent, O, min_l=1, max_l=1, alpha=4e-3, c=2e-11, wo=1e-5, k_hat=5e4, Nmax=np.infty):
+  """
+  builds a collective set quickly based on the procedure outlined in Weinberg 2012
+  """
+  ### pull out parent parameters
+  n_p, l_p, m_p = parent.get_nlm()
+  w_p = parent.w
+  absO = abs(O)
+  sgnO = O/absO
+
+  ### compute the range of n allowed
+  if Nmax <= 0:
+    raise ValueError, "Nmax must be a positive integer"
+  dn = int(min(n_p/2, Nmax)) ### approximate the wavenumber condition by |n1-n2| = dn <= n_p/2
+
+  ### compute m
+  if m_p%2!=0:
+    return [] ### no possible self-coupled collective sets
+  m = -m_p/2
+
+  triples = []
+
+  for l in xrange(min_l, max_l+1):
+    ### compute coupling coefficients for these modes
+    k = compute_kabc(l_p, m_p, l, m, l, m, k_hat=k_hat, P=2*np.pi/w_p)
+
+    ### solve a polynomial equation for lowest Ethr self-coupled daughter and start there
+    L2 = l*(l+1)
+    alphal = alpha*l
+    coeffs = np.array([ 6*(c*wo**3*L2)**2 / alphal**6 , 0 , 0, 0, 0.5*(absO/alphal)**2, -absO/alphal ])
+    sols = np.roots( coeffs )
+    sols = sols[sols.imag == 0] ### pick only real roots
+
+    ### build collective sets around these!
+    for n in sols.real:
+      n = int(n)
+      daughters = []
+      for _n in xrange(max(1,n-dn), n+dn+1):
+        d = gm.gmode(n=_n, l=l, m=m, alpha=alpha, c=c, wo=wo)
+        d.w = -sgnO*d.w
+        daughters.append( d )
+      for ind, d1 in enumerate(daughters):
+        for d2 in daughters[ind:]:
+          triples.append( (parent, d1, d2, k) )
+
+  return triples
+
+
+##################################################
 def multiple_collective_instabilities(parent, O, Eo, maxp=1, Nmin=0, Nmax=10000, alpha=4e-3, c=2e-10, wo=1e-5, k_hat=5e4, verbose=False, min_l=False, max_l=False, min_n=False, max_n=False, min_absw=False, max_absw=False, catalogdir="./"):
   """
   systematically searches for all allowed collectively unstable modes coupled to parent
