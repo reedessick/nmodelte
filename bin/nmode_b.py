@@ -225,13 +225,15 @@ if require_outfile:
 ### get the number of daughters requested into a convenient form
 num_pairs = sorted([int(l) for l in config.get("children","num_pairs").strip().split()])
 
-if config.get("children","selection") == "collective":
-  if not opts.outfilename:
-    opts.outfilename = raw_input("outfilename = ")
+if "collective" in config.get("children","selection"):
+  if config.get("children","selection") == "collective":
+    if not opts.outfilename:
+      opts.outfilename = raw_input("outfilename = ")
+    min_num_pairs = config.getint("children","min_num_pairs")
+
   if len(num_pairs) > 1:
     raise ValueError, "collective instabilities currently only support a single num-pair argument."
   num_pairs = num_pairs[:1]
-  min_num_pairs = config.getint("children","min_num_pairs")
 
 ####################################################################################################
 #
@@ -328,6 +330,11 @@ for n_m, (O, mode) in enumerate(modes):
     if opts.verbose: 
       print "found %d triples" % (len(my_triples))
     ### add triples to the network
+    new_systems[0].network.add_couplings(my_triples, opts.verbose)
+
+  elif daughter_selection == "fast_collective": ### collective sets a la Weinberg 2012
+    my_triples = ggg.fast_collective_instability(mode, O, min_l=daughter_min_l, max_l=daughter_max_l, alpha=alpha, c=c, wo=wo, k_hat=k_hat, Nmax=num_pairs[0])
+    if opts.verbose: print "found %d triples" % len(my_triples)
     new_systems[0].network.add_couplings(my_triples, opts.verbose)
 
   else: # 3mode selection criteria
