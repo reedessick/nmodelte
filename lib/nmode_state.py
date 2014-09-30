@@ -400,6 +400,8 @@ def compute_S(E):
 
   weights = E / np.outer(np.ones(len(E),float), np.sum(E, axis=0))
 
+  weights = weights[weights>0] ### keep only the positive-defininte terms
+
   return -np.sum( weights*np.log(weights) , axis=0 )
 
 ##################################################
