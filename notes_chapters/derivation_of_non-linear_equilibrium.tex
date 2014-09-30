@@ -1,0 +1,148 @@
+\section*{Derivation of non-linear equilibrium}\label{section:derivation of non-linear equilibrium}
+
+We begin with the equations of motion
+
+\begin{eqnarray}
+\dot{q}_o + (i\omega_o+\gamma_o)q_o & = & i\omega_o U e^{-i\Omega t} + 2i\omega_o \kappa q_a^\ast q_b^\ast \\
+\dot{q}_a + (i\omega_a+\gamma_a)q_a & = & 2i\omega_a \kappa q_o^\ast q_b^\ast \\
+\dot{q}_b + (i\omega_b+\gamma_b)q_b & = & 2i\omega_b \kappa q_o^\ast q_a^\ast \\
+\end{eqnarray}
+
+Now, if we make the subsitutions $q=x e^{-i(\omega-\Delta)t}$, we obtain the following
+
+\begin{eqnarray}
+\dot{x}_o + (i\Delta_o+\gamma_o)x_o & = & i\omega_o U e^{-i(\Omega-\omega_o+\Delta_o) t} + 2i\omega_o \kappa x_a^\ast x_b^\ast e^{+i(\omega_o+\omega_a+\omega_b-\Delta_o-\Delta_a-\Delta_b)t} \\
+\dot{x}_a + (i\Delta_a+\gamma_a)x_a & = & 2i\omega_a \kappa x_o^\ast x_b^\ast e^{+i(\omega_o+\omega_a+\omega_b-\Delta_o-\Delta_a-\Delta_b)t} \\
+\dot{x}_b + (i\Delta_b+\gamma_b)x_b & = & 2i\omega_b \kappa x_o^\ast x_a^\ast e^{+i(\omega_o+\omega_a+\omega_b-\Delta_o-\Delta_a-\Delta_b)t}
+\end{eqnarray}
+
+and by demanding that
+
+\begin{eqnarray}
+\Omega - \omega_o + \Delta_o & = & 0 \\
+\omega_o+\omega_a+\omega_b-\Delta_o-\Delta_a-\Delta_b & = & 0
+\end{eqnarray}
+
+we can remove the time dependence from the right-hand-side of these equations. It is natural to seek solutions which are independent of time, so we set $\dot{x}=0$, which yields the algebraic equations
+
+\begin{eqnarray}
+(i\Delta_o+\gamma_o)x_o & = & i\omega_o U + 2i\omega_o \kappa x_a^\ast x_b^\ast \\
+(i\Delta_a+\gamma_a)x_a & = & 2i\omega_a \kappa x_o^\ast x_b^\ast \\
+(i\Delta_b+\gamma_b)x_b & = & 2i\omega_b \kappa x_o^\ast x_a^\ast
+\end{eqnarray}
+
+Now, if we take the two daughter equations, we can write
+
+\begin{eqnarray}
+(i\Delta_a+\gamma_a)(-i\Delta_b+\gamma_b)x_a & = & 2i\omega_a \kappa x_o^\ast \left( (i\Delta_b+\gamma_b)x_b \right)^\ast \\
+& = & 4\omega_a\omega_b\kappa^2 |x_o|^2 \\
+(\Delta_a\Delta_b + \gamma_a\gamma_b) + i(\Delta_a\gamma_b - \Delta_b\gamma_a) & = & 4\omega_a\omega_b\kappa^2 |x_o|^2 \in \mathbb{R} x_a
+\end{eqnarray}
+
+This implies that
+
+\begin{eqnarray}
+\Delta_b\gamma_a & = & \Delta_a\gamma_b \\
+\Delta_a\Delta_b + \gamma_a\gamma_b & = & 4\kappa^2\omega_a\omega_b|x_o|^2
+\end{eqnarray}
+
+from which we obtain
+
+\begin{equation}
+|x_o|^2 = A_o^2 = \frac{\gamma_a\gamma_b}{4\kappa^2\omega_a\omega_b}\left(1+\frac{\Delta_a\Delta_b}{\gamma_a\gamma_b}\right) = \frac{\gamma_a\gamma_b}{4\kappa^2\omega_a\omega_b}\left(1+\left(\frac{\Delta_a + \Delta_b}{\gamma_a+\gamma_b}\right)^2 \right)
+\end{equation}
+
+which we obtain by clever mainipulation with $\Delta_a\gamma_b = \Delta_b\gamma_a$. Furthermore, we recognize this as the instability threshold $A_{thr}$. Therefore, we expect that in the presence of \emph{only} 3mode couplings the parent's amplitude will drop the the minimum $A_{thr}$, which will render all other couplings stable. 
+
+Using the daughter equations again, we recognize that
+
+\begin{equation}
+\frac{(i\Delta_a+\gamma_a)x_a}{\omega_a x_b^\ast} = 2i\kappa x_o^\ast = \frac{(i\Delta_b+\gamma_b)x_b}{\omega_b x_a^\ast}
+\end{equation}
+
+from which we immediately obtain
+
+\begin{eqnarray}
+\frac{i\Delta_a+\gamma_a}{\omega_a}|x_a|^2 & = & \frac{i\Delta_b+\gamma_b}{\omega_b}|x_b|^2 \\
+\Rightarrow \frac{\Delta_a}{\omega_a}|x_a|^2 & = & \frac{\Delta_b}{\omega_b}|x_b|^2 \\
+\Rightarrow \frac{\gamma_a}{\omega_a}|x_a|^2 & = & \frac{\gamma_b}{\omega_b}|x_b|^2
+\end{eqnarray}
+
+where the last two equations are redundant. We can then write
+
+\begin{equation}
+\left(\frac{A_a}{A_b}\right)^2 = \frac{\gamma_b \omega_a}{\gamma_a \omega_b}
+\end{equation}
+
+If we further define $x=Ae^{i\delta}$, then we can write
+
+\begin{eqnarray}
+(i\Delta_a+\gamma_a)A_a & = & 2i\omega_a \kappa A_o A_b e^{-i(\delta_o+\delta_a+\delta_b)} \\
+\Rightarrow (i\Delta_a+\gamma_a)\frac{A_a}{A_b} & = & i 2\omega_a \kappa Ao e^{-i(\delta_o+\delta_a+\delta_b)} \\
+\gamma_a \frac{A_a}{A_b} & = & 2\omega_a\kappa A_o \sin\delta \\
+\Delta_a \frac{A_a}{A_b} & = & 2\omega_a\kappa A_o \cos\delta
+\end{eqnarray}
+
+where $\delta = \delta_o+\delta_a+\delta_b$. We obtain the following solution for $\delta$
+
+\begin{eqnarray}
+\sin\delta & = & \frac{1}{2\kappa A_o}\sqrt{ \frac{\gamma_a\gamma_b}{\omega_a\omega_b} } \\
+\cos\delta & = & \frac{1}{2\kappa A_o}\sqrt{ \frac{\Delta_a\Delta_b}{\omega_a\omega_b} } \\
+\tan\delta & = & \sqrt{ \frac{\gamma_a\gamma_b}{\Delta_a\Delta_b}}
+\end{eqnarray}
+
+
+Which leaves us with 2 phases (some linear combination of $\delta_o$, $\delta_a$, $\delta_b$) and one amplitude ($A_aA_b$ combined with $A_a/A_b$) still undetermined. For these, we must examine the parent's equation.
+
+\begin{eqnarray}
+(i\Delta_o+\gamma_o)A_o & = & i\omega_o U e^{-i\delta_o} + 2i\omega_o\kappa A_aA_b e^{-i(\delta_o+\delta_a+\delta_b)} \\
+\Rightarrow \Delta_o A_o & = & \omega_o U \cos\delta_o + 2\omega_o\kappa A_aA_b \cos\delta \\
+\gamma_oA_o & = & \omega_o U \sin\delta_o + 2\omega_o\kappa A_aA_b \sin\delta
+\end{eqnarray}
+
+We can re-write these equations as follows:
+
+\begin{eqnarray}
+\Delta_oA_o - 2 \omega_o \kappa A_aA_b\cos\delta_o & = & \omega_o U \cos\delta_o \\
+\Delta_oA_o - \omega_o \frac{A_aA_b}{A_o}\sqrt{\frac{\Delta_a\Delta_b}{\omega_a\omega_b} }& = & \\
+\gamma_oA_o - 2 \omega_o \kappa A_aA_b\sin\delta_o & = & \omega_o U \sin\delta_o \\
+\gamma_oA_o - \omega_o \frac{A_aA_b}{A_o}\sqrt{ \frac{\gamma_a\gamma_b}{\omega_a\omega_b} } & = & \\
+\end{eqnarray}
+
+from which we can eliminate the terms depending on $\delta_o$.
+
+\begin{equation}
+\Delta_o^2A_o^2 + \omega_o^2 \left( \frac{A_aA_b}{A_o} \right)^2 \frac{\Delta_a\Delta_b}{\omega_a\omega_b} - 2\Delta_o\omega_o A_aA_b \sqrt{ \frac{\Delta_a\Delta_b}{\omega_a\omega_b} } + \gamma_o^2A_o^2 + \omega_o^2 \left( \frac{A_aA_b}{A_o} \right)^2 \frac{\gamma_a\gamma_b}{\omega_a\omega_b} - 2\gamma_o\omega_o A_aA_b \sqrt{ \frac{\gamma_a\gamma_b}{\omega_a\omega_b} } = \omega_o^2 U^2
+\end{equation}
+
+
+This equation is quadratic in $A_aA_b$, so we can solve.
+
+\begin{equation}
+2A_aA_b =\frac{ 2\omega_o\left(\Delta_o\sqrt{ \frac{\Delta_a\Delta_b}{\omega_a\omega_b} } + \gamma_o \sqrt{ \frac{\gamma_a\gamma_b}{\omega_a\omega_b} }\right) \pm \sqrt{ 4\omega_o^2 \left(\Delta_o\sqrt{ \frac{\Delta_a\Delta_b}{\omega_a\omega_b} } + \gamma_o \sqrt{ \frac{\gamma_a\gamma_b}{\omega_a\omega_b} }\right)^2 - 4\omega_o^2\left(\frac{\Delta_a\Delta_b + \gamma_a\gamma_b}{\omega_a\omega_b}\right)Ao^{-2}\left((\Delta_o^2+\gamma_o^2)Ao^2 - \omega_o^2 U^2\right) } }{\frac{\omega_o^2}{\omega_a\omega_b}(\Delta_a\Delta_b + \gamma_a\gamma_b)A_o^{-2} }
+\end{equation}
+
+with some manipulation, this can be coaxed into the following form
+
+\begin{eqnarray}
+A_aA_b & = & (4\kappa^2\omega_o)^{-1}\sqrt{\frac{\gamma_a\gamma_b}{\omega_a\omega_b}} \left(\frac{\Delta_o|\Delta_a+\Delta_b| + \gamma_o|\gamma_a+\gamma_b|}{|\gamma_a + \gamma_b|}\right) \\
+       &   & \times \left[ 1 + \sqrt{1 + \frac{\omega_a\omega_b}{\gamma_a\gamma_b}\left(\frac{\Delta_o|\Delta_a+\Delta_b| + \gamma_o|\gamma_a+\gamma_b|}{|\gamma_a + \gamma_b|}\right)^{-2}4\kappa^2(\Delta_o^2 + \gamma_o^2)(A_{lin}^2 - A_{thr}^2) } \right]
+\end{eqnarray}
+
+where 
+
+\begin{equation}
+A_{lin} = \frac{\omega_o^2 U^2}{\Delta_o^2 + \gamma_o^2}
+\end{equation}
+
+We can also compute 
+
+\begin{eqnarray}
+\cos\delta_o & = & \frac{\Delta_oA_o}{\omega_oU} - \frac{A_aA_b}{A_oU}\sqrt{\frac{\Delta_a\Delta_b}{\omega_a\omega_b}} \\
+             & = & \left( 1 + \left( \frac{\Delta_a+\Delta_b}{\gamma_a+\gamma_b}\right)^2 \right)^{-1/2} \leq 1 \\
+\sin\delta_o & = & \frac{\gamma_oA_o}{\omega_oU} - \frac{A_aA_b}{A_oU}\sqrt{\frac{\gamma_a\gamma_b}{\omega_a\omega_b}} \\
+             & = & \left( 1 + \left( \frac{\gamma_a+\gamma_b}{\Delta_a+\Delta_b}\right)^2 \right)^{-1/2} \leq 1
+\end{eqnarray}
+
+Similarly, we can get $(\delta_a\delta_b)$ from trig identities with knowledge of $\delta_o$ and $\delta$. We note that there is a degeneracy between $\delta_a$ and $\delta_b$ which comes from the redundant frequency conditions that remove the time dependence in the daughter equations. This degeneracy appears to be real and the final $\delta_a$, $\delta_b$ depend on the initial conditions.
+

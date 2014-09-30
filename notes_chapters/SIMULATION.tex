@@ -1,0 +1,195 @@
+\section*{Simulation}
+
+simulate several sets of equations:
+\begin{enumerate}
+\item{full perturbations about non-linear equilibrium to $O(X^2)$.}
+\item{multi-scale equations.}
+\end{enumerate}
+
+plot time-frequency domain? use wavelet transforms? will this be interesting? If so, probably only on large scales.
+
+\subsection*{mode selection algorithms}
+
+We've considered two main mechanisms that de-stabilize daughter modes. These can be broadly classified as either 3mode or collective interactions. Here, we describe algorithms to select daughter modes and couplings based on these criteria.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection*{$E_{thr}$}
+
+The first 3mode criterion is to use the exact stability threshold for the parent's amplitude. This takes the form 
+
+\begin{equation}
+A_{thr}^2 = \frac{\gamma_a \gamma_b}{4\kappa^2\omega_a\omega_b}\left(1+\left(\frac{\Omega+\omega_a+\omega_b}{\gamma_a+\gamma_b}\right)^2\right)
+\end{equation}
+
+and for \emph{ggg} couplings, we have the scaling relations for g-mode parameters
+
+\begin{eqnarray}
+\omega & = & \alpha\frac{l}{n} \\
+\gamma & = & c \omega_o^3 \omega^{-2} l(l+1) \\
+       & = & c \omega_o^3 \alpha^{-2} n^2 (1+\frac{1}{l}) \\
+       & = & \sigma \alpha n^2 L
+\end{eqnarray}
+
+Substituting these into the definition of $A_{thr}$, and defining $\eta = |\Omega|/alpha$, we obtain
+
+\begin{equation}
+A_{thr}^2 = \frac{L_a L_b n_a^3 n_b^3}{4\kappa^2 l_a l_b}\left( \sigma^2 + \left(\frac{\eta - \frac{l_a}{n_a} - \frac{l_b}{n_b}}{n_a^2 L_a + n_b^2 L_b} \right)^2 \right)
+\end{equation}
+
+which is complicated. However, if we decide to find the optimal $n_b$ given $l_a$, $l_b$, $m_a$, $m_b$, and $n_a$ then there is a straightforward optimization problem. Differentiating with respect to $n_b$ and factoring out any constant terms yields
+
+\begin{equation}
+\frac{\partial}{\partial n_b} \frac{4\kappa^2 A_{thr}^2 l_a l_b}{L_a L_b na^3} = 3n_b^2\left( \sigma^2 + \left(\frac{\eta - \frac{l_a}{n_a} - \frac{l_b}{n_b}}{n_a^2 L_a + n_b^2 L_b} \right)^2 \right) + n_b^3\left( \frac{2\frac{l_b}{n_b^2}(\eta - \frac{l_a}{n_a} - \frac{l_b}{n_b})}{(n_a^2 L_a + n_b^2 L_b)^2} - \frac{4n_b L_b (\eta - \frac{l_a}{n_a} - \frac{l_b}{n_b})^2}{(n_a^2 L_a + n_b^2 L_b)^3} \right)
+\end{equation}
+
+observing that $(n_a^2 L_a + n_b^2 L_b)$ is positive definite, we can factor it out and obtain a \emph{polynomial} equation for $n_b$. Explicitly, we obtain
+
+\begin{equation}
+0 = \left[3\sigma^2L_b^3\right] n_b^8 + \left[9\sigma^2 n_a^2 L_a L_b^2\right] n_b^6 + \left[9\sigma^2n_a^4L_aL_b-L_b\Theta\right] n_b^4 + \left[4l_bL_b\Theta\right]n_b^3 + \left[3\sigma^2n_a^6L_a^3 + 3n_a^2L_a\Theta^2 - 3L_bl_b^2\right]n_b^2 -\left[4n_a^2L_al_b\Theta\right]n_b + \left[n_a^2 L_a l_b^2\right]
+\end{equation}
+
+where 
+
+$\Theta = \eta - \frac{l_a}{n_a}$ 
+
+By iterating through all allowed $l_a$, $l_b$, $m_a$, $m_b$, and $n_a$, we can numerically solve for the optimal $n_b$ (choosing neighboring points if the solution is not an integer). This reduces the computational cost from $O(N^2)$ for a brute-force iteration to $O(N)$.
+
+Furthermore, it does not make much sense to find the global minima of this function. Because the parameters are restricted to integers, it is often the case that the allowed minima live far away from the (continuous) global minima. For example, there could be an allowed set of integers that lives very close to the minimum detuning line. If the distance of the closest point to the global minimum is relatively large, the better-placed parameter set near the line of zero detuning could have a lower $A_{thr}$. For this reason, we need to iterate over all allowed $n_a$ and record the best $n_b$ as outlined above.
+
+Lastly, once we have these local minima\footnote{These may not be true local minima in the full parameter space, but they are in the restricted problem described here.} defined, we can build sets of modes by exploring the parameter space around all these minima simultaneously. Essentially, we can climb out of all the wells at once and select the next-lowest $A_{thr}$ pair from all the wells.\footnote{For extremely large networks, we may have to worry about boundaries from frequency limits, etc, but those should be a small set if the frequency limits are rather forgiving.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection*{heuristic}
+
+A somewhat simpler selection criteria is the following
+
+\begin{equation}
+\left(\gamma_a+\gamma_b\right)^2 + \left(\Omega+\omega_a+\omega_b\right)^2
+\end{equation}
+
+which models the trade-off between small damping rates (small $n$) and small detunings (typical of large $n$). By following a similar proceedure, we can obtain a 6$^{th}$ order polynomial (instead of 8$^{th}$ order) for $n_b$):
+
+\begin{equation}
+0 = \left[2\sigma^2L_b^2\right]n_b^6 + \left[2L_aL_bn_a^2\sigma^2\right]n_b^4 + \left[l_b\left(\eta-\frac{l_a}{n_a}\right)\right]n_b - l_b^2
+\end{equation}
+
+again, numerical solution of this polynomial equation can greatly reduce the computational cost associated with minimizing this functional.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection*{collective $E_{thr}$}
+
+We define a \emph{collective} $E_{thr}$ for a single mode as follows:
+
+\begin{equation}
+A_{coll}^2 = \frac{A_{thr}}{N}
+\end{equation}
+
+where $N$ is the number of triples couplings to this mode for which $\left(A_{thr}\right)_i\leq A_{thr}$. This is a qualitative guess at the stability criteria for many collectively-coupled modes. We can search for such modes given a starting point by expanding ``bubbles'' in parameter space around the two original modes. In this algorithm, we have two sets of \emph{included modes}, each staring around one of the original daughters that seed the algorithm. We also have two sets of \emph{boarder modes} that encircle the \emph{included modes}. We iterate over each \emph{boarder mode} and compute it's coupling to every \emph{included mode}. We can then associate an $A_{coll}$ with each boarder mode, representing the $A_{thr}$ it would have if it were added to the \emph{included modes}.\footnote{Note that we don't include couplings to other boarder modes while a mode is still in the boarder}. Iterating over \emph{boarder modes} and selecting the one with lowest $A_{coll}$ allows us to increase the \emph{included modes} set. We then expand the boarder as needed and repeat.
+
+This algorithm depends on a seed coupling around which it explores the parameter space. Typically, collective instabilities are important for relatively \emph{high-l} modes. In this limit, we can somewhat safely assume that the detuning vanishes, in which case $A_{thr}$ for fixed $l_a$, $l_b$, $m_a$, $m_b$ is simply
+
+\begin{equation}
+A_{thr} \propto \left(\omega_a \omega_b\right)^{-3}
+\end{equation}
+
+and by equating the two daughter frequencies we can minimize this threshold. This gives us a natural seed for each allowed combination of $l_a$, $l_b$, $m_a$, and $m_b$. Iterating over $l_a$, $l_b$, $m_a$, and $m_b$ allows us to fully explore the parameter space.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection*{Comments on installing software tools}
+
+tar-balls are available online via the distribution web-sites. 
+
+\emph{INSTALLING Python2.7}
+\begin{itemize}
+  \item{tar -xzf Python2.7}
+  \item{cd Python2.7}
+  \item{./configure --prefix=\$PYTHON\_INSTALL\_PATH}
+  \item{make}
+  \item{make install}
+\end{itemize}
+
+To make this your default Python installation, you can either set \$PYTHON\_INSTALL\_PATH to be the first element of your path, or you can explicitly set the alias
+
+alias python=\$PYTHON\_INSTALL\_PATH/python
+
+\emph{INSTALLING gsl}:
+\begin{itemize}
+  \item{tar -xzf gsl-version}
+  \item{cd gsl-version}
+  \item{./configure --prefix=\$GSL\_PATH}
+  \item{make}
+  \item{make install}
+\end{itemize}
+
+where \$GSL\_PATH is the location into which all executables will be written. To use GSL, \$GSL\_PATH must be in your search path.
+
+\emph{INSTALLING pygsl}:
+Requires Python 2.2 or above and numpy or Numeric
+\begin{itemize}
+  \item{tar -xzvf pygsl-version}
+  \item{cd pygsl-version}
+  \item{python setup.py build --gsl-prefix=\$GSL\_PATH}
+%  \item{python setup.py build\_ext -i}
+  \item{python setup.py install --home=\$PYGSL\_PATH}
+\end{itemize}
+
+You will need ``gsl-config'' in your path. This can typically be found under \$GSL\_PATH/bin/. You will also need to make sure that \emph{shared libraries} are correctly exported. This can be done by setting \$LD\_LIBRARY\_PATH=\$GSL\_PATH/lib/ .
+
+I've also run into problems with some of the `ufuncs\_testing' routines that are run by pygsl before it builds successfully. You should be able to get around that by commenting out the offending lines in setup.py. Then running the commands listed above successfully installs pygsl. 
+
+\textbf{to force installation with a specific array library, use the ``--array-object=numpy'' command. Substitute ``Numeric'' for ``numpy'' if desired. This option should be supplied to ALL commands involving setup.py .}
+
+\textbf{We can install some of these packages using older versions of python. To do so, we simply run the installation commands using ``/usr/bin/python2.4'' to install with python version 2.4, for example.}
+
+This will set up the PYGSL executables in \$PYGSL\_PATH, and this needs to be in the search path to import pygsl. There are further commands that can be used to install the package in something like /usr/bin/pygsl/, but I've found that those may not be possible (permissions on clusters, etc.) and simply appending the python-path by hand is sufficient for my needs.
+
+\emph{INSTALLING numpy}:
+Requires Python 2.4 or above
+\begin{itemize}
+  \item{tar -xzvf numpy-version}
+  \item{cd numpy-version}
+  \item{python setup.py build}
+  \item{python setup.py install --home=\$NUMPY\_PATH}
+\end{itemize}
+
+
+\emph{INSTALLING matplotlib}:
+Requires Python 2.6 or above
+\begin{itemize}
+  \item{tar -xzvf matplotlib-version}
+  \item{cd matplotlib-version}
+  \item{python setup.py build}
+  \item{python setup.py install --home=\$MATPLOTLIB\_PATH}
+\end{itemize}
+
+
+\emph{INSTALLING sympy}:
+Requires Python 2.5 or above
+\begin{itemize}
+  \item{tar -xzvf sympy-version}
+  \item{cd sympy-version}
+  \item{python setup.py build}
+  \item{python setup.py install --home=\$SYMPY\_PATH}
+\end{itemize}
+
+
+\emph{INSTALLING openMPI}
+\begin{itemize}
+  \item{tar -xvf openmpi-version}
+  \item{cd openmpi-version}
+  \item{./configure --prefix=\$OPENMPI\_PATH}
+  \item{make}
+  \item{make install}
+\end{itemize}
+
+Be sure you add \$OPENMPI\_PATH/bin to your path and \$OPENMPI\_PATH/lib to your LD\_LIBRARY\_PATH.
+
+\emph{INSTALLING mpi4py}
+\begin{itemize}
+  \item{tar -xzvf mpi4py-version}
+  \item{cd mpi4py-version}
+  \item{python setup.py build --mpicc=\$MPICC\_PATH/mpicc}
+  \item{python setup.py install --home=\$MPI4PY\_PATH}
+\end{itemize}
+
+

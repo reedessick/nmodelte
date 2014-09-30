@@ -1,0 +1,23 @@
+\section*{Summary of non-linear equilibrium solution}
+
+We present a concice summarize of the non-linear equilibria solutions here:
+\begin{subequations}
+\begin{align}
+\Delta_0 & = \omega_0 - \Omega \\
+\Delta_1 & = \left(\frac{\Omega + \omega_1 + \omega_2}{1 + \gamma_2/\gamma_1}\right) \\
+\Delta_2 & = \left(\frac{\Omega + \omega_1 + \omega_2}{1 + \gamma_1/\gamma_2}\right) \\
+A_0 & = \frac{1}{2\kappa}\sqrt{\frac{\gamma_1\gamma_2 + \Delta_1\Delta_2}{\omega_1\omega_2}} \\
+A_1 & = \frac{1}{2\kappa}\sqrt{\frac{\gamma_0\gamma_2}{\omega_0\omega_2}}\left[\left(\frac{\Delta_0}{\gamma_0}\sqrt{\frac{\Delta_1\Delta_2}{\gamma_1\gamma_2}} + 1 \right) - 2\kappa U \frac{\omega_0}{\gamma_0}\sqrt{\frac{\omega_1\omega_2}{\gamma_1\gamma_2}}\cos(\delta_1 + \delta_2)\right]^{1/2} \\
+A_2 & = \frac{1}{2\kappa}\sqrt{\frac{\gamma_0\gamma_1}{\omega_0\omega_1}}\left[\left(\frac{\Delta_0}{\gamma_0}\sqrt{\frac{\Delta_1\Delta_2}{\gamma_1\gamma_2}} + 1 \right) - 2\kappa U \frac{\omega_0}{\gamma_0}\sqrt{\frac{\omega_1\omega_2}{\gamma_1\gamma_2}}\cos(\delta_1 + \delta_2)\right]^{1/2} \\
+\tan\delta & = \gamma_1/\Delta_1 = \gamma_2/\Delta_2 \\
+           & \mathrm{\ \ with\ the\ constraint\ that\ } \sin\delta \geq 0 \\
+\sin(\delta_1 + \delta_2) & = \frac{A_0}{\omega_0 U}(\Delta_0\sin\delta - \gamma_0\cos\delta) \\
+           & \mathrm{\ \ with\ the\ constraint\ that\ } A_1, A_2 \geq 0 \mathrm{\ and\ } A_1, A_2 \in \mathbb{R} \\
+U & \geq \frac{\gamma_0}{2\kappa\omega_0}\sqrt{\frac{\gamma_1\gamma_2}{\omega_1\omega_2}}\left| \frac{\Delta_0}{\gamma_0} - \sqrt{\frac{\Delta_1\Delta_2}{\gamma_1\gamma_2}} \right|
+\end{align}
+\end{subequations}
+and we remind ourselves that for a given mode, the actual amplitude in equilibrium will look like
+\begin{equation}
+q_j = A_j e^{i\{\delta_j - (\omega_j - \Delta_j)t \}}
+\end{equation}
+and that we cannot determine $\delta_1$ and $\delta_2$ separately, but only constrain their sum (which is equivalent to constraining $\delta$ and $\delta_0$).

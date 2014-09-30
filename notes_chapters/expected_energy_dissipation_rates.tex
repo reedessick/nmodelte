@@ -1,0 +1,157 @@
+\section*{Expected energy dissipation rates}
+
+If we define the energy of our system to be
+\begin{equation}
+E/E_o = \sum_j q_j^\ast q_j
+\end{equation}
+where $E_o$ is a normalization factor, then we can write down the energy dissipation rate from the (\ref{eq:3mode_amplitude_eqn's}).
+\begin{subequations}
+\begin{align}
+\dot{E}/E_o  = & \sum_j \dot{q}_j^\ast q_j + q_j^\ast \dot{q}_j \\
+             = & \sum_j q_j \left( (i\omega_j - \gamma_j)q_j^\ast - i\omega_j U_j e^{i\Omega t} -i\omega_j\sum_{m,n}\kappa_{jmn}q_m q_n \right) \\ 
+               & + \sum_j q_j^\ast \left( (-i\omega_j -\gamma_j)q_j + i\omega_j U_j e^{-i\Omega t} + i\omega_j\sum{m,n}\kappa_{jmn}q_m^\ast q_n^\ast \right) \\
+             = & \sum_j\left[ -2\gamma_j q_j^\ast q_j + i\omega_j U_j \left( q_j^\ast e^{-i\Omega t} - q_j e^{i\Omega t} \right) + i\omega_j \sum_{m,n} \kappa_{jmn}\left(q_j^\ast q_m^\ast q_n^\ast - q_j q_m q_n\right)\right]
+\end{align}
+\end{subequations}
+And if we specialize to our simplified 3mode system in equilibrium, this condition reduces to:
+\begin{equation}
+\dot{E}/E_o = -2\left(\gamma_0 A_0^2 + \gamma_1 A_1^2 + \gamma_2 A_2^2\right) + 2\omega_0 U A_0 \sin\delta_a + 4\kappa\left(\omega_0 + \omega_1 + \omega_2\right) A_0 A_1 A_2\sin\delta
+\end{equation}
+Now, in equilibrium we expect $\dot{E} = 0$ because the amplitudes are constant. This should be the case for our equilibrium solution.
+
+We can also identify the three terms in this expression.
+\begin{enumerate}
+\item{$-2\left(\gamma_0 A_0^2 + \gamma_1 A_1^2 + \gamma_2 A_2^2\right)$: this is the linear damping associated with each mode.}
+\item{$2\omega_0 U A_0 \sin\delta_a$: this is the interaction with the linear tide, and can either increase or decrease the energy in the system depending on $\sin\delta_0$.}
+\item{$4\kappa\left(\omega_0 + \omega_1 + \omega_2\right) A_0 A_1 A_2\sin\delta$: this is an energy exchange between the modes. We should note, that a complete system would include both positive and negative frequencies in the summation. The linear eigenvalues include both, but we only consider the resonant terms and artificially truncate the list. If both positive and negative frequencies are included, then we observe a term-by-term cancellation in the sum over frequencies. Therefore, this term should vanish in a complete system. \textbf{I'm not 100\% on this.}}
+\end{enumerate}
+Because the third term should vanish, we see that $\sin\delta_a$ should be positive and we can expect the energy removed from the system to be entirely due to the linear damping. Therefore, the energy removed from the system should be
+\begin{equation}\label{damping only}
+\dot{E}_{\mathrm{orb}}/E_o = -2\left(\gamma_0 A_0^2 + \gamma_1 A_1^2 + \gamma_2 A_2^2\right)
+\end{equation}
+
+We note that the energy removed from the orbit may not be given by $-2\sum\gamma_i A_i^2$, because this value could contain contributions from energy stored in the stellar modes, etc. A better way to model the orbial evolution as influenced by tidal excitations is to look at the interaction Hamiltonian.
+
+\begin{equation} \label{Hint}
+H_{\mathrm{int}} = - \frac{G \mu M_{\Sigma}}{R} \sum_{l,m} W_{lm} \left(\frac{R}{D}\right)^{l+1} e^{-i m \Phi} \sum_{a} \left[ I_{alm} q_a^\ast + \frac{1}{2}\sum_{b} J_{ablm} q_a q_b \right]
+\end{equation}
+
+where the sums over $a$,$b$ include all mode numbers $(n_a,l_a,m_a)$ as well as ``frequency sign,'' which I will denote as $a,\bar{a}$, which are related by the reality constraint for $\vec{\xi}$, the lagrangian displacement vector (given below). $\mu$ is the reduced mass ($M M^\prime/(M+M^\prime)$) and $M_{\Sigma}$ is the total mass ($M+M^\prime$). We also have $W_{lm} = 4\pi (2l+1)^{-1} Y_{lm}(\theta=\pi/2,\phi=0)$. The overlap integrals $I_{alm}$ and $J_{ablm}$ are given by
+\begin{subequations}
+\begin{align}
+I_{alm}   = & \frac{1}{M R^l} \int \mathrm{d}^3 x \rho \vec{\xi}_a^\ast \cdot \vec{\nabla} \left(r^l Y_{lm}\right) \\
+J_{ablm}  = & \frac{1}{M R^l} \int \mathrm{d}^3 x \rho \vec{\xi}_a \cdot \left(\vec{\xi}_b\cdot\vec{\nabla}\right) \vec{\nabla}\left(r^l Y_{lm} \right) \\
+          = & \frac{1}{M R^l} \int \mathrm{d}^3 x \rho (\vec{\xi}_a)^i (\vec{\xi}_b)^j \left(r^l Y_{lm} \right)_{;ij}
+\end{align}
+\end{subequations}
+where we've used tensor notation and the Einstein summation convention in the last line. We also note that $\rho$ is spherically symmetric (the unperturbed mass distribution) so that the angular integrations depend on products of $Y_{lm}$ factors \emph{only}.
+
+Our equations depend on the decomposition
+
+\begin{equation}
+\begin{bmatrix} \vec{\xi} \\ \partial_t \vec{\xi} \end{bmatrix}
+= 
+\sum_{a} q_a(t) \begin{bmatrix} \vec{\xi}_a \\ -i\omega_a\vec{\xi}_a \end{bmatrix}
+\end{equation}
+
+where $\vec{\xi}_a = \left( a_r Y_a, \frac{a_h}{r} \partial_{\theta} Y_a, \frac{a_h}{r \sin\theta} \partial_{\phi} Y_a \right)$ and $\vec{\xi}, \partial_t \vec{xi} \in \mathbb{R}^3$. We note that the only sensible definition of $a \leftrightarrow \bar{a}$ is as follows:
+\begin{subequations}
+\begin{align}
+q_a & =  q_{\bar{a}}^\ast \\
+\vec{\xi}_a & =  \vec{\xi}_{\bar{a}}^\ast \\
+\omega_a & =  -\omega_{\bar{a}}
+\end{align}
+\end{subequations}
+
+This means our decompostion reads
+\begin{equation}
+\begin{bmatrix} \vec{\xi} \\ \partial_t \vec{\xi} \end{bmatrix}
+= 
+\sum_{n_a,l_a,m_a} \begin{bmatrix} q_a\vec{\xi}_a + q_{\bar{a}}\vec{\xi}_{\bar{a}} \\ -i\omega_a\left( q_a\vec{\xi}_a - q_{\bar{a}}\vec{\xi}_{\bar{a}} \right) \end{bmatrix}
+\end{equation}
+and with our requirements relating a mode and it's complex conjugate ensure that these are real fields.
+
+We should also note that $Y_{lm}^\ast = Y_{l(-m)}$, which will be useful. In particular, it lets us note the convenient facts
+\begin{subequations}
+\begin{align}
+I_{alm}  = & I_{\bar{a}l(-m)}^\ast = I_{\bar{a}l(-m)}\\
+J_{ablm}  = & J_{\bar{a}\bar{b}l(-m)}^\ast = J_{\bar{a}\bar{b}l(-m)}
+\end{align}
+\end{subequations}
+where we've used the fact that $I_{alm},J_{ablm} \in \mathbb{R}$. 
+
+We can now re-write \ref{Hint} explicitly in terms of sums over $a$ and $\bar{a}$ components. This yields
+\begin{subequations}
+\begin{align}
+H_{\mathrm{int}}  = & - \frac{G \mu M_{\Sigma}}{R} \sum_{l,m} W_{lm} \left(\frac{R}{D}\right)^{l+1} e^{-i m \Phi} \sum_{a} \left[I_{alm} q_a^\ast + \frac{1}{2}\sum_{b} J_{ablm} q_a q_b \right] \\
+                  = & - \frac{G \mu M_{\Sigma}}{R} \sum_{l,m} W_{lm} \left(\frac{R}{D}\right)^{l+1} e^{-i m \Phi} \sum_{n_a, l_a, m_a} \left[I_{alm}q_a^\ast + I_{\bar{a}lm}q_{\bar{q}}^\ast \right. \\ 
+                    & \left. + \frac{1}{2}\sum_{n_b,l_b,m_b} \left(J_{ablm}q_aq_b + J_{\bar{a}blm}q_{\bar{a}}q_b + J_{a\bar{b}lm}q_a q_{\bar{b}} + J_{\bar{a}\bar{b}lm}q_{\bar{a}}q_{\bar{b}} \right) \right]
+\end{align}
+\end{subequations}
+
+We note that we sum over all possible values of $m$, so we are free to re-label this dummy index as $m\rightarrow\tilde{m}=-m$ as long as we do this consistently throughout all terms involved in that particular sum. This freedom allows us to write
+\begin{subequations}
+\begin{align}
+H_{\mathrm{int}}  = & - \frac{G \mu M_{\Sigma}}{R} \sum_{l,m} W_{lm} \left(\frac{R}{D}\right)^{l+1} \sum_{n_a, l_a, m_a} \left[I_{alm}q_a^\ast e^{-i m \Phi} + I_{\bar{a}l(-m)}q_{\bar{a}}^\ast e^{+i m \Phi} \right. \\
+                    & \left. + \frac{1}{2}\sum_{n_b,l_b,m_b} \left(J_{ablm}q_a q_b e^{-i m \Phi} + J_{\bar{a}\bar{b}lm}q_{\bar{a}}q_{\bar{b}} e^{+i m \Phi} \right. \right.\\
+                    & \left. \left. + \frac{1}{2}\left( J_{\bar{a}blm}q_{\bar{a}} q_b e^{-i m \Phi} + J_{a\bar{b}l(-m)}q_a q_{\bar{b}} e^{+i m \Phi} + J_{\bar{a}bl(-m)}q_{\bar{a}} q_b e^{+i m \Phi} + J_{a\bar{b}lm}q_a q_{\bar{b}} e^{-i m \Phi} \right) \right) \right]
+\end{align}
+\end{subequations}
+where we've written the last terms so they are obviously symmetric under $a \leftrightarrow b$. Using the symmetry properties of $I_{alm}$, $J_{ablm}$, and $q_{a}$ under the interchange $a\leftrightarrow b$, we can re-write this as
+\begin{subequations}
+\begin{align}
+H_{\mathrm{int}}  = & - \frac{G \mu M_{\Sigma}}{R} \sum_{l,m} W_{lm} \left(\frac{R}{D}\right)^{l+1} \sum_{n_a, l_a, m_a} \left[I_{alm}q_a^\ast e^{-i m \Phi} + \left(I_{alm}q_{a}^\ast e^{-i m \Phi}\right)^\ast \right. \\
+                    & \left. + \frac{1}{2}\sum_{n_b,l_b,m_b} \left(J_{ablm}q_a q_b e^{-i m \Phi} + \left(J_{ablm}q_{a}q_{b} e^{-i m \Phi}\right)^\ast \right. \right.\\
+                    & \left. \left. + \frac{1}{2}\left( J_{\bar{a}blm}q_{\bar{a}} q_b e^{-i m \Phi} + \left(J_{\bar{a}blm}q_{\bar{a}} q_{b} e^{-i m \Phi}\right)^\ast \right. \right. \right. \\
+                    & \left. \left. \left. + J_{a\bar{b}lm}q_{a} q_{\bar{b}} e^{-i m \Phi} + \left(J_{a\bar{b}lm)}q_{a} q_{\bar{b}} e^{-i m \Phi}\right)^\ast \right) \right) \right] \\
+                  = & - \frac{G \mu M_{\Sigma}}{R} \sum_{l,m} W_{lm} \left(\frac{R}{D}\right)^{l+1} \sum_{n_a, l_a, m_a} \left[ 2\mathbb{R}\left\{I_{alm}q_a^\ast e^{-i m \Phi}\right\} \right. \\
+                    & \left. + \frac{1}{2}\sum_{n_b,l_b,m_b} \left( 2\mathbb{R}\left\{J_{ablm}q_a q_b e^{-i m \Phi}\right\} \right. \right.\\
+                    & \left. \left. + \frac{1}{2}\left( 2\mathbb{R}\left\{J_{\bar{a}blm}q_{a}^\ast q_b e^{-i m \Phi}\right\} + 2\mathbb{R}\left\{J_{a\bar{b}lm}q_{a} q_{b}^\ast e^{-i m \Phi}\right\} \right) \right) \right] 
+\end{align}
+\end{subequations}
+
+
+Furthermore, $\vec{\xi}_a = \left( a_r Y_a, \frac{a_h}{r} \partial_{\theta} Y_a, \frac{a_h}{r \sin\theta} \partial_{\phi} Y_a \right)$, and $a_r, a_h \in \mathbb{R}$ do not depend on the azimuthal mode number $m$. This means the only dependence on $m$ is due to the $Y_{lm}$ factors\footnote{This is to be expected for non-rotating spherically symmetric stars.}. This means that $\vec{\xi}_{n_a,l_a,m_a} = \left(\vec{\xi}_{n_a,l_a,(-m_a)}\right)^\ast$. We can then write $I_{\bar{a}lm} \rightarrow I_{alm}$ and $J_{\bar{a}blm} \rightarrow J_{ablm}$ as long as we also make the exchange $m_a \rightarrow -m_a$. Now, because we are summing over all possible $m_a$, we can simply make this interchange.
+
+\begin{subequations}
+\begin{align}
+H_{\mathrm{int}}  = & - \frac{G \mu M_{\Sigma}}{R} \sum_{l,m} W_{lm} \left(\frac{R}{D}\right)^{l+1} \sum_{n_a, l_a, m_a} \left[ 2\mathbb{R}\left\{I_{alm}q_a^\ast e^{-i m \Phi}\right\} \right. \\
+                    & \left. + \frac{1}{2}\sum_{n_b,l_b,m_b} \left( 2\mathbb{R}\left\{J_{ablm}q_a q_b e^{-i m \Phi}\right\} \right. \right.\\
+                    & \left. \left. + \frac{1}{2}\left( 2\mathbb{R}\left\{J_{ablm}q_{a}^\ast q_b e^{-i m \Phi}\right\} + 2\mathbb{R}\left\{J_{ablm}q_{a} q_{b}^\ast e^{-i m \Phi}\right\} \right) \right) \right] \\ 
+                  = & - \frac{G \mu M_{\Sigma}}{R} \sum_{l,m} W_{lm} \left(\frac{R}{D}\right)^{l+1} \sum_{n_a, l_a, m_a} \left[ 2I_{alm}\mathbb{R}\left\{q_a^\ast e^{-i m \Phi}\right\} \right. \\
+                    & \left. + \frac{1}{2}\sum_{n_b,l_b,m_b} 2J_{ablm}\left( \mathbb{R}\left\{q_a q_b e^{-i m \Phi}\right\} \right. \right.\\
+                    & \left. \left. + \frac{1}{2}\left( \mathbb{R}\left\{q_{a}^\ast q_b e^{-i m \Phi}\right\} + \mathbb{R}\left\{q_{a} q_{b}^\ast e^{-i m \Phi}\right\} \right) \right) \right] \\
+\end{align}
+\end{subequations}
+
+We can write this in two (possibly) more useful ways.
+
+\begin{subequations}
+\begin{align}
+H_{\mathrm{int}}  = & - \frac{G \mu M_{\Sigma}}{R} \sum_{l,m} W_{lm} \left(\frac{R}{D}\right)^{l+1} \sum_{n_a, l_a, m_a} \left[ 2I_{alm}\left(\R{a}\cos m\Phi - \I{a}\sin m\Phi\right) \right. \\
+                    & \left. + \frac{1}{2}\sum_{n_b,l_b,m_b} 2J_{ablm}\left( 2\R{a}\R{b}\cos m\Phi + \left(\R{a}\I{b} + \I{a}\R{b}\right)\sin m\Phi \right) \right]\\
+\end{align}
+\end{subequations}
+
+and
+
+\begin{subequations}
+\begin{align}
+H_{\mathrm{int}}  = & - \frac{G \mu M_{\Sigma}}{R} \sum_{l,m} W_{lm} \left(\frac{R}{D}\right)^{l+1} \sum_{n_a, l_a, m_a} \left[ 2I_{alm}A_a\cos(\phi_a - m\Phi) \right. \\
+                    & \left. + \frac{1}{2}\sum_{n_b,l_b,m_b} 2J_{ablm}A_a A_b\left( \cos(\phi_a + \phi_b + m\Phi) +\cos(\phi_a - \phi_b + m\Phi) + \cos(-\phi_a + \phi_b + m\Phi)\right) \right]\\
+\end{align}
+\end{subequations}
+
+Where we've written $q_a = A_a e^{-i\phi_a} \left| A_a,\phi_a \in \mathbb{R} \right.$. We really only expect secular effects to come from the $\cos(\phi_a - m\Phi)$ and $\cos(\phi_a+\phi_b+m\Phi)$ terms, and a time-average over many orbits should select off only these terms.
+
+We note that the sum now runs over \emph{only one} ``frequency sign,'' and we should not allow multiple modes in our networks with the same mode numbers. Because we deal mostly with resonant interactions, the opposite frequency signs will be far off resonance and will not be included by our mode selection algorithms.
+
+Now, this result is perfectly valid assuming the mode sums run over all possible stellar modes (both equilibrium and dynamical tides). However, we only simulate the dynamical tide and there may be cancellation between the dynamical tide and the equilibrium tide (see N. Weinberg's paper). We will attempt to get around this in several ways:
+\begin{itemize}
+  \item{Include \emph{many} modes in the network, so we have some hope of capturing the equilibrium tide.}
+  \item{Explicitly and analytically write the interaction energy in terms of the non-linear mode amplitudes, which should obviate the cancellation between the equilibrium and dynamical tides.}
+\end{itemize}
+
+
+
+\textbf{CONTINUE...}

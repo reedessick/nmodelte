@@ -1,0 +1,55 @@
+\section*{Standard perturbation theory around the non-linear equilibria}
+
+If we consider (\ref{eq:transformed_3mode_amplitude_eqn's}) as our starting point for perturbations about the equilibrium, we can derive a linear stability problem for infinitesimal perturbations. We begin by assuming the amplitudes have the form $x_j = (A_j + X_j) e^{i\delta_j} $, and we assume small perturbations $X_j \ll 1$. Inserting this ansatz into (\ref{eq:transformed_3mode_amplitude_eqn's}) yields
+\begin{subequations}
+\begin{align}
+\dot{X}_0 + (i\Delta_0 + \gamma_0)X_0 & = 2i\omega_0\kappa(A_1 X_2^\ast + A_2 X_1^\ast) e^{-i\delta} + O(X^2) \\
+\dot{X}_1 + (i\Delta_1 + \gamma_1)X_1 & = 2i\omega_1\kappa(A_0 X_2^\ast + A_2 X_0^\ast) e^{-i\delta} + O(X^2) \\
+\dot{X}_2 + (i\Delta_2 + \gamma_2)X_2 & = 2i\omega_2\kappa(A_0 X_1^\ast + A_1 X_1^\ast) e^{-i\delta} + O(X^2)
+\end{align}
+\end{subequations}
+We see that the individual equilibrium phases do not affect the dynamics of perturbations, and there is only a contribution from the sum of the phases $\delta = \delta_0 + \delta_1 + \delta_2$. This means we cannot break the degeneracy in equilibria with simple perturbations of this kind. It's likely that we'll have to include some sort of linear driving term for the daughters to break this degeneracy, since that will allow us to isolate $\delta_1$ and $\delta_2$ individually.
+
+Furthermore, if we define $X_j = R_j + iI_j$, we can write these first order ODE's as a matrix equation
+\begin{equation}
+\frac{\mathrm{d}}{\mathrm{d}t}
+\begin{bmatrix}
+R_0 \\
+I_0 \\
+R_1 \\
+I_1 \\
+R_2 \\
+I_2 \\
+\end{bmatrix}
+=
+\mathbb{M}
+\begin{bmatrix}
+R_0 \\
+I_0 \\
+R_1 \\
+I_1 \\
+R_2 \\
+I_2 \\
+\end{bmatrix}
+\end{equation}
+where
+\begin{equation}
+\mathbb{M} = 
+\begin{bmatrix}
+            -\gamma_0         &               \Delta_0         & 2\omega_0\kappa A_2\sin\delta &  2\omega_0\kappa A_2\cos\delta & 2\omega_0\kappa A_1\sin\delta &  2\omega_0\kappa A_1\cos\delta \\
+            -\Delta_0         &              -\gamma_0         & 2\omega_0\kappa A_2\cos\delta & -2\omega_0\kappa A_2\sin\delta & 2\omega_0\kappa A_1\cos\delta & -2\omega_0\kappa A_1\sin\delta \\
+2\omega_1\kappa A_2\sin\delta &  2\omega_1\kappa A_2\cos\delta &             -\gamma_1         &              \Delta_1          & 2\omega_1\kappa A_0\sin\delta &  2\omega_1\kappa A_0\cos\delta \\
+2\omega_1\kappa A_2\cos\delta & -2\omega_1\kappa A_2\sin\delta &             -\Delta_1         &             -\gamma_1          & 2\omega_1\kappa A_0\cos\delta & -2\omega_1\kappa A_0\sin\delta \\ 
+2\omega_2\kappa A_1\sin\delta &  2\omega_2\kappa A_1\cos\delta & 2\omega_2\kappa A_0\sin\delta &  2\omega_2\kappa A_0\cos\delta &            -\gamma_2          &          \Delta_2              \\
+2\omega_2\kappa A_1\cos\delta & -2\omega_2\kappa A_1\sin\delta & 2\omega_2\kappa A_0\cos\delta & -2\omega_2\kappa A_0\sin\delta &            -\Delta_2          &         -\gamma_2        
+\end{bmatrix}
+\end{equation}
+
+There is a tentative implementation of this formalism (3mode\_simplified.py) which will solve for the non-linear equilibrium amplitudes an the stability of the equilibrium (reports the eigenvalues and eigenvectors).
+
+\textbf{Curiously, it appears that there might be a marginally stable eigenvalue (eigenvalue vanishes). Preliminarily, it also appears that there are 4 stable spirals, one stable direction, and one marginally stable direction (with eigenvalue = 0). The reported value isn't exactly zero, but it is MUCH smaller than the other eigenvalues, and seems to sit around the error i'd expect in floating-point arithmetic. Looking for this pattern analytically seems like a fool's errand. Is there a way to examine the stability at a higher order without making things too complicated?}
+
+\subsection*{mulitple-scale perturbations}
+
+\textbf{there may be hope for determining a set of dynamically favored equilibrium phases using two-timing or some sort of averaged equations.}
+

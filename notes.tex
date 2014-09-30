@@ -1,0 +1,72 @@
+\documentclass[10pt]{report}
+
+\usepackage{fullpage}
+\usepackage{color}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{\baselineskip}
+
+\newcommand\R[1]{\ensuremath{\mathbb{R}_{#1}}}
+\newcommand\I[1]{\ensuremath{\mathbb{I}_{#1}}}
+
+\title{notes on stellar oscillations and coupled systems of oscillators}
+\author{R. Essick}
+
+\begin{document}
+
+\maketitle
+
+I've implicitly assumed that the detunings are non-zero for all modes. We should be able to analytically continue all solutions to the appropriate limiting cases assuming that the limit exists. Other assumptions should be noteded explicitly when they are made.
+
+%\section*{Preliminaries}
+\input{./notes_chapters/preliminaries}
+
+%\section*{Linear Equilibrium Solutions}
+\input{./notes_chapters/linear_equilibrium_solutions}
+
+%\section*{Stability of Linear Equiblibria}
+\input{./notes_chapters/stability_of_linear_equilibrium_solutions}
+
+\input{./notes_chapters/stability_of_N-coupled_daughter.tex}
+
+%\section*{Derivation of Non-linear Equilibrium}
+\input{./notes_chapters/derivation_of_non-linear_equilibrium}
+
+%\section*{Summary of non-linear Equilibrium Solution}
+\input{./notes_chapters/summary_of_non-linear_equilibrium_solution.tex}
+
+%\section{multi-parent 3mode systems}
+\input{./notes_chapters/multi-parent_systems.tex}
+
+%\section*{Limitting cases of non-linear equilibrium}
+\input{./notes_chapters/limitting_cases_of_non-linear_equilibrium}
+
+%\section*{Stability of non-linear equilibrium}
+\input{./notes_chapters/stability_of_non-linear_equilibrium}
+
+%\section*{Single self-coupled daughter}
+\input{./notes_chapters/single_self-coupled_daughter}
+
+%\section*{Two self-coupled and inter-coupled daughters}
+\input{./notes_chapters/two_self-coupled_and_inter-coupled_daughters}
+
+%\section*{Two pairs of daughters}
+\input{./notes_chapters/two_pairs_of_daughters}
+
+%\section*{N inter-coupled daughters}
+\input{./notes_chapters/N_inter-coupled_daughters}
+
+%\section*{Expected energy dissipation rates}
+\input{./notes_chapters/expected_energy_dissipation_rates}
+
+\newpage
+%\section{SIMULATION}
+\input{./notes_chapters/SIMULATION}
+
+
+%\include{./3mode_simplified}
+
+\end{document}

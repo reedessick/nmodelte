@@ -1,0 +1,16 @@
+\section*{Linear equilibrium solutions}
+
+To linear order in mode amplitudes, these equations become the (almost) trivial set
+\begin{equation}
+\dot{q}_j + (i\omega_j + \gamma_j)q_j = i\omega_j U_j(t)
+\end{equation}
+Importantly, the modes are uncoupled and evolve independently. If we assume that $U_j(t) = U_j e^{-i\Omega t}$, then we have the simple solution for the equilibrium mode amplitude $(q_j)_{\mathrm{eq}}$
+\begin{subequations}
+\begin{align}
+(q_j)_{\mathrm{eq}} & = \frac{i\omega_j U_j}{i(\Omega - \omega_j) + \gamma_j} \\
+\Rightarrow (A_j)_{\mathrm{eq}} & = \frac{\omega_j U_j}{(\Omega - \omega_j)^2 + \gamma_j^2} \\
+            (\delta_j)_{\mathrm{eq}} & = \arctan{\left(\frac{\gamma_j}{\Omega - \omega_j}\right)}
+\end{align}
+\end{subequations}
+For completness, we note that each mode will oscillate at angular frequency $\Omega$, so that $\Delta_j = \Omega - \omega_j$ for all modes.
+

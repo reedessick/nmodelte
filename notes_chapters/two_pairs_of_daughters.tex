@@ -1,0 +1,62 @@
+\subsection*{Two pairs of daughter modes, separately coupled to the parent and not coupled between pairs}
+
+\begin{subequations}
+\begin{align}
+\dot{q}_0 + (i\omega_0 + \gamma_0)q_0 = & i\omega_0 U_0 e^{-i\Omega t} + 2i\omega_0 \kappa q_1^\ast q_2^\ast + 2i\omega_0 \kappa^\prime q_3^\ast q_4^\ast \\
+\dot{q}_1 + (i\omega_1 + \gamma_1)q_1 = & 2i\omega_1 \kappa q_0^\ast q_2^\ast \\
+\dot{q}_2 + (i\omega_2 + \gamma_2)q_2 = & 2i\omega_2 \kappa q_0^\ast q_1^\ast \\
+\dot{q}_3 + (i\omega_3 + \gamma_3)q_3 = & 2i\omega_3 \kappa^\prime q_0^\ast q_4^\ast \\
+\dot{q}_4 + (i\omega_4 + \gamma_4)q_4 = & 2i\omega_4 \kappa^\prime q_0^\ast q_3^\ast
+\end{align}
+\end{subequations}
+
+Make the standard assumptions that $q_j = x_je e^{-i(\omega_j - \Delta_j)t}$, and further assume that $\Omega - \omega_0 + \Delta_0 = \omega_0 + \omega_1 + \omega_2 - \Delta_0 - \Delta_1 - \Delta_2 = \omega_0 + \omega_3 + \omega_4 - \Delta_0 - \Delta_3 - \Delta_4 = 0$. This removes all time dependence from the problem, and we can set $\dot{x}_j=0$, making the problem algebraic. The equations then reduce to
+\begin{subequations}
+\begin{align}
+(i D_0 + \Gamma_0) x_0 = & i U_0 + 2i \kappa x_1^\ast x_2^\ast + 2i \kappa^\prime x_3^\ast x_4^\ast \\
+(i D_1 + \Gamma_1) x_1 = & 2i \kappa x_0^\ast x_2^\ast \\
+(i D_2 + \Gamma_2) x_2 = & 2i \kappa x_0^\ast x_1^\ast \\
+(i D_3 + \Gamma_3) x_3 = & 2i \kappa^\prime x_0^\ast x_4^\ast \\
+(i D_4 + \Gamma_4) x_4 = & 2i \kappa^\prime x_0^\ast x_3^\ast
+\end{align}
+\end{subequations}
+where I've defined $D_j = \Delta_j / \omega_j$ and $\Gamma_j = \gamma_j /\omega_j$. We also make the definition $x_j = A_j e^{i\delta_j}$, and introduce the notation $\delta_{jk...l} = \delta_j + \delta_k + ... + \delta_l$.
+
+Now, the daughter mode equations can be manipulated exactly as before, because they are only coupled within their pairs. This yields
+\begin{subequations}
+\begin{align}
+\frac{A_1^2}{A_2^2} = & \frac{\Gamma_2}{\Gamma_1} \\
+\tan\delta_{012} = & \frac{\Gamma_1}{D_1} = \frac{\Gamma_2}{D_2} \\
+\frac{A_3^2}{A_4^2} = & \frac{\Gamma_4}{\Gamma_3} \\
+\tan\delta_{034} = & \frac{\Gamma_3}{D_3} = \frac{\Gamma_4}{D_4} \\
+\mathrm{and} & \\
+A_0 = & \frac{1}{2\kappa}\sqrt{D_1 D_2 + \Gamma_1 \Gamma_2} \\
+    = & \frac{1}{2\kappa^\prime}\sqrt{D_3 D_4 + \Gamma_3 \Gamma_4}
+\end{align}
+\end{subequations}
+We note that this imposes a constraint on the allowed parameters for the daughter modes. The two sets must predict the same parent amplitude, otherwise not equilibrium exists. We can also solve for the daughter mode detunings exactly as before, and we don't bother to write out their solutions. Suffice it to say that they are known.
+
+This is as far as we can get considering the daughter pairs separately. If we divide or multiply any two daughters modes across the pairs (eg: $A_1$ and $A_3$), then we obtain
+\begin{subequations}
+\begin{align}
+\left(\sqrt{D_1 D_2} - i \sqrt{\Gamma_1 \Gamma_2} \right) \frac{e^{i\delta_{12}}}{\kappa} = & \left( \sqrt{D_3 D_4} -i \sqrt{\Gamma_3 \Gamma_4} \right) \frac{e^{i\delta_{34}}}{\kappa^\prime} \\
+\sqrt{\Gamma_1 \Gamma_2 \Gamma_3 \Gamma_4} - \sqrt{D_1 D_2 D_3 D_4} + i \left( \sqrt{\Gamma_1 \Gamma_2 D_3 D_4} + \sqrt{D_1 D_2 \Gamma_3 \Gamma_4} \right) = & -4\kappa \kappa^\prime A_0^2 e^{-i\delta_{012} - i\delta_{034}}
+\end{align}
+\end{subequations}
+
+\textbf{there are copious restrictions on $A_0$ and $\delta_0$ through these equations. We should work to show whether or not an equilibrium can exist.}
+
+Now, if we substitute into the $x_0$ equation, we obtain
+\begin{subequations}
+\begin{align}
+(D_0 - i \Gamma_0) A_0 = & U_0 e^{-i\delta_0} + 2\kappa\sqrt{\frac{\Gamma_1}{\Gamma_2}}A_1^2 e^{-i\delta_{012}} + 2\kappa^\prime\sqrt{\frac{\Gamma_3}{\Gamma_4}}A_3^2 e^{-i\delta_{034}} \\
+\Rightarrow D_0 A_0^2 - A_0 U_0 \cos\delta_0 = & D_1 A_1^2 + D_3 A_3^2 = \frac{1}{2}\left(D_1 A_1^2 + D_2 A_2^2 + D_3 A_3^2 + D_4 A_4^2\right) \\
+\Gamma_0 A_0^2 - A_0 U_0 \sin\delta_0 = & \Gamma_1 A_1^2 + \Gamma_3 A_3^2 = \frac{1}{2}\left(\Gamma_1 A_1^2 + \Gamma_2 A_2^2 + \Gamma_3 A_3^2 + \Gamma_4 A_4^2 \right) \\
+\end{align}
+\end{subequations}
+
+\textbf{If a solution exists, it seems like there is a one parameter family of possible equilibria. simulations may say something about this.}
+
+\textbf{if the constraints are consistent, then can we solve for $A_b$, $A_d$ in equilibrium? If multiple solutions exist, we should choose the one with less energy or look for some other dynamically favored rationale (stability?).}
+
+

@@ -1,0 +1,194 @@
+\section*{Derivation of non-linear equilibrium}\label{section:derivation of non-linear equilibrium}
+
+The reason we made these specific approximations is twofold: 1) they are somewhat realistic for `important' sets of parent-daughter systems and 2) they allow us to solve for a non-linear equilibrium. Specifically, we make the change of coordinates $q_j = x_j e^{-i(\omega_j - \Delta_j)t}$. We note that we do not know the numerical values of the $\{\Delta_j\}$ a priori, but that we will determine them in the process of solving for equilibrium. With this substitution, we can write the equations of motion for $\{x_j\}$ as
+\begin{subequations}\label{eq:transformed_3mode_amplitude_eqn's}
+\begin{align}
+\dot{x}_0 + (i\Delta_0 + \gamma_0)x_0 & = i\omega_0 U e^{-i(\Omega - \omega_0 + \Delta_0)t} + 2i\omega_0\kappa x_1^\ast x_2^\ast e^{i(\omega_0 + \omega_1 + \omega_2 - \Delta_0 - \Delta_1 - \Delta_2)t} \,, \label{subeq:trans_3mode_0}\\
+\dot{x}_1 + (i\Delta_1 + \gamma_1)x_1 & = 2i\omega_1\kappa x_0^\ast x_2^\ast e^{i(\omega_0 + \omega_1 + \omega_2 + \Delta_0 + \Delta_1 + \Delta_2)t} \,, \label{subeq:trans_3mode_1} \\
+\dot{x}_2 + (i\Delta_2 + \gamma_2)x_2 & = 2i\omega_2\kappa x_0^\ast x_1^\ast e^{i(\omega_0 + \omega_1 + \omega_2 + \Delta_0 + \Delta_1 + \Delta_2)t} \,, \label{subeq:trans_3mode_2} 
+\end{align}
+\end{subequations}
+
+Now, for equilibrium to exit we expect the $\{x_j\}$ to be constant in time ($\Rightarrow \dot{x}_j = 0$). If we require $\Omega - \omega_1 + \Delta_1 = \omega_0 + \omega_1 + \omega_2 - \Delta_1 - \Delta_2 - \Delta_3 = 0$, then the problem reduces to an algebraic solution for the equilibrium amplitudes. We should note that these conditions impose two restrictions on the $\{\Delta_j\}$. Taking the ratio of (\ref{subeq:trans_3mode_1}) and (\ref{subeq:trans_3mode_2}) yields
+\begin{subequations}
+\begin{align}
+\left(\frac{i\Delta_1 + \gamma_1}{i\Delta_2 + \gamma_2}\right) \frac{x_1}{x_2} & = \left(\frac{\omega_1}{\omega_2}\right)\frac{x_2^\ast}{x_1^\ast} \\
+\Rightarrow \frac{|x_1|^2}{|x_2|^2} & = \frac{\omega_1}{\omega_2}\left(\frac{i\Delta_2 + \gamma_2}{i\Delta_1 + \gamma_1}\right) \\
+                                    & = \frac{\omega_1}{\omega_2}\left(\frac{\gamma_1\gamma_2 + \Delta_1\Delta_2 + i(\gamma_1\Delta_2 - \gamma_2\Delta_1)}{\Delta_1^2 + \gamma_1^2}\right) \label{subeq:x1_by_x2}
+\end{align}
+\end{subequations}
+However, because the LHS of (\ref{subeq:x1_by_x2}) is $\in \mathbb{R}$, we must have $\gamma_1\Delta_2 - \gamma_2\Delta_1 = 0$, which in turn implies that $\gamma_1/\Delta_1 = \gamma_2/\Delta_2$. This is a third condition for the $\{\Delta_j\}$, and we can solve them explicitly as
+\begin{subequations}\label{eq:Deltas}
+\begin{align}
+\Delta_0 & = \omega_0 -\Omega \\
+\Delta_1 & = \left(\frac{\Omega + \omega_1 + \omega_2}{1 + \gamma_2/\gamma_1}\right) \\
+\Delta_2 & = \left(\frac{\Omega + \omega_1 + \omega_2}{1 + \gamma_1/\gamma_2}\right)
+\end{align}
+\end{subequations}
+
+We can further simplify (\ref{subeq:x1_by_x2}) to
+\begin{subequations}
+\begin{align}
+\frac{|x_1|^2}{|x_2|^2} & = \frac{\omega_1\gamma_2}{\omega_2\gamma_1} \\
+\Rightarrow \frac{A_1}{A_2} & = \sqrt{\frac{\omega_1\gamma_2}{\omega_2\gamma_1}} \label{subeq:ratio_of_daughters}
+\end{align}
+\end{subequations}
+where we've explictly defined $x_j = A_j e^{i\delta_j}$ with $A_j, \delta_j \in \mathbb{R}$ and $A_j \geq 0$. Now, we can solve for the parent amplitude using (\ref{subeq:ratio_of_daughters}) and (\ref{subeq:trans_3mode_1}) or (\ref{subeq:trans_3mode_2}). This yields
+\begin{subequations}
+\begin{align}
+(i\Delta_1+\gamma_1)\frac{A_1}{A_2}e^{i(\delta_1+\delta_2)}  & = 2i\omega_1\kappa A_0 e^{-i\delta_0} \\
+\Rightarrow A_0 & = \frac{\Delta_1 - i\gamma_1}{2\kappa\omega_1}\sqrt{\frac{\omega_1\gamma_2}{\omega_2\gamma_1}} e^{i\delta} \\ 
+                & = \frac{1}{2\kappa}\sqrt{\frac{\gamma_1\gamma_2}{\omega_1\omega_2}}\left(\frac{\Delta_1}{\gamma_1}\cos{\delta} + \sin{\delta} + i\left(\frac{\Delta_1}{\gamma_1}\sin{\delta} - \cos{\delta}\right)\right)
+\end{align}
+\end{subequations}
+where $\delta = \delta_0 + \delta_1 + \delta_2$. Again, $A_0 \in \mathbb{R}$ so we require $\Delta_1\sin{\delta} - \gamma_1\cos{\delta} = 0 \Rightarrow \tan{\delta} = \gamma_1/\Delta_1 = \gamma_2/\Delta_2$. This imposes one constraint on the equilibrium phases in terms of known quantities.
+
+There is a sign ambiguity in this constraint, which is resolved by our requirement that $A_0 \geq 0$. Essentially, this requirement is equivalent to $\sin{\delta} \geq 0$. This means we know which quadrant to use depending on the sign of $\tan{\delta}=\gamma_1/\Delta_1$. Further simplification leads to
+\begin{subequations}\label{eq:A_0}
+\begin{align}
+A_0  & = \frac{1}{2\kappa} \sqrt{\frac{\gamma_1\gamma_2}{\omega_1\omega_2}} \left| \left(\frac{\Delta_1}{\gamma_1} + \frac{\gamma_1}{\Delta_1}\right) \cos{\delta} \right| \\
+     & = \frac{1}{2\kappa} \sqrt{\frac{\gamma_1\gamma_2}{\omega_1\omega_2}} \left| \cos{\delta} \left(\frac{\cos{\delta}}{\sin{\delta}} + \frac{\sin{\delta}}{\cos{\delta}} \right) \right| \\
+     & = \frac{1}{2\kappa} \sqrt{\frac{\gamma_1\gamma_2}{\omega_1\omega_2}} \left| \frac{1}{\sin{\delta}} \right| \\
+     & = \frac{1}{2\kappa} \sqrt{\left(\frac{\gamma_1\gamma_2}{\omega_1\omega_2}\right) \left(1+\left(\frac{\Delta_1}{\gamma_1}\right)^2 \right)} \\
+     & = \frac{1}{2\kappa} \sqrt{\frac{\gamma_1\gamma_2 + \Delta_1\Delta_2}{\omega_1\omega_2}}
+\end{align}
+\end{subequations}
+\begin{subequations}
+\begin{align}
+\delta \in [0, \pi/2] & \mathrm{\ if\ } \gamma_1/\Delta_1 \geq 0 \\
+\delta \in [\pi/2, \pi] & \mathrm{\ if\ } \gamma_1/\Delta_1 \leq 0 
+\end{align}
+\end{subequations}
+Note that this solution treats the daughter modes equally, because it is invarient under the interchange of labels ($1 \leftrightarrow 2$). This symmetry seems appropriate. It is also interesting that $A_0$ does not depend on the linear driving amplitude $U$. Instead, the daughter amplitudes depend on $U$.
+
+To see this, we solve for the daughter mode amplitudes using (\ref{subeq:trans_3mode_0}) along with (\ref{subeq:x1_by_x2}) and (\ref{eq:A_0}).
+
+\begin{subequations}
+\begin{align}
+A_0 e^{i\delta_0}(i\Delta_0 + \gamma_0) = & i\omega_a U + 2i\omega_0 \kappa A_1 A_2 e^{-i(\delta_1 + \delta_2)} \\
+\Rightarrow 2i\omega_0\kappa A_2^2\sqrt{\frac{\omega_1\gamma_2}{\omega_2\gamma_1}} = & A_0 e^{i\delta}(i\Delta_0 + \gamma_0) - i\omega_0 U e^{i(\delta_1 + \delta_2)} \\
+A_2^2 = & \frac{1}{2\kappa\omega_0} \sqrt{\frac{\omega_2\gamma_1}{\omega_1\gamma_2}} \left(A_0 (\Delta_0 \cos{\delta} + \gamma_0 \sin{\delta}) -\omega_0 U \cos(\delta-\delta_0)\right) \\
+      & -i \frac{1}{2\kappa\omega_0} \sqrt{\frac{\omega_2\gamma_1}{\omega_1\gamma_2}}\left(A_0(\gamma_0\cos\delta - \Delta_0\sin\delta) + \omega_0 U \sin(\delta-\delta_0)\right) \\
+\end{align}
+\end{subequations}
+
+Again, we require $A_2 \in \mathbb{R}$, so
+\begin{subequations}
+\begin{align}
+A_0(\Delta_0\sin\delta - \gamma_0\cos\delta) & = \omega_0 U \sin(\delta-\delta_0) \\
+\sin(\delta-\delta_0) & = \frac{A_0}{\omega_0 U} \left( \Delta_0 \sin\delta - \gamma_0\cos\delta \right) \\
+\Rightarrow \delta_0 & = \delta - \arcsin\left(\frac{A_0}{\omega_0 U} \left( \Delta_0 \sin\delta - \gamma_0\cos\delta \right)\right) \\
+\delta_1 + \delta_2 & = \arcsin\left(\frac{A_0}{\omega_0 U} \left( \Delta_0 \sin\delta - \gamma_0\cos\delta \right)\right) 
+\end{align}
+\end{subequations}
+We note that this only places a constraint on $\delta_1 + \delta_2$, and we cannot determine them individually from this analysis. There is also a sign ambiguity in the equation for $\delta_0$, which can again be resolved by demanding that $A_2 \geq 0$. We should note that this is complicated, and will require some of the following fun facts:
+\begin{subequations}
+\begin{align}
+\sin\delta &\geq 0 \\
+w_0 w_1 & \leq 0 \\
+w_0 w_2 & \leq 0 
+\end{align}
+\end{subequations}
+
+There is also a constraint on $U$ required for this equilibrium to exist. We require $\delta-\delta_0 \in \mathbb{R}$, which means $|\sin(\delta-\delta_0)| \leq 1$, and therefore we have\footnote{We can assume that $U\geq0$ because we can always translate our time origin to make this so.}
+\begin{subequations}
+\begin{align}
+U \geq & \frac{A_0}{\omega_0}\left|\delta_0\sin\delta - \gamma_0\cos\delta\right|  \\
+       & = \frac{A_0}{\omega_0}\left| \frac{\Delta_0 \sqrt{\gamma_1\gamma_1} - \gamma_0\sqrt{\Delta_1\Delta_2}}{\sqrt{\gamma_1\gamma_2 + \Delta_1\Delta_2}}\right| \\
+       & = \frac{1}{2\kappa\omega_0\sqrt{\omega_1\omega_2}}\left| \Delta_0\sqrt{\gamma_1\gamma_2} - \gamma_0\sqrt{\Delta_1\Delta_2} \right| \\
+\mathrm{therefore,} & \\
+U \geq & \frac{\gamma_0}{2\kappa\omega_0}\sqrt{\frac{\gamma_1\gamma_2}{\omega_1\omega_2}}\left| \frac{\Delta_0}{\gamma_0} - \sqrt{\frac{\Delta_1\Delta_2}{\gamma_1\gamma_2}} \right|
+\end{align}
+\end{subequations}
+We note that this condition must be satisfied for our particular non-linear equilibrium to exist. However, if it is violated there may be other non-linear equilibria.\footnote{Simulations seem to suggest that the system approaches a set of constant amplitudes, but the phases may vary in some complicated way.} This requirement may be related to energies near the linear-stability threshold for the daughters (below the linear threshold, the daughter amplitudes may vanish and $\delta_1,\delta_2 \in \mathbb{C}$ is perfectly allowed. The linear threshold may depend on $U$ in the proper way.
+
+These last two are not strictly necessary for the most general 3-mode systems, but they hold for the cases in which we are interested.
+
+Upon choosing the correct value for $\delta_0$, we can compute
+\begin{subequations}
+\begin{align}
+A_2^2 = &  \frac{1}{2\kappa\omega_0} \sqrt{\frac{\omega_2\gamma_1}{\omega_1\gamma_2}} \left(A_0 (\Delta_0 \cos{\delta} + \gamma_0 \sin{\delta}) -\omega_0 U \cos(\delta-\delta_0)\right) \\
+      = & \frac{\gamma_0\gamma_1}{4\kappa^2\omega_0\omega_1}\sqrt{1+(\Delta_1/\gamma_1)^2}\left[ \left(\frac{\Delta_0\Delta_1}{\gamma_0\gamma_1} + 1 \right)\frac{1}{\sqrt{1+(\Delta_1/\gamma_1)^2}} - \frac{\omega_0 U}{\gamma_0}\left(2\kappa\sqrt{\frac{\omega_1\omega_2}{\gamma_1\gamma_2 + \Delta_1\Delta_2}}\right)\cos(\delta - \delta_0)\right] 
+\end{align}
+\end{subequations}
+
+A similar expression for $A_1$ can be derived by permuting indecies ($1 \leftrightarrow 2$).
+
+\subsection*{solution for non-linear equilib assuming $q_j = A_j e^{i f_j(t)}$}
+
+Inspired by some simulation results, we look for an equilibrium solution in which the modes behave as $q_j = A_j e^{if_j(t)}$, with $A_j,\,f_j \in \mathbb{R}$. This means we can re-write the general equations as
+\begin{subequations}
+\begin{align}
+(i\dot{f}_0 + i\omega_0 + \gamma_0) A_0 e^{if_0} = & i\omega_0 U_0 e^{-i\Omega t} + 2i\omega_0 \kappa A_1 A_2 e^{-i(f_1 + f_2)} \label{subeq:f_0}\\
+(i\dot{f}_1 + i\omega_1 + \gamma_1) A_1 e^{if_1} = & 2i\omega_1 \kappa A_0 A_2 e^{-i(f_0 + f_2)} \label{subeq:f_1}\\
+(i\dot{f}_2 + i\omega_2 + \gamma_2) A_2 e^{if_2} = & 2i\omega_2 \kappa A_0 A_1 e^{-i(f_0 + f_1)} \label{subeq:f_2}
+\end{align}
+\end{subequations}
+
+We can then recognize that (\ref{subeq:f_1}) and (\ref{subeq:f_2}) can be combined to yeild
+\begin{subequations}
+\begin{align}
+\frac{A_1}{\omega_1 A_2} (i\dot{f}_1 + i\omega_1 + \gamma_1) = & 2i\kappa A_0 e^{-i(f_0 + f_1 +f_2)}  \\
+                                                             = & \frac{A_2}{\omega_2 A_1}(i\dot{f}_2 + i\omega_2 + \gamma_2) \\
+\Rightarrow \frac{A_1}{\omega_1 A_2}(f_1 + (\omega_1 - i\gamma_1)t) = & \frac{A_2}{\omega_2 A_1} (f_c + (\omega_2 -i\gamma_2)t) + C \\
+\Rightarrow f_1 = & \frac{A_2^2 \omega_1}{A_1^2 \omega_2} f_2 + \left( \frac{A_2^2}{A_1^2} -1 \right)\omega_1 t - i\left(\frac{A_2^2\omega_1\gamma_2}{A_1^2\omega_2\gamma_1} - 1 \right)\gamma_1 t + C
+\end{align}
+\end{subequations}
+We demand that $f_1 \in \mathbb{R}$, and obtain
+\begin{equation}
+\frac{A_1^2}{A_2^2} = \frac{\omega_1\gamma_2}{\omega_2\gamma_1}
+\end{equation}
+which is the same condition we obtained earlier. This appears to be a generic feature of constant amplitude equilibria. This lets us write
+\begin{subequations}
+\begin{align}
+f_1 = & \frac{\gamma_1}{\gamma_2} f_2 + \left(\frac{\omega_2\gamma_1}{\omega_1\gamma_2} - 1\right) \omega_1 t + C \\
+A_1 = & A_2 \sqrt{\frac{\omega_1\gamma_2}{\omega_2\gamma_1}}
+\end{align}
+\end{subequations}
+which essentially reduces the problem to solving for $A_0$, $A_2$, $f_0$, and $f_2$. If we attempt a similar combination of (\ref{subeq:f_0}) with (\ref{subeq:f_1}), we obtain
+\begin{equation}
+(\dot{f}_2 + \omega_2 -i\gamma_2)\omega_0 A_2^2 = (\dot{f}_0 + \omega_0 -i\gamma_0)\omega_2 A_0^2 - \omega_0 \omega_2 A_0 U_0 e^{-i(\Omega t + f_0)}
+\end{equation}
+This is much harder to integrate, due primarily to the exponential factor $\mathrm{exp}\{-i(\Omega t + f_0)\}$. If we set $f_0 = -\Omega t$, this exponential dissapears and we notice that $\dot{f}_2 = \mathrm{constant} \Rightarrow f_2 \propto t \Rightarrow f_1 \propto t$. Therefore, if the parent mode has a linear phase, all modes will have a linear phase in equilibrium.
+
+Inspired by this, if we write $f_j = -(\omega_j - \Delta_j)t + g_j$, then we have the following relations for the $g_j$.
+\begin{subequations}
+\begin{align}
+g_1 -(\omega_1 - \Delta_1)t = & \frac{\gamma_1}{\gamma_2}(g_2 - (\omega_2 - \Delta_2)t ) +\left(\frac{\omega_2\gamma_1}{\omega_1\gamma_2} -1\right)\omega_1 t + C \\
+\Rightarrow g_1 = & \frac{\gamma_1}{\gamma_2} g_2 + \left(\frac{\gamma_1/\Delta_1}{\gamma_2/\Delta_2} - 1\right) \Delta_1 t + C \\
+\end{align}
+\end{subequations}
+We note that for the linear-phase nonlinear equilibrium, $\gamma_1/\Delta_1 = \gamma_2/\Delta_2$ and the explicit time dependence cancels. Furthermore
+\begin{subequations}
+\begin{align}
+(\dot{g}_2 + \Delta_2 -i\gamma_2)\omega_0 A_2^2 = & (\dot{g}_0 + \Delta_0 -i\gamma_0)\omega_2 A_0^2 - \omega_0\omega_2 A_0 U_0 e^{-i\{(\Omega - \omega_0 + \Delta_0)t + g_0\}} \\
+(\dot{g}_2 + \Delta_2 -i\gamma_2) A_2 = & 2\omega_2 \kappa A_0 \sqrt{\frac{\omega_1\gamma_2}{\omega_2\gamma_1}} A_2 e^{-i\{(\omega_0 + \omega_1 + \omega_2 - \Delta_0 - \Delta_1 - \Delta_2)t + g_0 + g_1 + g_2\}}
+\end{align}
+\end{subequations}
+We can simplify these equations without loss of generality by assuming $\Omega - \omega_0 + \Delta_0 = \omega_0 + \omega_1 + \omega_2 - \Delta_0 - \Delta_1 - \Delta_2 = 0$. This is exactly the assumption made in the linear-phase non-linear equilibrium solution, and results in
+\begin{subequations}
+\begin{align}
+(\dot{g}_2 + \Delta_2 -i\gamma_2)\omega_0 A_2^2 = & (\dot{g}_0 + \Delta_0 -i\gamma_0)\omega_2 A_0^2 - \omega_0\omega_2 A_0 U_0 e^{-ig_0} \\
+(\dot{g}_2 + \Delta_2 -i\gamma_2) = & 2\omega_2 \kappa A_0 \sqrt{\frac{\omega_1\gamma_2}{\omega_2\gamma_1}} e^{-i(g_0 + g_1 + g_2)}
+\end{align}
+\end{subequations}
+Now, the interesting content of these equations is the imaginary parts. We have
+\begin{subequations}
+\begin{align}
+\gamma_2 \omega_0 A_2^2 = & \gamma_0 \omega_2 A_0^2 - \omega_0\omega_2 A_0 U_0 \sin g_0 \\
+\Rightarrow \sin g_0 = & \frac{\gamma_0 \omega_2 A_0^2 - \gamma_2 \omega_0 A_2^2}{\omega_0\omega_2 A_0 U_0} \\
+\Rightarrow g_0 = & \textsc{constant}
+\end{align}
+\end{subequations}
+We see that $g_0$ is forced to be nothing more than a constant phase. Furthermore, we have
+\begin{subequations}
+\begin{align}
+\gamma_2 = & 2\omega_2 \kappa A_0 \sqrt{\frac{\omega_1\gamma_2}{\omega_2\gamma_1}} \sin \left(g_0 + g_1 + g_2\right) \\
+\Rightarrow \sin\left(g_0 + g_1 + g_2\right) = & \frac{1}{2\kappa A_0}\sqrt{\frac{\gamma_1\gamma_2}{\omega_1\omega_2}} \\
+\Rightarrow \left(1 + \frac{\gamma_1}{\gamma_2}\right) g_2 = & \left(\frac{\gamma_1/\Delta_1}{\gamma_2/\Delta_2} - 1\right) \Delta_1 t + \textsc{constant}
+\end{align}
+\end{subequations}
+We see that $g_2$ is at most a linear phase, which reduces the problem to exactly the one we solved earlier.
+
+I should note that this derivation assumes that $g_j\in\mathbb{R}$, so that the amplitudes are constant in time. Therefore, the only constant amplitude solution is one with linear phases. If we want to observe more interesting steady-state behavior, we are going to have to introduce perturbations to the amplitude. However, as we've seen, these perturbations can be considered a linear stability problem (in the neighborhood of the non-linear equilibrium), and from what I've seen the equilibrium tends to be absolutely stable.\footnote{I do find an exceptionally small eigenvalue, such that the convergence to the equilibrium is exceptionally long. However, given enough time, the solution should converge to the linear-phase non-linear equilibrium.}
+
