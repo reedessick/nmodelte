@@ -1,8 +1,6 @@
 #!python_alias
 usage="""an executable to generate integration data. "f" is for "fast integration" """
 
-import gc
-
 import sys, pygsl
 import pygsl.odeiv as odeiv
 
@@ -45,6 +43,8 @@ parser.add_option("", "--onward-logfilename", default=False, type="string", help
 parser.add_option("-l", "--logfilename", dest="logfilename", default=False, type="string", help="the system parameters will be taken from this log file.")
 
 parser.add_option("-t", "--time-integration", default=False, action="store_true", help="time the duration of the integration loop and report the result. This does not include overhead like setting up initial conditions or integration objects")
+
+parser.add_option("", "--flush", default=False, action="store_true", help="flush outputfile after each print statment")
 
 opts, args = parser.parse_args()
 
@@ -286,7 +286,8 @@ if opts.time_integration: ### time integrations: individual steps and total time
   if use_phase:
     if (not opts.onward) or (opts.init_time != "none"):
       print >>outfile, nm_u.report_func(t, q[:-1], Porb)
-      outfile.flush()
+      if opts.flush:
+        outfile.flush()
     while t < t1:
       _to = time.time()
       while t < sample_time:
@@ -294,12 +295,14 @@ if opts.time_integration: ### time integrations: individual steps and total time
       sample_time += sample_step
       print >>outfile, nm_u.report_func(t, q[:-1], Porb) # phase is tacked on the end
       print >>outfile, "#dt = ", time.time()-_to
-      outfile.flush()
+      if opts.flush:
+        outfile.flush()
 
   else:
     if (not opts.onward) or (opts.init_time != "none"):
       print >>outfile, nm_u.report_func(t, q, Porb)
-      outfile.flush()
+      if opts.flush:
+        outfile.flush()
     while t < t1:
       _to = time.time()
       while t < sample_time:
@@ -307,7 +310,8 @@ if opts.time_integration: ### time integrations: individual steps and total time
       sample_time += sample_step
       print >>outfile, nm_u.report_func(t, q, Porb)
       print >>outfile, "#dt = ", time.time()-_to
-      outfile.flush()
+      if opts.flush:
+        outfile.flush()
  
     print >>outfile, "#total integration time = ", time.time()-to, " sec"
 
@@ -315,24 +319,28 @@ else: ### don't time integrations
   if use_phase:
     if (not opts.onward) or (opts.init_time != "none"):
       print >>outfile, nm_u.report_func(t, q[:-1], Porb)
-      outfile.flush()
+      if opts.flush:
+        outfile.flush()
     while t < t1:
       while t < sample_time:
         t, h, q = evolve.apply(t, sample_time, h, q) # evolve network and update variables
       sample_time += sample_step
       print >>outfile, nm_u.report_func(t, q[:-1], Porb) # phase is tacked on the end
-      outfile.flush()
+      if opts.flush:
+        outfile.flush()
 
   else:
     if (not opts.onward) or (opts.init_time != "none"):
       print >>outfile, nm_u.report_func(t, q, Porb)
-      outfile.flush()
+      if opts.flush:
+        outfile.flush()
     while t < t1:
       while t < sample_time:
         t, h, q = evolve.apply(t, sample_time, h, q) # evolve network and update variables
       sample_time += sample_step
       print >>outfile, nm_u.report_func(t, q, Porb)
-      outfile.flush()
+      if opts.flush:
+        outfile.flush()
 
 
 ####################################################################################################
