@@ -39,8 +39,8 @@ def sweeps_powerlaw(stepkl_filenames, Porb_window=1000):
 			cluster = [data[Porb]]
 
 	### compute harmonic average (via delegation)
-	p = np.array([np.mean([sdata["system"]["Porb"] for sdata, _ in cluster] for cluster in clusters])
-	edot = np.array( [harmonic_average(cluster)) for cluster in clusters] )
+	p = np.array([np.mean([sdata["system"]["Porb"] for sdata, _ in cluster]) for cluster in clusters])
+	edot = np.array( [harmonic_average(cluster) for cluster in clusters] )
 
 	### fit to function!
 	### simple power law!
