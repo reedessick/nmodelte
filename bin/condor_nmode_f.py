@@ -55,7 +55,7 @@ if not opts.tmpfilename:
 ####################################################################################################
 ### build command for nmode_f.py
 
-cmd = "nmode_f.py --outfilename %s -l %s -f %s --num-proc %d -P %f --steps-per-P %f --rel-err %s --abs-err %s "%(opts.tmpfilename, opts.logfilename, opts.function, opts.num_proc, opts.num_periods, opts.steps_per_P, str(opts.rel_err), str(opts.abs_err) )
+cmd = "nmode_f.py --outfilename %s -l %s -f %s --num-proc %d -P %f --steps-per-P %f --rel-err %s --abs-err %s "%(opts.tmpfilename, opts.logfilename, opts.function, opts.num_proc, opts.N_P, opts.steps_per_P, str(opts.rel_err), str(opts.abs_err) )
 
 cmd = cmd.split()
 
@@ -69,7 +69,7 @@ if opts.onward:
 	cmd += ["--onward", opts.onward]
 if opts.onward_logfilename:
 	cmd += ["--onward-logfilename", opts.onward]
-if opts.time-integration:
+if opts.time_integration:
 	cmd += ["--time-integration"]
 if opts.flush:
 	cmd += ["--flush"]
