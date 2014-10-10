@@ -23,36 +23,39 @@ def sweeps_powerlaw(stepkl_filenames, Porb_window=1000):
 
 	### load data from files
 	data = {}
-	for filename in ste_pkl_filenames:
+	for filename in stepkl_filenames:
 		sdata, mdata = nmu.load_ste(filename)
 		data[sdata["system"]["Porb"]] = (sdata, mdata)
 
 	### cluster data by Porb_window
 	Porbs = sorted(data.keys())
 	clusters = []
-	cluster = [Porbs[0]]
+	old_Porb = Porbs[0]
+	cluster = [data[old_Porb]]
 	for Porb in Porbs[1:]:
 		if Porb-old_Porb < Porb_window: ### we're in the same cluster
 			cluster.append( data[Porb] )
 		else:
 			clusters.append( cluster )
-			cluster = [data[Porb]]
+			cluster = [ data[Porb] ]
+		old_Porb = Porb
+	clusters.append( cluster )
 
 	### compute harmonic average (via delegation)
-	p = np.array([np.mean([sdata["system"]["Porb"] for sdata, _ in cluster]) for cluster in clusters])
+	p = [ np.mean( [ sdata["system"]["Porb"] for sdata, _ in cluster ] ) for cluster in clusters ] 
 	edot = np.array( [harmonic_average(cluster) for cluster in clusters] )
 
 	### fit to function!
 	### simple power law!
 	logp = np.log(p)
-	logedot = np.log(edot)
+	logedot = np.log(np.abs(edot))
 
 	### linear fit in log-space
 	yx = np.sum( logp*logedot )
 	y = np.sum( logedot )
-	xx = np.sum( logedot*logedot )
-	x = np.sum( logedot )
-	n = np.len( logedot )
+	xx = np.sum( logp*logp )
+	x = np.sum( logp )
+	n = len( logp )
 
 	det = xx*n - x*x
 	m = (n*yx - x*y)/det
@@ -77,7 +80,7 @@ def harmonic_average(cluster):
 		Porb = sdata["system"]["Porb"]
 		Eorb = sdata["system"]["Eorb"]
 		Edot = sdata["stats"]["mean{|sum{Edot}|*(Porb/|Eorb|)}"]
-		
+	
 		num += Eorb/Porb
 		den += 1.0/Edot
 
