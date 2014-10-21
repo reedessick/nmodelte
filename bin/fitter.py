@@ -16,6 +16,8 @@ from optparse import OptionParser
 colors = ["b", "r", "g", "m", "c", "y", "k"]
 markers = ["o", "s", "^", ">", "<"]
 
+iax_pos = [0.51, 0.51, 0.40, 0.40]
+
 #=================================================
 parser = OptionParser(usage=usage)
 
@@ -44,7 +46,7 @@ parser.add_option("", "--time-unit", default=False, type="string")
 parser.add_option("", "--Mprim", default=1.0, type="float")
 parser.add_option("", "--Rprim", default=1.0, type="float")
 parser.add_option("", "--n-lin", default=10, type="int", help="number of modes to include in computation of linear dampling rates")
-parser.add_option("", "--n-pts", default=1001, type="int", help="the number of points used to construct the linear dampoing rates curve")
+parser.add_option("", "--n-pts", default=1001, type="int", help="the number of points used to construct the linear dampoing rates curve and to draw the fit curves for averaged data")
 parser.add_option("", "--alpha", default=4e-3, type="float")
 parser.add_option("", "--c", default=2e-11, type="float")
 
@@ -60,6 +62,8 @@ else:
 if opts.tag:
 	opts.tag = "_%s"%opts.tag
 
+opts.clusters = [l.split(",") for l in opts.clusters]
+
 #=================================================
 if opts.Edot:
 	### sweeps_powerlaw fits!
@@ -70,14 +74,14 @@ if opts.Edot:
 	ax = plt.subplot(1,1,1)
 
 	### generate a fit for each list of clusters
-	for ind, filename in enumerate(opts.clusters):
+	for ind, (label, filename) in enumerate(opts.clusters):
 		color = colors[ind%len(colors)]
 		marker = markers[ind%len(markers)]
 
-		label = filename.split("clusters")[-1].strip(".pkl")
-		if label[0] == "_":
-			label = label[1:]
-		label = label.replace("_","\_")
+#		label = filename.split("clusters")[-1].strip(".pkl")
+#		if label[0] == "_":
+#			label = label[1:]
+#		label = label.replace("_","\_")
 	
 		### read in list of clusters
 		if opts.verbose: print filename
@@ -103,16 +107,18 @@ if opts.Edot:
 				mEdot += cluster.get_Edot(unit_system=opts.unit_system)[0]
 				Porb += cluster.get_Porb(unit_system=opts.unit_system)
 
-			ax.plot(Porb, mEdot, marker="*", markerfacecolor="none", markeredgecolor=color, markersize=4, linestyle="none")
+			ax.plot([nmu.convert_time(p, nmu.units["time"], time_unit) for p in Porb], mEdot, marker="*", markerfacecolor="none", markeredgecolor=color, markersize=4, linestyle="none")
 
 		### plot fitting function
-		p = np.exp(logp)
+		p = nmu.convert_time(np.exp(logp), nmu.units["time"], time_unit)
 		ax.plot(p, np.exp(logedot), marker=marker, markerfacecolor="none", markeredgecolor=color, markersize=6, linestyle="none")
+		p = np.linspace(np.min(p), np.max(p), opts.n_pts)
+		logp = np.log( nmu.convert_time(p, time_unit, nmu.units["time"]) )
 		ax.plot(p, np.exp(m*logp + b), marker="none", linestyle="-", color=color, label=label)
 
 	### inset clusters (for zoom of a particular region)
 	if opts.inset_clusters:
-		iax = fig.add_axes([0.55, 0.55, 0.40, 0.40])
+		iax = fig.add_axes(iax_pos)
 		### compute linear expectation
 	        wo = ms.compute_wo(opts.Mprim, opts.Rprim)
 
@@ -164,7 +170,7 @@ if opts.Edot:
 
 	        ### plot linear result
 	        #ax.semilogy(O, Edot_lin, color='k', alpha=0.5)
-	        iax.plot((2*np.pi/O), Edot_lin, color='k', alpha=0.5)
+	        iax.plot(nmu.convert_time((2*np.pi/O), nmu.units["time"], time_unit), Edot_lin, color='k', alpha=0.5)
 
 		for ind, filename in enumerate(opts.inset_clusters):
 			color = colors[ind%len(colors)]
@@ -184,7 +190,7 @@ if opts.Edot:
                                 mEdot += cluster.get_Edot(unit_system=opts.unit_system)[0]
                                 Porb += cluster.get_Porb(unit_system=opts.unit_system)
 
-                        iax.plot(Porb, mEdot, marker=marker, markerfacecolor=color, markeredgecolor=color, markersize=4, linestyle="none")
+                        iax.plot([nmu.convert_time(p, nmu.units["time"], time_unit) for p in Porb], mEdot, marker=marker, markerfacecolor=color, markeredgecolor=color, markersize=4, linestyle="none")
 
 		iax.set_xlabel("$P_\mathrm{orb}$ [%s]"%time_unit)
 		iax.set_ylabel("$\left< \partial_t E_\mathrm{orb} \\right>$ [%s/%s]"%(energy_unit, time_unit))
@@ -192,12 +198,17 @@ if opts.Edot:
 
 		iax.set_yscale('log')
 
+		iax.xaxis.tick_top()
+		iax.xaxis.set_label_position("top")
+		iax.yaxis.tick_right()
+		iax.yaxis.set_label_position("right")
+
 	### decoration, etc
 	ax.set_xlabel("$P_\mathrm{orb}$ [%s]"%time_unit)
 	ax.set_ylabel("$\left< \partial_t E_\mathrm{orb} \\right>$ [%s/%s]"%(energy_unit, time_unit))
 	ax.grid(opts.grid, which="both")
 
-	ax.set_xscale('log')
+#	ax.set_xscale('log')
 	ax.set_yscale('log')
 
 	if opts.legend:
@@ -220,14 +231,14 @@ if opts.E:
         ax = plt.subplot(1,1,1)
 
         ### generate a fit for each list of clusters
-        for ind, filename in enumerate(opts.clusters):
+        for ind, (label,filename) in enumerate(opts.clusters):
                 color = colors[ind%len(colors)]
                 marker = markers[ind%len(markers)]
 
-                label = filename.split("clusters")[-1].strip(".pkl")
-                if label[0] == "_":
-                        label = label[1:]
-                label = label.replace("_","\_")
+#                label = filename.split("clusters")[-1].strip(".pkl")
+#                if label[0] == "_":
+#                        label = label[1:]
+#                label = label.replace("_","\_")
 
                 ### read in list of clusters
                 if opts.verbose: print filename
@@ -253,16 +264,18 @@ if opts.E:
                                 mE += cluster.get_E(unit_system=opts.unit_system)[0]
                                 Porb += cluster.get_Porb(unit_system=opts.unit_system)
 
-                        ax.plot(Porb, mE, marker="*", markerfacecolor="none", markeredgecolor=color, markersize=4, linestyle="none")
+                        ax.plot([nmu.convert_time(p, nmu.units["time"], time_unit) for p in Porb], mE, marker="*", markerfacecolor="none", markeredgecolor=color, markersize=4, linestyle="none")
 
                 ### plot fitting function
-                p = np.exp(logp)
+                p = nmu.convert_time(np.exp(logp), nmu.units["time"], time_unit)
                 ax.plot(p, np.exp(loge), marker=marker, markerfacecolor="none", markeredgecolor=color, markersize=6, linestyle="none")
+		p = np.linspace(np.min(p), np.max(p), opts.n_pts)
+		logp = np.log( nmu.convert_time(p, time_unit, nmu.units["time"]) )
                 ax.plot(p, np.exp(m*logp + b), marker="none", linestyle="-", color=color, label=label)
 
         ### inset clusters (for zoom of a particular region)
         if opts.inset_clusters:
-                iax = fig.add_axes([0.55, 0.55, 0.40, 0.40])
+                iax = fig.add_axes(iax_pos)
                 ### compute linear expectation
                 wo = ms.compute_wo(opts.Mprim, opts.Rprim)
 
@@ -314,7 +327,7 @@ if opts.E:
 
                 ### plot linear result
                 #ax.semilogy(O, Edot_lin, color='k', alpha=0.5)
-                iax.plot((2*np.pi/O), E_lin, color='k', alpha=0.5)
+                iax.plot(nmu.convert_time((2*np.pi/O), nmu.units["time"], time_unit), E_lin, color='k', alpha=0.5)
 
                 for ind, filename in enumerate(opts.inset_clusters):
                         color = colors[ind%len(colors)]
@@ -334,20 +347,26 @@ if opts.E:
                                 mE += cluster.get_E(unit_system=opts.unit_system)[0]
                                 Porb += cluster.get_Porb(unit_system=opts.unit_system)
 
-                        iax.plot(Porb, mE, marker=marker, markerfacecolor=color, markeredgecolor=color, markersize=4, linestyle="none")
+                        iax.plot([nmu.convert_time(p, nmu.units["time"], time_unit) for p in Porb], mE, marker=marker, markerfacecolor=color, markeredgecolor=color, markersize=4, linestyle="none")
 
                 iax.set_xlabel("$P_\mathrm{orb}$ [%s]"%time_unit)
                 iax.set_ylabel("$\left< E_{\\ast} \\right>$ [%s]"%(energy_unit))
+
                 iax.grid(opts.grid, which="both")
 
                 iax.set_yscale('log')
+
+		iax.xaxis.tick_top()
+		iax.xaxis.set_label_position("top")
+		iax.yaxis.tick_right()
+		iax.yaxis.set_label_position("right")
 
         ### decoration, etc
         ax.set_xlabel("$P_\mathrm{orb}$ [%s]"%time_unit)
         ax.set_ylabel("$\left< E_{\\ast} \\right>$ [%s]"%(energy_unit))
         ax.grid(True, which="both")
 
-        ax.set_xscale('log')
+#        ax.set_xscale('log')
         ax.set_yscale('log')
 
         if opts.legend:
