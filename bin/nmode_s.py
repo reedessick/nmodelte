@@ -146,7 +146,7 @@ if time_domain:
   t_P, q, N_m = nm_u.load_out(opts.filename, tmin=opts.tmin, tmax=opts.tmax, downsample=opts.tdownsample)
 
   if not len(t_P):
-    raise ValueError, "no data loaded from ",opts.filename
+    raise ValueError, "no data loaded from "+opts.filename
 
   if opts.amplitude:
     if opts.verbose: print "computing mode amplitudes"
