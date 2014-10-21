@@ -342,10 +342,9 @@ if opts.special_plots:
     ### pull out Ntriples
     Ntriples.append( sdata["system"]["Ntriples"] )
 
-  """
   ### convert mEdot into sizes
-#  cmap_norm = matplotlib.colors.Normalize(vmin=min(mEdot), vmax=max(mEdot))
-  cmap_norm = matplotlib.colors.LogNorm(vmin=min(mEdot), vmax=max(mEdot))
+  cmap_norm = matplotlib.colors.Normalize(vmin=min(mEdot), vmax=max(mEdot))
+#  cmap_norm = matplotlib.colors.LogNorm(vmin=min(mEdot), vmax=max(mEdot))
   min_size = 1
   max_size = 10
   sizes = [ min_size + (max_size-min_size)*cmap_norm( Edot ) for Edot in mEdot ]
@@ -355,8 +354,8 @@ if opts.special_plots:
 #  cmap_norm = matplotlib.colors.LogNorm(vmin=min(Ntriples), vmax=max(Ntriples))
   cmap = plt.get_cmap("jet")
   colors = [ cmap( cmap_norm(Nt) ) for Nt in Ntriples]
-  """
 
+  """
   ### convert Ntriples into sizes
   cmap_norm = matplotlib.colors.Normalize(vmin=min(Ntriples), vmax=max(Ntriples))
 #  cmap_norm = matplotlib.colors.LogNormalize(vmin=min(Ntriples), vmax=max(Ntriples))
@@ -369,13 +368,18 @@ if opts.special_plots:
 #  cmap_norm = matplotlib.colors.LogNorm(vmin=min(mEdot), vmax=max(mEdot))
   cmap = plt.get_cmap("jet")
   colors = [ cmap( cmap_norm(Edot) ) for Edot in mEdot]
+  """
 
   ### generate plot
   fig = plt.figure()
   ax = fig.add_axes(axes_loc)
   ax_cb = fig.add_axes(cb_loc)
 
-  for ng1, ng2, color, size in zip(Ng1, Ng2, colors, sizes):
+  ### plot in order of decreasing size
+  zipped = zip(Ng1, Ng2, colors, sizes)
+  zipped.sort(key=lambda l: l[3], reverse=True)
+
+  for ng1, ng2, color, size in zipped:
     ax.plot(ng1, ng2, marker="o", markeredgecolor=color, markerfacecolor=color, alpha = 0.5, markersize=size)
 
   cb = matplotlib.colorbar.ColorbarBase(ax_cb, cmap=cmap, norm=cmap_norm, orientation='vertical')
@@ -383,11 +387,15 @@ if opts.special_plots:
   ax.set_xlabel("$N_{G1}$")
   ax.set_ylabel("$N_{G2}$")
 
-  """
+  ax.set_xlim(xmin=min(Ng1) - 1, xmax=max(Ng1) + 1)
+  ax.set_ylim(ymin=min(Ng2) - 1, ymax=max(Ng2) + 1)
+
   cb.set_label(r"No. triples")
+
   """
   cb.set_label(r"$\frac{\sum 2\gamma_i A_i^2}{|E_\mathrm{orb}|/P_\mathrm{orb}}$")
- 
+  """
+
   ax.grid(True)
  
   figname = "%s/Ng1-Ng2%s.png" % (opts.output_dir, opts.tag)
@@ -395,4 +403,52 @@ if opts.special_plots:
   fig.savefig(figname)
   plt.close(fig)
 
-  
+  #===============================================
+  if opts.verbose: print "yE vs Nmodes in gen"
+
+  ### pull out maximum number of generations
+  max_Ngens = 0
+  for stefilename, sdata in dat:
+    Ngens = sdata["system"]["Ngens"]
+    if max_Ngens < Ngens:
+      max_Ngens = Ngens
+
+  ### iterate over number of generations, with a new plot for each
+  for igen in xrange(max_Ngens):
+    fig = plt.figure()
+    ax = fig.add_axes(axes_loc)
+
+    ngi = []
+    mEdot = []
+    vEdot = []
+
+    ### iterate over data
+    for stefilename, sdata in dat:
+      Ngens = sdata["system"]["Ngens"]
+      if Ngens > igen:
+        try:
+          mEdot.append( sdata["stats"]["mean{|sum{Edot}|*(Porb/|Eorb|)}"] )
+          vEdot.append( sdata["stats"]["stdv{|sum{Edot}|*(Porb/|Eorb|)}"] )
+        except KeyError:
+          print "could not find data for mean{|sum{Edot}|*Porb/|Eorb|} in %s... skipping" % (stefilename)
+          continue
+
+        ngi.append( sdata["system"]["Ngi"][igen] )
+        
+    ax.plot( ngi, mEdot, marker="o", markerfacecolor="none", markeredgecolor="b", linestyle="none")
+
+    ax.set_xlabel("No. modes in generation %d"%igen)
+    ax.set_ylabel(r"$\frac{\sum 2\gamma_i A_i^2}{|E_\mathrm{orb}|/P_\mathrm{orb}}$")
+
+    ax.set_xlim(xmin=min(ngi)-1, xmax=max(ngi)+1)
+
+    ax.grid(True, which="both")
+    
+    figname = "%s/Edot-Ng%d%s.png" % (opts.output_dir, igen, opts.tag)
+    if opts.verbose: print "\t\t\tsaving ", figname
+    fig.savefig(figname)
+    plt.close(fig)
+
+
+
+
