@@ -93,7 +93,7 @@ if opts.Edot:
 			cluster.load(verbose=opts.vverbose)
 
 		### compute power law fits
-		(logp, logedot), (m, b) = fitting.sweeps_Edot_powerlaw(clusters, unit_system=opts.unit_system)
+		(logp, logedot), (sedot, sp), (m, b) = fitting.sweeps_Edot_powerlaw(clusters, unit_system=opts.unit_system)
 
 		if opts.verbose:
 			print "\tlog(Edot) = %f * log(P) + %f"%(m, b)
@@ -110,7 +110,14 @@ if opts.Edot:
 
 		### plot fitting function
 		p = nmu.convert_time(np.exp(logp), nmu.units["time"], time_unit)
+		sp = nmu.convert_time(np.array(sp), nmu.units["time"], time_unit)
 		ax.plot(p, np.exp(logedot), marker=marker, markerfacecolor="none", markeredgecolor=color, markersize=6, linestyle="none")
+		### plot error estimates
+		for abscissa, ordinate, errx, erry in zip(p, np.exp(logedot), sp, sedot):
+			ax.plot( [abscissa, abscissa], [ordinate+erry, ordinate-erry], marker="none", color=color, linestyle="-")
+			ax.plot( [abscissa-errx, abscissa+errx], [ordinate, ordinate], marker="none", color=color, linestyle="-")
+
+
 		p = np.linspace(np.min(p), np.max(p), opts.n_pts)
 		logp = np.log( nmu.convert_time(p, time_unit, nmu.units["time"]) )
 		ax.plot(p, np.exp(m*logp + b), marker="none", linestyle="-", color=color, label=label)
@@ -184,12 +191,17 @@ if opts.Edot:
 				cluster.load(verbose=opts.vverbose)
 
 			mEdot = []
+			sEdot = []
                         Porb = []
                         for cluster in clusters:
-                                mEdot += cluster.get_Edot(unit_system=opts.unit_system)[0]
+				a, b = cluster.get_Edot(unit_system=opts.unit_system)
+                                mEdot += a
+				sEdot += b
                                 Porb += cluster.get_Porb(unit_system=opts.unit_system)
 
                         iax.plot([nmu.convert_time(p, nmu.units["time"], time_unit) for p in Porb], mEdot, marker=marker, markerfacecolor=color, markeredgecolor=color, markersize=4, linestyle="none")
+			for abscissa, ordinate, erry in zip([nmu.convert_time(p, nmu.units["time"], time_unit) for p in Porb], mEdot, sEdot):
+				iax.plot([abscissa, abscissa], [ordinate+erry, ordinate-erry], color=color, marker="none", linestyle="-")
 
 		iax.set_xlabel("$P_\mathrm{orb}$ [%s]"%time_unit)
 		iax.set_ylabel("$\left< \partial_t E_\mathrm{orb} \\right>$ [%s/%s]"%(energy_unit, time_unit))
@@ -250,7 +262,7 @@ if opts.E:
                         cluster.load(verbose=opts.vverbose)
 
                 ### compute power law fits
-                (logp, loge), (m, b) = fitting.sweeps_E_powerlaw(clusters, unit_system=opts.unit_system)
+                (logp, loge), (se, sp), (m, b) = fitting.sweeps_E_powerlaw(clusters, unit_system=opts.unit_system)
 
                 if opts.verbose:
                         print "\tlog(E) = %f * log(P) + %f"%(m, b)
@@ -268,6 +280,12 @@ if opts.E:
                 ### plot fitting function
                 p = nmu.convert_time(np.exp(logp), nmu.units["time"], time_unit)
                 ax.plot(p, np.exp(loge), marker=marker, markerfacecolor="none", markeredgecolor=color, markersize=6, linestyle="none")
+                ### plot error estimates
+		sp = nmu.convert_time(np.array(sp), nmu.units["time"], time_unit)
+                for abscissa, ordinate, errx, erry in zip(p, np.exp(loge), sp, se):
+                        ax.plot( [abscissa, abscissa], [ordinate+erry, ordinate-erry], marker="none", color=color, linestyle="-")
+                        ax.plot( [abscissa-errx, abscissa+errx], [ordinate, ordinate], marker="none", color=color, linestyle="-")
+
 		p = np.linspace(np.min(p), np.max(p), opts.n_pts)
 		logp = np.log( nmu.convert_time(p, time_unit, nmu.units["time"]) )
                 ax.plot(p, np.exp(m*logp + b), marker="none", linestyle="-", color=color, label=label)
@@ -341,12 +359,17 @@ if opts.E:
                                 cluster.load(verbose=opts.vverbose)
 
                         mE = []
+			sE = []
                         Porb = []
                         for cluster in clusters:
-                                mE += cluster.get_E(unit_system=opts.unit_system)[0]
+				a, b = cluster.get_E(unit_system=opts.unit_system)
+				mE += a
+				sE += b
                                 Porb += cluster.get_Porb(unit_system=opts.unit_system)
 
                         iax.plot([nmu.convert_time(p, nmu.units["time"], time_unit) for p in Porb], mE, marker=marker, markerfacecolor=color, markeredgecolor=color, markersize=4, linestyle="none")
+                        for abscissa, ordinate, erry in zip([nmu.convert_time(p, nmu.units["time"], time_unit) for p in Porb], mE, sE):
+                                iax.plot([abscissa, abscissa], [ordinate+erry, ordinate-erry], color=color, marker="none", linestyle="-")
 
                 iax.set_xlabel("$P_\mathrm{orb}$ [%s]"%time_unit)
                 iax.set_ylabel("$\left< E_{\\ast} \\right>$ [%s]"%(energy_unit))

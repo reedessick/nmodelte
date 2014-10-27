@@ -4,6 +4,9 @@ import numpy as np
 import pickle
 import nmode_utils as nmu
 
+import pygsl.multifit_nlin as pygsl_mfN # fitting functions
+import pygsl.errno as pygsl_errno
+
 #=================================================
 # cluster object
 #=================================================
@@ -80,6 +83,68 @@ def harmonic_average(cluster, key, unit_system="SI"):
         time_unit = nmu.units["time"]
         energy_unit = nmu.units["energy"]
 
+	P = []
+	E = []
+	mEdot = []
+	sEdot = []
+	x = []
+	sx = []
+
+	for sdata, mdata in cluster.data:
+		nmu.set_units(sdata["unit_system"])
+
+		### convertion to Porb measure
+		Porb = nmu.convert_time(sdata["system"]["Porb"], nmu.units["time"], time_unit)
+		Eorb = nmu.convert_energy(sdata["system"]["Eorb"], nmu.units["energy"], energy_unit)
+
+		P.append( Porb )
+		E.append( Eorb )
+
+		mEdot.append( sdata["stats"]["mean{|sum{Edot}|*(Porb/|Eorb|)}"] * Eorb/Porb )
+		sEdot.append( sdata["stats"]["stdv{|sum{Edot}|*(Porb/|Eorb|)}"] * Eorb/Porb )
+
+		if key == "Edot":
+			x.append( sdata["stats"]["mean{|sum{Edot}|*(Porb/|Eorb|)}"] * Eorb/Porb )
+			sx.append( sdata["stats"]["stdv{|sum{Edot}|*(Porb/|Eorb|)}"] * Eorb/Porb )
+		elif key == "E":
+			x.append( sdata["stats"]["mean{sum{E}/|Eorb|}"] * Eorb )
+			sx.append( sdata["stats"]["stdv{sum{E}/|Eorb|}"] * Eorb )
+		else:
+			raise KeyError, "key=%s not understood"%key
+
+	### cast to arrays
+	P = np.array(P)
+	E = np.array(E)
+	mEdot = np.array(mEdot)
+	sEdot = np.array(sEdot)
+	x = np.array(x)
+	sx = np.array(sx)
+
+	### compute averages
+	integrand = Eorb/(Porb*mEdot)
+
+	num = np.sum( integrand * x )
+	den = np.sum( integrand )
+
+	p = np.sum( integrand * P )
+
+	mx = num/den
+	mp = p/den
+
+	### compute uncertainties
+	T = np.sum( integrand )
+	integrate = E/(P*mEdot**2)
+	a = np.sum( integrand**2 * sx**2 ) / T**2
+	b = np.sum( (integrate * ( x*T - np.sum( x*integrand) ))**2 * sEdot**2 ) / T**4
+
+	smx = a + b ### uncertainty in x
+	smp = np.sum( (integrate * ( P*T - np.sum( P*integrand) ))**2 * sEdot**2 ) / T**4 ### uncertainty in p
+
+
+	return (mx, smx**0.5) , (mp, smp**0.5)
+
+
+	'''
         num = 0.0
         den = 0.0
         p = 0.0
@@ -107,7 +172,7 @@ def harmonic_average(cluster, key, unit_system="SI"):
                 p += integrand * Porb
 
         return num/den, p/den
-
+	'''
 #=================================================
 # sweeps fitting
 #=================================================
@@ -124,7 +189,8 @@ def sweeps_Edot_powerlaw(clusters, unit_system="SI"):
 	ALSO ASSUMES all system data is identical EXCEPT for Porb so the fit makes sense.
 	"""
 	### compute harmonic average (via delegation)
-	edot, p = np.transpose(np.array( [harmonic_average(cluster, "Edot", unit_system=unit_system) for cluster in clusters] ))
+	(edot, p), (sedot, sp) = np.transpose(np.array( [harmonic_average(cluster, "Edot", unit_system=unit_system) for cluster in clusters] ))
+#	edot, p = np.transpose(np.array( [harmonic_average(cluster, "Edot", unit_system=unit_system) for cluster in clusters] ))
 
 	### fit to function!
 	### simple power law!
@@ -142,10 +208,13 @@ def sweeps_Edot_powerlaw(clusters, unit_system="SI"):
 	m = (n*yx - x*y)/det
 	b = (-x*yx + xx*y)/det
 
-	return (logp, logedot), (m, b)
+	return (logp, logedot), (sedot, sp), (m, b)
 
+###
 def sweeps_E_powerlaw(clusters, unit_system="SI"):
-	e, p = np.transpose(np.array( [harmonic_average(cluster, "E", unit_system=unit_system) for cluster in clusters] ))
+	""" fits stellar energy to a power law of orbital period """
+	(e, p), (se, sp) = np.transpose(np.array( [harmonic_average(cluster, "E", unit_system=unit_system) for cluster in clusters] ))
+#	e, p = np.transpose(np.array( [harmonic_average(cluster, "E", unit_system=unit_system) for cluster in clusters] ))
 
         ### fit to function!
         ### simple power law!
@@ -163,5 +232,150 @@ def sweeps_E_powerlaw(clusters, unit_system="SI"):
         m = (n*yx - x*y)/det
         b = (-x*yx + xx*y)/det
 
-        return (logp, loge), (m, b)
+        return (logp, loge), (se, sp), (m, b)
 
+#========================
+# helper methods for more general fitting
+#========================
+###
+def chi2(y, yhat, reduced=False):
+	"""
+	computes the chi2 statistic for y, yhat
+
+	if reduced, returns the reduced chi2 statistic
+	"""
+
+	chi2_stat = np.sum( (1.0 - y/yhat)**2 )
+
+	if reduced:
+		chi2_stat /= len(y)
+
+	return chi2_stat
+
+###
+def steps(x, params):
+	"""
+	computes y(x) = sum C * x**a * (1 + e**(b*x))**(-1)
+
+	and params = [ C, a, b, C1, a1, b1, ...]
+	"""
+	if not isinstance(x, np.ndarray):
+		x = np.array( x )
+
+	y = np.zeros_like(x, float)
+	for n in xrange(len(params)/3):
+		C, a, b = params[3*n:3*(n+1)]
+		y += C * x**a / (1+np.exp(b*x))
+
+	return y
+
+def dsteps(x, params):
+	"""
+	computes the partial derivative matrix for steps
+	"""
+	if not isinstance(x, np.ndarray):
+		x = np.array( x )
+
+	dfit = []
+	for n in xrange(len(params)/3):
+		C, a, b = params[3*n:3*(n+1)]
+		dfit.append( x**a / (1+np.exp(b*x)) ) ### dfit/dC
+		dfit.append( C * x**a * np.log(x) / (1+np.exp(b*x)) ) ### dfit/da
+		dfit.append( -C * x**(a+1) * np.exp(b*x) / (1+np.exp(b*x))**2 ) ### dfit/db
+
+	return np.transpose( np.array(dfit) )
+
+### 
+def steps_fit(params, data):
+	x, y = data
+	return y - steps(x, params)
+
+###
+def steps_dfit(params, data):
+	x, y = data
+	return dsteps(x, params)
+
+###
+def steps_fitdfit(params, data):
+	return steps_fit(params, data), steps_dfit(params, data)
+
+###
+def steps_fitter(x, y, n, max_iters=50, rtol=1e-8, verbose=False):
+	"""
+	fits data to "steps" with n terms
+	"""
+	if not isinstance(x, np.ndarray):
+		x = np.array( x )
+	if not isinstance(y, np.ndarray):
+		y = np.array( y )
+
+	n_pts = len(x) ### number of points
+	p = 3*n ### number of fitting parameters
+
+	### set up system
+	mysys = pygsl_mfN.gsl_multifit_function_fdf( fit, dfit, fitdfit, np.array( [x, y] ), n, p)
+	solver = pygsl_mfN.lmsder(mysys, n, p)
+
+	### starting points
+	params = []
+	for i in xrange(n):
+		a = -4.0
+		b = 0.0
+		C = y[0]/x[0]**a
+		params += [ C, a, b]
+
+	solver.set(params) ### set starting point
+
+	if verbose:
+		s = "# %5s"
+		S = "  %5d"%0
+		for i in xrange(n):
+			s += " %9s %9s %9s"%("C", "a", "b")
+			S += " %.7f %.7f %7f"%tuple(params[3*n:3*(n+1)])
+		print s
+		print S
+
+	for iter in range(1,max_iters+1):
+		status = solver.iterate() # move fit params
+		_fit_params = solver.getx() # new guess
+		dfit_params = solver.getdx() # change in fit params
+		fits = np.array( solver.getf() ) # residuals at every data point
+
+		J = solver.getJ() # jacobian of fit
+		tdx = pygsl_mfN.gradient( J, fits ) # gradient at fit
+		status = pygsl_mfN.test_delta(dfit_params, _fit_params, rtol, rtol) # just copied, not understood...
+
+		fn = np.sum((fits/sigma)**2)**0.5 # sum square errors
+
+		if status == pygsl_errno.GSL_SUCCESS:
+			if verbose: 
+				print "# Converged :"
+			break
+		if verbose: 
+			S = "  %5d"%iter
+			for i in xrange(n):
+				S += " %.7f %.7f %7f"%tuple(_fit_params[3*n:3*(n+1)])
+			S += " %.7f"%fn
+			print S
+	else:
+		if verbose:
+			print "WARNING! Number of Iterations exceeded in nmode_state.broken_PowLaw_fitter!"
+			print "continuing with best guess after %d iterations" % max_iters
+
+	# get error bars on fit params
+	covar = pygsl_mfN.covar(solver.getJ(), 0.0) # covariance matrix
+	red_chi2 = 1.0*sum( (steps(x, _fit_params) - y)**2 / y )/len(x)
+
+
+	if verbose:
+                s = "#"
+                S = " "
+		ss= " "
+                for i in xrange(n):
+                        s += " %9s %9s %9s"%("C", "a", "b")
+                        S += " %.7f %.7f %7f"%tuple(_fit_params[3*n:3*(n+1)])
+			ss+= " %.7f %.7f %7f"%tuple(covar[i][i] for i in xrange(3*n, 3*(n+1)))
+		print s
+		print S
+
+	return _fit_params, [covar[i][i] for i in range(len(covar))], red_chi2
