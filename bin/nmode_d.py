@@ -73,7 +73,7 @@ parser.add_option("", "--conc-fit-rtol", default=1e-8, type="float")
 parser.add_option("", "--conc-verbose", default=False, action="store_true")
 
 ### coupling diagram options
-parser.add_option("", "--coupling-diagram", default=False, type="string", help="the type of coupling diagram to generate. Supply at least one of \"w\", \"nlm\", \"nl-placement\", \"nl-sibling\", \"nl-shared_parent\", \"nl-shared_child\", \"nl-triples\"")
+parser.add_option("", "--coupling-diagram", default=False, type="string", help="the type of coupling diagram to generate. Supply at least one of \"w\", \"nlm\", \"nl-placement\", \"nl-siblings\", \"nl-shared_parent\", \"nl-shared_child\", \"nl-triples\"")
 parser.add_option("", "--coupling-diagram-coloration", default="", type="string", help="coloration schema for coupling diagrams that support it (nl)")
 parser.add_option("", "--coupling-diagram-colormap", default="copper", type="string", help="colormap for mode_colors in coupling diagrams that support it")
 parser.add_option("", "--coupling-diagram-logcolors", default=False, action="store_true", help="set the coloration to logarithmic scale")

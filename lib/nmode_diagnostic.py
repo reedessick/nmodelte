@@ -329,7 +329,7 @@ def coupling_tree_nl(system, tree_type="placement", genNos=[], verbose=False, mo
 #  return __coupling_tree_nl(modes, mode_colors=__mode_colors, conns=conns, conn_colors=conn_colors, verbose=verbose, fig_ax=fig_ax)
 
 ##################################################
-def __coupling_tree_nl(modes, mode_colors="b", conns=[], conn_colors="r", verbose=False, fig_ax=None, mode_alpha=0.75, edge_alpha=0.50):
+def __coupling_tree_nl(modes, mode_colors="b", conns=[], conn_colors="r", verbose=False, fig_ax=None, mode_alpha=0.75, edge_alpha=0.25):
   """ 
   a plotting function for coupling_tree_nl. It plots the modes on the n-l plane (with offsets from l described by m) and draws connections between them described in conns)
   Because we can come up with many different lines to connect the modes, this method should be useful through delegation 
