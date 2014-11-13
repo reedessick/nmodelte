@@ -23,6 +23,8 @@ parser = OptionParser(usage=usage)
 parser.add_option("-v", "--verbose", default=False, action="store_true")
 parser.add_option("-V", "--vverbose", default=False, action="store_true")
 
+parser.add_option("", "--logx", default=False, action="store_true")
+
 parser.add_option("-c", "--clusters", default=[], type="string", action="append", help="filename of pickled lists of clusters")
 
 parser.add_option("-i", "--inset-clusters", default=[], type="string", action="append", help="clusters that will be plotted as a freq sweep in an inset")
@@ -49,6 +51,8 @@ parser.add_option("", "--n-pts", default=1001, type="int", help="the number of p
 parser.add_option("", "--alpha", default=4e-3, type="float")
 parser.add_option("", "--c", default=2e-11, type="float")
 
+parser.add_option("", "--maxPorb", default=np.infty, type="float")
+
 opts, args = parser.parse_args()
 
 nmu.set_units(system=opts.unit_system) ### set our system of units
@@ -62,6 +66,8 @@ if opts.tag:
 	opts.tag = "_%s"%opts.tag
 
 opts.clusters = [l.split(",") for l in opts.clusters]
+
+opts.verbose = opts.verbose or opts.vverbose
 
 #=================================================
 if opts.Edot:
@@ -89,8 +95,12 @@ if opts.Edot:
 		file_obj.close()
 
 		### load data for each clusters
+		c = []
 		for cluster in clusters:
 			cluster.load(verbose=opts.vverbose)
+			if np.mean(cluster.get_Porb()) <= opts.maxPorb:
+				c.append( cluster )
+		clusters = c		
 
 		### compute power law fits
 		(logp, logedot), (sedot, sp), (m, b) = fitting.sweeps_Edot_powerlaw(clusters, unit_system=opts.unit_system)
@@ -117,6 +127,11 @@ if opts.Edot:
 			ax.plot( [abscissa, abscissa], [ordinate+erry, ordinate-erry], marker="none", color=color, linestyle="-")
 			ax.plot( [abscissa-errx, abscissa+errx], [ordinate, ordinate], marker="none", color=color, linestyle="-")
 
+		if opts.verbose:
+			print label
+			print "\tedot sedot p sp"
+			for A, B, C, D in zip(np.exp(logedot), sedot, p, sp):
+				print "\t", A, B, C, D
 
 		p = np.linspace(np.min(p), np.max(p), opts.n_pts)
 		logp = np.log( nmu.convert_time(p, time_unit, nmu.units["time"]) )
@@ -219,7 +234,8 @@ if opts.Edot:
 	ax.set_ylabel("$\left< \partial_t E_\mathrm{orb} \\right>$ [%s/%s]"%(energy_unit, time_unit))
 	ax.grid(opts.grid, which="both")
 
-#	ax.set_xscale('log')
+	if opts.logx:
+		ax.set_xscale('log')
 	ax.set_yscale('log')
 
 	if opts.legend:
@@ -286,9 +302,16 @@ if opts.E:
                         ax.plot( [abscissa, abscissa], [ordinate+erry, ordinate-erry], marker="none", color=color, linestyle="-")
                         ax.plot( [abscissa-errx, abscissa+errx], [ordinate, ordinate], marker="none", color=color, linestyle="-")
 
+                if opts.verbose:
+                        print label
+			print "\te se p sp"
+			for A, B, C, D in zip(np.exp(loge), se, p, sp):
+				print "\t", A, B, C, D
+
 		p = np.linspace(np.min(p), np.max(p), opts.n_pts)
 		logp = np.log( nmu.convert_time(p, time_unit, nmu.units["time"]) )
                 ax.plot(p, np.exp(m*logp + b), marker="none", linestyle="-", color=color, label=label)
+
 
         ### inset clusters (for zoom of a particular region)
         if opts.inset_clusters:
@@ -388,7 +411,8 @@ if opts.E:
         ax.set_ylabel("$\left< E_{\\ast} \\right>$ [%s]"%(energy_unit))
         ax.grid(True, which="both")
 
-#        ax.set_xscale('log')
+	if opts.logx:
+	        ax.set_xscale('log')
         ax.set_yscale('log')
 
         if opts.legend:

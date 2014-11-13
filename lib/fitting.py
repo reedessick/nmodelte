@@ -269,7 +269,7 @@ def steps(x, params):
 
 	return y
 
-def dsteps(x, params):
+def dsteps(x, s, params):
 	"""
 	computes the partial derivative matrix for steps
 	"""
@@ -283,24 +283,24 @@ def dsteps(x, params):
 		dfit.append( C * x**a * np.log(x) / (1+np.exp(b*x)) ) ### dfit/da
 		dfit.append( -C * x**(a+1) * np.exp(b*x) / (1+np.exp(b*x))**2 ) ### dfit/db
 
-	return np.transpose( np.array(dfit) )
+	return np.transpose( np.array(dfit) / s )
 
 ### 
 def steps_fit(params, data):
-	x, y = data
-	return y - steps(x, params)
+	x, y, s = data
+	return (y - steps(x, params)) / s
 
 ###
 def steps_dfit(params, data):
-	x, y = data
-	return dsteps(x, params)
+	x, y, s = data
+	return dsteps(x, s, params)
 
 ###
 def steps_fitdfit(params, data):
 	return steps_fit(params, data), steps_dfit(params, data)
 
 ###
-def steps_fitter(x, y, n, max_iters=50, rtol=1e-8, verbose=False):
+def steps_fitter(x, y, sigma, n, max_iters=50, rtol=1e-8, verbose=False):
 	"""
 	fits data to "steps" with n terms
 	"""
@@ -308,20 +308,28 @@ def steps_fitter(x, y, n, max_iters=50, rtol=1e-8, verbose=False):
 		x = np.array( x )
 	if not isinstance(y, np.ndarray):
 		y = np.array( y )
+	if not isinstance(sigma, np.ndarray):
+		sigma = np.array( sigma )
+
 
 	n_pts = len(x) ### number of points
 	p = 3*n ### number of fitting parameters
 
 	### set up system
-	mysys = pygsl_mfN.gsl_multifit_function_fdf( fit, dfit, fitdfit, np.array( [x, y] ), n, p)
-	solver = pygsl_mfN.lmsder(mysys, n, p)
+	if verbose:
+		print "setting up objects"
+	mysys = pygsl_mfN.gsl_multifit_function_fdf( steps_fit, steps_dfit, steps_fitdfit, np.array( [x, y, sigma] ), n_pts, p)
+	solver = pygsl_mfN.lmsder(mysys, n_pts, p)
 
 	### starting points
+	if verbose: 
+		print "setting up stating point"
 	params = []
 	for i in xrange(n):
-		a = -4.0
-		b = 0.0
+		a = -8.2
+		b = 2.6e-6
 		C = y[0]/x[0]**a
+#		C = np.mean(y)/np.mean(x)**a
 		params += [ C, a, b]
 
 	solver.set(params) ### set starting point
@@ -331,7 +339,7 @@ def steps_fitter(x, y, n, max_iters=50, rtol=1e-8, verbose=False):
 		S = "  %5d"%0
 		for i in xrange(n):
 			s += " %9s %9s %9s"%("C", "a", "b")
-			S += " %.7f %.7f %7f"%tuple(params[3*n:3*(n+1)])
+			S += " %.7f %.7f %7f"%tuple(params[3*i:3*(i+1)])
 		print s
 		print S
 
@@ -345,7 +353,7 @@ def steps_fitter(x, y, n, max_iters=50, rtol=1e-8, verbose=False):
 		tdx = pygsl_mfN.gradient( J, fits ) # gradient at fit
 		status = pygsl_mfN.test_delta(dfit_params, _fit_params, rtol, rtol) # just copied, not understood...
 
-		fn = np.sum((fits/sigma)**2)**0.5 # sum square errors
+		fn = np.sum((fits)**2)**0.5 # sum square errors
 
 		if status == pygsl_errno.GSL_SUCCESS:
 			if verbose: 
@@ -354,7 +362,7 @@ def steps_fitter(x, y, n, max_iters=50, rtol=1e-8, verbose=False):
 		if verbose: 
 			S = "  %5d"%iter
 			for i in xrange(n):
-				S += " %.7f %.7f %7f"%tuple(_fit_params[3*n:3*(n+1)])
+				S += " %.7f %.7f %7f"%tuple(_fit_params[3*i:3*(i+1)])
 			S += " %.7f"%fn
 			print S
 	else:
@@ -373,8 +381,8 @@ def steps_fitter(x, y, n, max_iters=50, rtol=1e-8, verbose=False):
 		ss= " "
                 for i in xrange(n):
                         s += " %9s %9s %9s"%("C", "a", "b")
-                        S += " %.7f %.7f %7f"%tuple(_fit_params[3*n:3*(n+1)])
-			ss+= " %.7f %.7f %7f"%tuple(covar[i][i] for i in xrange(3*n, 3*(n+1)))
+                        S += " %.7f %.7f %7f"%tuple(_fit_params[3*i:3*(i+1)])
+			ss+= " %.7f %.7f %7f"%tuple(covar[i][i] for i in xrange(3*i, 3*(i+1)))
 		print s
 		print S
 
