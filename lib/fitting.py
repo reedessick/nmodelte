@@ -22,6 +22,16 @@ class Cluster(object):
 				print filename
 			self.data.append( nmu.load_ste(filename) )
 
+	def get_Mcomp(self, unit_system="SI"):
+		nmu.set_units(system=unit_system)
+		mass_unit = nmu.units["mass"]
+
+		Mcomp = []
+		for sdata, _ in self.data:
+			Mcomp.append( sdata["system"]["Mcomp/Mjup"]*nmu.Mjup )
+
+		return Mcomp
+
 	def get_Edot(self, unit_system="SI"):
 		nmu.set_units(system=unit_system)
 		energy_unit = nmu.units["energy"]
@@ -51,6 +61,17 @@ class Cluster(object):
 			Porb.append( nmu.convert_time(sdata["system"]["Porb"], nmu.units["time"], time_unit) )
 
 		return Porb
+
+	def get_Eorb(self, unit_system="SI"):
+		nmu.set_units(system=unit_system)
+		energy_unit = nmu.units["energy"]
+
+		Eorb = []
+		for sdata, _ in self.data:
+			nmu.set_units(sdata["unit_system"])
+			Eorb.append( nmu.convert_energy(sdata["system"]["Eorb"], nmu.units["energy"], energy_unit) )
+
+		return Eorb
 
 	def get_E(self, unit_system="SI"):
                 nmu.set_units(system=unit_system)
