@@ -88,6 +88,26 @@ class Cluster(object):
 
                 return mE, sE
 
+	def get_Mprim(self, unit_system="SI"):
+		nmu.set_units(system=unit_system)
+		mass_unit = nmu.units["mass"]
+
+		Mprime = []
+		for sdata, _ in self.data:
+			nmu.set_units(sdata["unit_system"])
+			Mprime.append( nmu.convert_mass(sdata["system"]["Mprim/Msun"]*nmu.Msun, nmu.units["mass"], mass_unit) )
+		return Mprime
+
+	def get_Rprim(self, unit_system="SI"):
+		nmu.set_units(system=unit_system)
+		length_unit = nmu.units["length"]
+
+		Rprime = []
+		for sdata, _ in self.data:
+			nmu.set_units(sdata["unit_system"])
+			Rprime.append( nmu.convert_length(sdata["system"]["Rprim/Rsun"]*nmu.Rsun, nmu.units["length"], length_unit) )
+		return Rprime
+
 #=================================================
 ### harmonic average
 def harmonic_average(cluster, key, unit_system="SI"):
