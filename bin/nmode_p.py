@@ -582,7 +582,7 @@ if time_domain:
       else:
         figname = opts.filename + ".amp.lin_time" + opts.tag + ".png"
       if opts.verbose: print "saving "+figname
-      plt.savefig(figname)
+      fig.savefig(figname)
 
     if opts.log_time:
       if opts.lin_amp_time:
@@ -598,7 +598,7 @@ if time_domain:
         _ax = ax.axis()
         ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
 
-      plt.savefig(figname)
+      fig.savefig(figname)
 
     plt.close(fig)
 
