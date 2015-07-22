@@ -66,6 +66,11 @@ parser.add_option("", "--eig-maxi", default=False, type="float")
 
 ### growth rates
 parser.add_option("", "--growth-rates", default=False, action="store_true", help="compute logarithmic derivatives of integration variable and plot real,imag parts vs. time")
+parser.add_option("", "--amp-growth-rates", default=False, action="store_true")
+parser.add_option("", "--analytic-amp-growth-rates", default=False, action="store_true")
+parser.add_option("", "--multi-gen-amp-growth-rates", default=False, action="store_true")
+parser.add_option("", "--multi-gen-analytic-amp-growth-rates", default=False, action="store_true")
+
 
 parser.add_option("", "--log-time", action="store_true", help="plot time-domain data with logarithmic time axis.")
 parser.add_option("", "--lin-time", action="store_true", help="generate time-domain figures with linear time axis.")
@@ -108,6 +113,7 @@ parser.add_option("", "--legend-loc", default="best", type="string", help="locat
 
 # plot only a few mode numbers
 parser.add_option("", "--mode-nums", default=False, type="string", help="a string containing all the mode numbers you want to plot.")
+parser.add_option("", "--gen-nums", default=False, type="string", help="a string containing all the generations you want to plot.")
 
 # put grids on all plots
 parser.add_option("-g", "--grid", default=False, action="store_true", help="put grid-lines on all plots.")
@@ -117,7 +123,7 @@ opts, args = parser.parse_args()
 ##################################################
 
 ### make time domain plots?
-if (opts.amp_time or opts.phs_time or opts.amp_phs_time or opts.real_time or opts.imag_time or opts.real_imag_time or opts.multi_gen_amp_time or opts.Hns_time or opts.growth_rates or opts.kr_xir_time or opts.multi_gen_kr_xir_time or opts.disp_time or opts.SE_time or opts.SyE_time):
+if (opts.amp_time or opts.phs_time or opts.amp_phs_time or opts.real_time or opts.imag_time or opts.real_imag_time or opts.multi_gen_amp_time or opts.Hns_time or opts.growth_rates or opts.kr_xir_time or opts.multi_gen_kr_xir_time or opts.yE_time or opts.SE_time or opts.SyE_time or opts.amp_growth_rates or opts.analytic_amp_growth_rates or opts.multi_gen_amp_growth_rates or opts.multi_gen_anaytic_amp_growth_rates):
   time_domain = True
 else:
   time_domain = False
@@ -129,7 +135,7 @@ else:
   freq_domain = False
 
 ### make multi-generation plots?
-if (opts.multi_gen_amp_time or opts.multi_gen_amp_freq or opts.multi_gen_amp_portrait or opts.multi_gen_real_imag_portrait or opts.multi_gen_kr_xir_time):
+if (opts.multi_gen_amp_time or opts.multi_gen_amp_freq or opts.multi_gen_amp_portrait or opts.multi_gen_real_imag_portrait or opts.multi_gen_kr_xir_time or opts.multi_gen_amp_growth_rates or opts.multi_gen_analytic_amp_growth_rates):
   multi_gen = True
 else:
   multi_gen = False
@@ -169,8 +175,11 @@ if opts.tag != "":
 if opts.mode_nums:
   opts.mode_nums = [int(l) for l in opts.mode_nums.split()]
 
+if opts.gen_nums:
+  opts.gen_nums = [int(l) for l in opts.gen_nums.split()]
+
 ### ensure we have all the required data
-if (multi_gen or portrait or compute_Hns or max_eig) and (not opts.logfilename):
+if (multi_gen or portrait or compute_Hns or max_eig or opts.gen_nums) and (not opts.logfilename):
   opts.logfilename = raw_input("logfilename = ")
 
 if time_domain and (not (opts.lin_time or opts.log_time) ):
@@ -210,19 +219,16 @@ if opts.logfilename:
   system = nm_u.load_log(opts.logfilename)
   n_l_m = system.network.nlm
 
-  if multi_gen:
+  if multi_gen or opts.gen_nums:
     if opts.verbose: print "determining generational structure"
-    gens, _ = system.network.gens()
-#    gi = system.network.find_G0()
-#    gens = []
-#    N_m = len(n_l_m)
-#    Nm = len(gi)
-#    gens.append(gi)
-#    while N_m > Nm: # continue until all modes are included
-#      gi, _ = system.network.find_Gip1(gi)
-#      Nm += len(gi)
-#      gens.append(gi)
+    gens, coups = system.network.gens()
+#    gens, _ = system.network.gens()
 
+    if opts.gen_nums:
+      if not opts.mode_nums:
+        opts.mode_nums = range(len(system.network))
+      opts.mode_nums = [modeNo for genNo in opts.gen_nums for modeNo in gens[genNo] if modeNo in opts.mode_nums]
+          
 ####################################################################################################
 #
 #
@@ -314,7 +320,7 @@ if time_domain:
 
   ### yE_time
   if opts.yE_time:
-    if opts.verbose: print "\tdisp_time"
+    if opts.verbose: print "\tyE_time"
     fig = plt.figure()
     ax = plt.subplot(1,1,1)
 
@@ -1149,9 +1155,11 @@ if time_domain:
     fig, ax1, ax2 = nm_p.real_imag_plot(t_P, nm_p.growth_rates([t*system.Porb for t in t_P], q, system, opts.tc, verbose=opts.verbose), n_l_m=n_l_m, mode_nums=opts.mode_nums)
   
     plt.setp(ax1.get_xticklabels(), visible=False)
-    ax1.set_ylabel(r'$\mathbb{R}\{\partial_{t} '+opts.tc+'_i / '+opts.tc+'_i \} \cdot P_{\mathrm{orb}}$')
+    ax1.set_ylabel(r'$\mathrm{R}\{\partial_{t} '+opts.tc+'_i / '+opts.tc+'_i \} \cdot P_{\mathrm{orb}}$')
+#    ax1.set_ylabel(r'$\mathbb{R}\{\partial_{t} '+opts.tc+'_i / '+opts.tc+'_i \} \cdot P_{\mathrm{orb}}$')
     ax2.set_xlabel(r'$t/P_{\mathrm{orb}}$')
-    ax2.set_ylabel(r'$\mathbb{I}\{\partial_{t} '+opts.tc+'_i / '+opts.tc+'_i \} / \Omega_{\mathrm{orb}}$')
+    ax2.set_ylabel(r'$\mathrm{I}\{\partial_{t} '+opts.tc+'_i / '+opts.tc+'_i \} / \Omega_{\mathrm{orb}}$')
+#    ax2.set_ylabel(r'$\mathbb{I}\{\partial_{t} '+opts.tc+'_i / '+opts.tc+'_i \} / \Omega_{\mathrm{orb}}$')
 
     if not opts.no_legend:
       ax1.legend(loc=opts.legend_loc, ncol=opts.legend_col, prop={'size':opts.legend_font_size})
@@ -1205,7 +1213,214 @@ if time_domain:
       plt.savefig(figname)
 
     plt.close(fig)
- 
+
+  ### amplitude growth rate 
+  if opts.amp_growth_rates or opts.multi_gen_amp_growth_rates :
+
+    gr = nm_p.amp_growth_rates([t*system.Porb for t in t_P], q, system, opts.tc, verbose=opts.verbose)
+
+    if opts.amp_growth_rates:
+      if opts.verbose: print "\tamp_growth_rates"
+
+      fig, ax1 = nm_p.plot(t_P, gr, n_l_m=n_l_m, mode_nums=opts.mode_nums)
+
+      ax1.set_ylabel(r'$\partial_{t} |'+opts.tc+'_i| / |'+opts.tc+'_i| \cdot P_{\mathrm{orb}}$')
+      ax1.set_xlabel(r'$t/P_{\mathrm{orb}}$')
+
+      if not opts.no_legend:
+        ax1.legend(loc=opts.legend_loc, ncol=opts.legend_col, prop={'size':opts.legend_font_size})
+
+      if opts.time_ymin:
+        ax = ax1.axis()
+        ax1.axis([ax[0], ax[1], opts.time_ymin, ax[3]])
+      if opts.time_ymax:
+        ax = ax1.axis()
+        ax1.axis([ax[0], ax[1], ax[2], opts.time_ymax])
+      if opts.time_xmin:
+        ax = ax1.axis()
+        ax1.axis([opts.time_xmin, ax[1], ax[2], ax[3]])
+      if opts.time_xmax:
+        ax = ax1.axis()
+        ax1.axis([ax[0], opts.time_xmax, ax[2], ax[3]])
+
+      # grid lines
+      ax1.grid(opts.grid)
+
+      if opts.lin_time:
+        figname = opts.filename + ".amp_growth_rates.lin_time" + opts.tag + ".png"
+        if opts.verbose: print "saving "+figname
+        plt.savefig(figname)
+
+      if opts.log_time:
+        figname = opts.filename + ".amp_growth_rates.log_time" + opts.tag + ".png"
+        if opts.verbose: print "saving "+figname
+        ax1.set_xscale('log')
+        if opts.time_xmin:
+          ax = ax1.axis()
+          ax1.axis([opts.time_xmin, ax[1], ax[2], ax[3]])
+        if opts.time_xmax:
+          ax = ax1.axis()
+          ax1.axis([ax[0], opts.time_xmax, ax[2], ax[3]])
+
+        plt.savefig(figname)
+
+      plt.close(fig)
+
+    ### multi-gen amplitude growth rate
+    if opts.multi_gen_amp_growth_rates:
+      if opts.verbose: print "\tmulti_gen_amp_growth_rates"
+
+      fig, axs = nm_p.multi_gen_plot(t_P, gr, gens, n_l_m=n_l_m, mode_nums=opts.mode_nums)
+
+      for ax in axs:
+        ax.set_ylabel(r'$\partial_{t} |'+opts.tc+'_i| / |'+opts.tc+'_i| \cdot P_{\mathrm{orb}}$')
+
+        if not opts.no_legend:
+          ax.legend(loc=opts.legend_loc, ncol=opts.legend_col, prop={'size':opts.legend_font_size})
+
+        if opts.time_ymin:
+          _ax = ax.axis()
+          ax.axis([_ax[0], _ax[1], opts.time_ymin, _ax[3]])
+        if opts.time_ymax:
+          _ax = ax.axis()
+          ax.axis([_ax[0], _ax[1], _ax[2], opts.time_ymax])
+        if opts.time_xmin:
+          _ax = ax.axis()
+          ax.axis([opts.time_xmin, _ax[1], _ax[2], _ax[3]])
+        if opts.time_xmax:
+          _ax = ax.axis()
+          ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
+
+        # grid lines
+        ax.grid(opts.grid, which="both")
+
+      ax.set_xlabel(r'$t/P_{\mathrm{orb}}$')
+
+      if opts.lin_time:
+        figname = opts.filename + ".multi-gen_amp_growth_rates.lin_time" + opts.tag + ".png"
+        if opts.verbose: print "saving "+figname
+        plt.savefig(figname)
+
+      if opts.log_time:
+        figname = opts.filename + ".multi-gen_amp_growth_rates.log_time" + opts.tag + ".png"
+        if opts.verbose: print "saving "+figname
+        for ax in axs:
+          ax.set_xscale('log')
+          if opts.time_xmin:
+            _ax = ax.axis()
+            ax.axis([opts.time_xmin, _ax[1], _ax[2], _ax[3]])
+          if opts.time_xmax:
+            _ax = ax.axis()
+            ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
+
+        plt.savefig(figname)
+
+      plt.close(fig)
+
+  ### analytic amplitude growth rate
+  if opts.analytic_amp_growth_rates or opts.multi_gen_analytic_amp_growth_rates:
+
+    gr = nm_p.analytic_amp_growth_rates([t*system.Porb for t in t_P], q, system, opts.tc, verbose=opts.verbose)
+
+    if opts.analytic_amp_growth_rates:
+      if opts.verbose: print "\tanalytic_amp_growth_rates"
+
+      fig, ax1 = nm_p.plot(t_P, gr, n_l_m=n_l_m, mode_nums=opts.mode_nums)
+
+      ax1.set_ylabel(r'analytic $\partial_{t} |'+opts.tc+'_i| / |'+opts.tc+'_i| \cdot P_{\mathrm{orb}}$')
+      ax1.set_xlabel(r'$t/P_{\mathrm{orb}}$')
+
+      if not opts.no_legend:
+        ax1.legend(loc=opts.legend_loc, ncol=opts.legend_col, prop={'size':opts.legend_font_size})
+
+      if opts.time_ymin:
+        ax = ax1.axis()
+        ax1.axis([ax[0], ax[1], opts.time_ymin, ax[3]])
+      if opts.time_ymax:
+        ax = ax1.axis()
+        ax1.axis([ax[0], ax[1], ax[2], opts.time_ymax])
+      if opts.time_xmin:
+        ax = ax1.axis()
+        ax1.axis([opts.time_xmin, ax[1], ax[2], ax[3]])
+      if opts.time_xmax:
+        ax = ax1.axis()
+        ax1.axis([ax[0], opts.time_xmax, ax[2], ax[3]])
+
+      # grid lines
+      ax1.grid(opts.grid)
+
+      if opts.lin_time:
+        figname = opts.filename + ".analytic_amp_growth_rates.lin_time" + opts.tag + ".png"
+        if opts.verbose: print "saving "+figname
+        plt.savefig(figname)
+
+      if opts.log_time:
+        figname = opts.filename + ".analytic_amp_growth_rates.log_time" + opts.tag + ".png"
+        if opts.verbose: print "saving "+figname
+        ax1.set_xscale('log')
+        if opts.time_xmin:
+          ax = ax1.axis()
+          ax1.axis([opts.time_xmin, ax[1], ax[2], ax[3]])
+        if opts.time_xmax:
+          ax = ax1.axis()
+          ax1.axis([ax[0], opts.time_xmax, ax[2], ax[3]])
+
+        plt.savefig(figname)
+
+      plt.close(fig)
+
+    ### multi-gen amplitude growth rate
+    if opts.multi_gen_analytic_amp_growth_rates:
+      if opts.verbose: print "\tmulti_gen_analytic_amp_growth_rates"
+
+      fig, axs = nm_p.multi_gen_plot(t_P, gr, gens, n_l_m=n_l_m, mode_nums=opts.mode_nums)
+
+      for ax in axs:
+        ax.set_ylabel(r'analytic $\partial_{t} |'+opts.tc+'_i| / |'+opts.tc+'_i| \cdot P_{\mathrm{orb}}$')
+
+        if not opts.no_legend:
+          ax.legend(loc=opts.legend_loc, ncol=opts.legend_col, prop={'size':opts.legend_font_size})
+
+        if opts.time_ymin:
+          _ax = ax.axis()
+          ax.axis([_ax[0], _ax[1], opts.time_ymin, _ax[3]])
+        if opts.time_ymax:
+          _ax = ax.axis()
+          ax.axis([_ax[0], _ax[1], _ax[2], opts.time_ymax])
+        if opts.time_xmin:
+          _ax = ax.axis()
+          ax.axis([opts.time_xmin, _ax[1], _ax[2], _ax[3]])
+        if opts.time_xmax:
+          _ax = ax.axis()
+          ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
+
+        # grid lines
+        ax.grid(opts.grid, which="both")
+
+      ax.set_xlabel(r'$t/P_{\mathrm{orb}}$')
+
+      if opts.lin_time:
+        figname = opts.filename + ".multi-gen_analytic_amp_growth_rates.lin_time" + opts.tag + ".png"
+        if opts.verbose: print "saving "+figname
+        plt.savefig(figname)
+
+      if opts.log_time:
+        figname = opts.filename + ".multi-gen_analytic_amp_growth_rates.log_time" + opts.tag + ".png"
+        if opts.verbose: print "saving "+figname
+        for ax in axs:
+          ax.set_xscale('log')
+          if opts.time_xmin:
+            _ax = ax.axis()
+            ax.axis([opts.time_xmin, _ax[1], _ax[2], _ax[3]])
+          if opts.time_xmax:
+            _ax = ax.axis()
+            ax.axis([_ax[0], opts.time_xmax, _ax[2], _ax[3]])
+
+        plt.savefig(figname)
+
+      plt.close(fig)
+
+
 ### linearization and diagonalizatioin
   if max_eig:
 
