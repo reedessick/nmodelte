@@ -164,6 +164,44 @@ def threeMode_equilib(triple, freq, network, verbose=False):
     if verbose: print "mode %d has no linear driving term. Don't know how to compute the equilibrium. skipping..." % o
     return ((o,i,j), (0,0,0))
 
+  do = wo - freq
+  di = (freq + wi + wj)/(1 + yj/yi)
+  dj = (freq + wi + wj)/(1 + yi/yj)
+
+  Ao = ( (di*dj + yi*yj)/(wi*wj))**0.5 / (2*k)
+
+  Ai_over_Aj = ((wi*yj)/(wj*yi))**0.5
+
+  cos_D = (di/wi)*(Ai_over_Aj)/(2*k*Ao)
+  sin_D = (yi/wi)*(Ai_over_Aj)/(2*k*Ao)
+
+  D = angle_from_trig( cos_D, sin_D )
+
+  X = do*cos_D + yo*sin_D
+
+  if wo*k > 0: ### required to ensure AiAj is positive!
+    AiAj = (Ao/(2*wo*k))*( X + ( X**2 + (wo*Uo/Ao)**2 - (do**2 + yo**2) )**0.5 )
+  else:
+    AiAj = (Ao/(2*wo*k))*( X - ( X**2 + (wo*Uo/Ao)**2 - (do**2 + yo**2) )**0.5 )
+
+  Ai = (Ai_over_Aj*AiAj)**0.5
+  Aj = Ai/Ai_over_Aj
+
+  cos_Do = (do*Ao - 2*wo*k*AiAj*cos_D)/(wo*Uo)
+  sin_Do = (yo*Ao - 2*wo*k*AiAj*sin_D)/(wo*Uo)
+
+  Do = angle_from_trig( cos_Do, sin_Do )
+
+  Di_plus_Dj = D - Do
+
+  Di_minus_Dj = np.random.rand()*2*np.pi
+
+  Di = 0.5*(Di_plus_Dj + Di_minus_Dj)
+  Dj = 0.5*(Di_plus_Dj - Di_minus_Dj)
+
+  return (o,i,j), (Ao, Ai, Aj), ((sin_Do, cos_Do), (np.sin(Di), np.cos(Di)), (np.sin(Dj), np.cos(Dj))), (do, di, dj)
+
+  '''
   wo = abs(wo) ; wi = -abs(wi) ; wj = -abs(wj) ;
 
   O = abs(freq)
@@ -202,6 +240,19 @@ def threeMode_equilib(triple, freq, network, verbose=False):
   cos_delta_i = cos_delta*cos_delta_o + sin_delta*sin_delta_o
 
   return (o,i,j), (Ao, Ai, Aj), ((sin_delta_o, cos_delta_o), (sin_delta_i, cos_delta_i), (0.0, 1.0)), (do, di, dj)
+  '''
+
+###
+def angle_from_trig( cosAngle, sinAngle):
+  """
+  returns the angle from the cosine and sine, determining the correct quadrant
+  """
+  angle = np.arccos(cosAngle)
+
+  if (sinAngle >= 0):
+    return angle
+  else:
+    return 2*np.pi - angle 
 
 ###
 def __threeMode_parents_from_daughters(O,Ai,Aj,(si,ci),(sj,cj),tuples,network):
