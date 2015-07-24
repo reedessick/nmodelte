@@ -21,7 +21,7 @@ from optparse import *
 
 parser=OptionParser(usage=usage)
 
-parser.add_option("", "--outfilename", default=False, type="string", help="file into which integration data is written. If not supplied, data is printed to the terminal.")
+parser.add_option("-F", "--outfilename", default=False, type="string", help="file into which integration data is written. If not supplied, data is printed to the terminal.")
 
 # options about integration
 parser.add_option("-P", "--num-periods", dest="N_P", default=False, type="float", help="the number of periods for simulation")

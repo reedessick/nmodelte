@@ -117,7 +117,7 @@ opts, args = parser.parse_args()
 ##################################################
 
 ### make time domain plots?
-if (opts.amp_time or opts.phs_time or opts.amp_phs_time or opts.real_time or opts.imag_time or opts.real_imag_time or opts.multi_gen_amp_time or opts.Hns_time or opts.growth_rates or opts.kr_xir_time or opts.multi_gen_kr_xir_time or opts.disp_time or opts.SE_time or opts.SyE_time):
+if (opts.amp_time or opts.phs_time or opts.amp_phs_time or opts.real_time or opts.imag_time or opts.real_imag_time or opts.multi_gen_amp_time or opts.Hns_time or opts.growth_rates or opts.kr_xir_time or opts.multi_gen_kr_xir_time or opts.yE_time or opts.SE_time or opts.SyE_time):
   time_domain = True
 else:
   time_domain = False
@@ -314,7 +314,7 @@ if time_domain:
 
   ### yE_time
   if opts.yE_time:
-    if opts.verbose: print "\tdisp_time"
+    if opts.verbose: print "\tyE_time"
     fig = plt.figure()
     ax = plt.subplot(1,1,1)
 
