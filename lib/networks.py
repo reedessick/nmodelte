@@ -627,6 +627,7 @@ class system:
       print "#WARNING: falling back to compute_single_parent_3mode_eq"
       return self.compute_single_parent_3mode_eq(t=t, default=default, tcurrent=tcurrent)
 
+    '''
     from nmode_state import threeMode_equilib # we import this here because it avoids conflicts when importing the module as a whole
     from nmode_state import __threeMode_parents_from_daughters
     from nmode_state import ____threeMode_effective_equilib
@@ -670,5 +671,5 @@ class system:
     ### compute residuals and iterate
     
     raise StandardError, "WRITE ME"
-
+    '''
 
