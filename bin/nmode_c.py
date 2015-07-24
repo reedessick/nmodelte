@@ -73,7 +73,7 @@ if opts.convert:
 #
 ####################################################################################################
 if opts.convert:
-  if opts.verbose: print "converting variable types in time domain"
+  if opts.verbose: print "converting variable types in time domain : %s -> %s"%(opts.current, opts.target)
   converted_t_P, converted_q, converted_current = nm_u.convert(t_P, q, opts.current, opts.target, system, system.Porb)
 
   if opts.convert_outfilename:
