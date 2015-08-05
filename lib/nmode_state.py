@@ -169,6 +169,9 @@ def threeMode_equilib(triple, freq, network, verbose=False):
   dj = (freq + wi + wj)/(1 + yi/yj)
 
   Ao = ( (di*dj + yi*yj)/(wi*wj))**0.5 / abs(2*k)
+  Alin = abs(wo*Uo)/(do**2 + yo**2)**0.5
+  if Alin < Ao:
+    return (o,i,j), (Alin, 0.0, 0.0), ((yo/(do**2+yo**2)**0.5, do/(do**2+yo**2)**0.5), (0.0, 1.0), (0.0, 1.0)), (do, 0.0, 0.0)
 
   Ai_over_Aj = ((wi*yj)/(wj*yi))**0.5
 
