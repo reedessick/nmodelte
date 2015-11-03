@@ -468,7 +468,7 @@ if opts.stacked_hist:
     axs[3].set_ylabel(r"$2 \gamma_i A_i^2$")
 
     if (not opts.no_legend) and opts.multi_gen_stacked_hist:
-        axs[3].legend()
+        axs[3].legend(loc=opts.legend_loc, ncol=opts.legend_col, prop={'size':opts.legend_font_size})
 
     ### save
     insert = "stacked_hist."
