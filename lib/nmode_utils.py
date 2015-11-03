@@ -24,7 +24,7 @@ SI_Mjup = 1.898e27 # kg
 SI_units = {"mass":"kg", "length":"m", "time":"s", "frequency":"Hz", "energy":"J"}
 
 ### CGS units
-CGS_G = SI_G * (1e2)**2 * (1e3)**-1 # cm^3 g^-1 s^-2
+CGS_G = SI_G * (1e2)**3 * (1e3)**-1 # cm^3 g^-1 s^-2
 CGS_Msun = SI_Msun * 1e3 # g
 CGS_Rsun = SI_Rsun * 1e2 # cm
 CGS_Mjup = SI_Mjup * 1e3 # g
@@ -333,12 +333,16 @@ def write_log(filename, system, enforce_float=False):
   return True
 
 ##################################################
-def load_ste(filename):
+def load_ste(filename, sdata_only=False):
   """
   loads pickled output from nmode_s.py
   """
   stefile = open(filename, "r")
   sdata = pickle.load(stefile)
+  if sdata_only:
+    stefile.close()
+    return sdata
+
   mdata = pickle.load(stefile)
   stefile.close()
 

@@ -4,7 +4,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-plt.rcParams.update({"text.usetex":True})
+#plt.rcParams.update({"text.usetex":True})
 
 import numpy as np
 pi = np.pi
@@ -136,6 +136,29 @@ def real_imag_plot(x, y, n_l_m=False, mode_nums=False):
   return fig, ax1, ax2
 
 ##################################################
+def multi_gen_plot(x, y, gens, n_l_m=False, mode_nums=False):
+  fig = plt.figure()
+  num_gen = len(gens)
+  ax_height = 0.8/num_gen
+  buff = 0.01*ax_height
+
+  axs = []
+  for genNo, gen in enumerate(gens):
+    ax = fig.add_axes( [0.15, 0.95-(1+genNo)*ax_height, 0.8, ax_height-buff] )
+    for m in gen:
+      if mode_nums and (m not in mode_nums):
+        continue
+      label = "mode %d" % m
+      if n_l_m:
+        label += ":%s" % str(n_l_m[m])
+      ax.plot(x, y[m], label=label)
+    plt.setp(ax.get_xticklabels(), visible=False)
+    axs.append( ax )
+
+  plt.setp(ax.get_xticklabels(), visible=True)
+  return fig, axs
+
+##################################################
 def multi_gen_amp_plot(x, y, gens, n_l_m=False, mode_nums=False):
   """
   returns a stacked plot with one panel for each generation
@@ -265,7 +288,7 @@ def _compute_time_derivatives(t,q,system,current):
       this_q = []
       for m in range(N_m):
         this_q += q[m][ind] # add real and imagninary part for each mode to single list
-      this_dqdt_P = nf.dxdt_no_NLT(t[ind], this_q, system) # compute derivatives
+      this_dqdt_P = nf.dxdt_no_NLT(t[ind], this_q, (N_m*2, system)) # compute derivatives
       for m in range(N_m):
         dqdt_P[m].append( [this_dqdt_P[2*m]*Porb, this_dqdt_P[2*m+1]*Porb] ) # re-format list into familiar form
 
@@ -274,7 +297,7 @@ def _compute_time_derivatives(t,q,system,current):
       this_q = []
       for m in range(N_m):
         this_q += q[m][ind] # add real and imagninary part for each mode to single list
-      this_dqdt_P = nf.dqdt_no_NLT(t[ind], this_q, system) # compute derivatives
+      this_dqdt_P = nf.dqdt_no_NLT(t[ind], this_q, (N_m*2, system)) # compute derivatives
       for m in range(N_m):
         dqdt_P[m].append( [this_dqdt_P[2*m]*Porb, this_dqdt_P[2*m+1]*Porb] ) # re-format list into familiar form
 
@@ -939,4 +962,92 @@ def growth_rates(t,q,system,current, verbose=False):
     s.append( _s )
 
   return s
+
+##################################################
+def amp_growth_rates(t, q, system, current, verbose=False):
+  """
+  computes the growth rates of the system at all times in sample.
+    |dx/dt|/|x| , etc.
+  """
+  if verbose: print "\tcomputing time derivatives"
+  dqdt_P, N_m, N_p = _compute_time_derivatives(t,q,system,current)
+
+  if verbose: print "\tcomputing growth rates"
+  s = []
+  for modeNo in xrange(N_m): ### iterate through modes
+    _q = q[modeNo]
+    _dqdt_P = dqdt_P[modeNo]
+
+    _s = []
+
+    for ind in xrange(N_p): ### iterate through time steps
+      r, i = _q[ind]
+      dr, di = _dqdt_P[ind]
+
+      A2 = r**2 + i**2
+      AdA = r*dr + i*di
+      if A2 > 0:
+        _s.append( AdA/A2 )
+      elif AdA > 0:
+        _s.append( abs(dA)/dA * np.infty )
+      else:
+        _s.append( 0 )
+
+    s.append( _s )
+
+  return s
+
+##################################################
+def analytic_amp_growth_rates(t, q, system, current, verbose=False):
+  """
+  computes the expected growth rates assuming a single three-mode triple
+    selecting the correct triple is not necessarily obvious...
+    compute growth rate over all triples and then choose the maximum thereof (for each mode?)
+  """
+  if verbose: print "\tcomputing coupling structure"
+  gens, coups = system.network.gens()
+  if verbose: print "\tcomputing 3mode frequencies"
+  freqs = system.compute_3mode_freqs()
+
+  q = np.array(q)
+
+  N_m = len(q)
+  N_p = len(t)
+
+  s = np.empty((N_m, N_p))
+  for p in gens[0]: ### zero the parents
+    s[p,:] = 0
+
+  if verbose: print "\tcomputing analytic growth rates (with assumptions...)"
+  for ind in xrange(N_p): ### compute the children
+    for gen, coup in zip(gens[1:], coups):
+        ss = [(threemode_growth_rate( np.sum(q[p][ind]**2), system, freqs, p, d1, d2, k ), (p, d1, d2, k)) for p, d1, d2, k in coup] 
+        ss.sort(key=lambda l: l[0]) ### small to large
+
+        for S, (p, d1, d2, k) in ss: ### iterate through, overwritting with larger S as needed
+            s[d1][ind] = S
+            s[d2][ind] = S
+
+  return s*system.Porb
+
+###
+def threemode_growth_rate( Eparent, system, freqs, p, d1, d2, k):
+  """
+  computes expected growth rate for 3mode system
+  """
+  O = freqs[p]
+
+  wp, yp, Up = system.network.wyU[p]
+  w1, y1, U1 = system.network.wyU[d1]
+  w2, y2, U2 = system.network.wyU[d2]
+  
+  y1Py2 = y1+y2
+  y1My2 = y1-y2
+  d1Pd2 = O + w1 + w2
+
+  amp = ( ((y1My2)**2 - (d1Pd2)**2 + 16*w1*w2*k**2*Eparent)**2 + 4*(y1My2)**2 * (d1Pd2)**2 )**0.25
+  phs = 0.5*np.arctan( 2*(y1My2)*(d1Pd2) / ( y1Py2**2 - d1Pd2**2 + 16*w1*w2*k**2*Eparent ) ) ### NEED TO WORRY ABOUT THE QUADRANTS?
+
+  return 0.5*(-y1Py2 + amp*np.cos(phs))
+
 

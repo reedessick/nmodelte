@@ -478,32 +478,49 @@ class system:
       wo, yo, Uo = network.wyU[modeNo]
       if len(Uo): # it is linearly forced
         mo = network.nlm[modeNo][-1]
-        Elin = -np.infty
-        O = wo
-        U = 0.0
         for u, k in Uo:
-          o = mo*k*self.Oorb
-          elin = compute_Elin(o, wo, yo, u)
-          if elin > Elin:
-            Elin = elin
-            O = o
-            U = u
+          w_O = wo - mo*k*self.Oorb
+          if tcurrent == "q":
+            p = mo*k*self.Oorb * t
+          elif tcurrent == "x":
+            p = - w_O *t
+          else:
+            raise ValueError, "unknown tcurrent = %s"%tcurrent
 
-        cd = np.cos((wo-O)*wo*U/((wo-O)**2+yo**2))
-        sd = np.sin(yo*wo*U/((wo-O)**2+yo**2))
+          sd = np.sin(p)
+          cd = np.cos(p)
 
-        if tcurrent == "q":
-          p = o*t
-          cp = np.cos(p)
-          sp = np.sin(p)
-          q[2*modeNo:2*modeNo+2] = Elin**0.5 * np.array([cp*cd + sp*sd, -sp*cd + sd*cp])
-        elif tcurrent == "x":
-          p = (O-wo)*t
-          cp = np.cos(p)
-          sp = np.sin(p)
-          q[2*modeNo:2*modeNo+2] = Elin**0.5 * np.array([cp*cd + sp*sd, -sp*cd + sd*cp])
-        else:
-          raise ValueError, "unknown tcurrent = %s"%tcurrent
+          q[2*modeNo:2*modeNo+2] += wo*u/(yo**2 + w_O**2) * np.array( [ w_O*cd + yo*sd, yo*cd - w_O*sd ] ) ### should be the exact result...
+
+### old implementation, seems silly. Not sure why I didn't use the exact result...
+#        mo = network.nlm[modeNo][-1]
+#        Elin = -np.infty
+#        O = wo
+#        U = 0.0
+#        for u, k in Uo:
+#          o = mo*k*self.Oorb
+#          elin = compute_Elin(o, wo, yo, u)
+#          if elin > Elin:
+#            Elin = elin
+#            O = o
+#            U = u
+#
+#        cd = np.cos((wo-O)*wo*U/((wo-O)**2+yo**2))
+#        sd = np.sin(yo*wo*U/((wo-O)**2+yo**2))
+#
+#        if tcurrent == "q":
+#          p = o*t
+#          cp = np.cos(p)
+#          sp = np.sin(p)
+#          q[2*modeNo:2*modeNo+2] = Elin**0.5 * np.array([cp*cd + sp*sd, -sp*cd + sd*cp])
+#        elif tcurrent == "x":
+#          p = (O-wo)*t
+#          cp = np.cos(p)
+#          sp = np.sin(p)
+#          q[2*modeNo:2*modeNo+2] = Elin**0.5 * np.array([cp*cd + sp*sd, -sp*cd + sd*cp])
+#        else:
+#          raise ValueError, "unknown tcurrent = %s"%tcurrent
+###
 
       else: # not linearly forced, so we set it to rand*default
         q[2*modeNo:2*modeNo+2] = np.random.rand(2)*default
@@ -610,6 +627,7 @@ class system:
       print "#WARNING: falling back to compute_single_parent_3mode_eq"
       return self.compute_single_parent_3mode_eq(t=t, default=default, tcurrent=tcurrent)
 
+    '''
     from nmode_state import threeMode_equilib # we import this here because it avoids conflicts when importing the module as a whole
     from nmode_state import __threeMode_parents_from_daughters
     from nmode_state import ____threeMode_effective_equilib
@@ -653,5 +671,5 @@ class system:
     ### compute residuals and iterate
     
     raise StandardError, "WRITE ME"
-
+    '''
 
