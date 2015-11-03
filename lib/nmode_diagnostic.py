@@ -3,6 +3,7 @@ usage="""a module for network diagnostics and visualizations"""
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+plt.rcParams.update({"text.usetex":True})
 
 import numpy as np
 from collections import defaultdict
@@ -145,9 +146,10 @@ def generational_stacked_histogram(network, bins, xdata, data, log=False):
     xdata_by_gen.append( this_gen )
 #  xdata_by_gen = [ [xdata[modeNo] for modeNo in gen] for gen in gens ]
 
+  labels = ["genNo : %d"%genNo for genNo in xrange(len(gens))]
   for d in range(depth):
     ax = fig.add_axes([0.15, 0.95-(d+1)*ax_height, ax_width, ax_height-buffer])
-    ax.hist(xdata_by_gen, bins, weights=[[data[modeNo][d] for modeNo in gen] for gen in gens], histtype="step", log=log)
+    ax.hist(xdata_by_gen, bins, weights=[[data[modeNo][d] for modeNo in gen] for gen in gens], histtype="step", log=log, label=labels)
 
     plt.setp(ax.get_xticklabels(), visible=False)
     axs.append(ax)
