@@ -96,7 +96,7 @@ def stacked_histogram(bins, xdata, data, log=False):
     n, _, _ = ax.hist(xdata, bins, weights=[l[d] for l in data], histtype="step", log=log)
 
     plt.setp(ax.get_xticklabels(), visible=False)
-    ax.set_ylim(ymax=1.1*max(n)) ### auto-scaling appears to mess up occassionally
+    ax.set_ylim(ymin=min([i for i in n if i > 0])/1.1, ymax=1.1*max(n)) ### auto-scaling appears to mess up occassionally
     axs.append(ax)
 
   plt.setp(ax.get_xticklabels(), visible=True)
@@ -149,9 +149,11 @@ def generational_stacked_histogram(network, bins, xdata, data, log=False):
   labels = ["genNo : %d"%genNo for genNo in xrange(len(gens))]
   for d in range(depth):
     ax = fig.add_axes([0.15, 0.95-(d+1)*ax_height, ax_width, ax_height-buffer])
-    ax.hist(xdata_by_gen, bins, weights=[[data[modeNo][d] for modeNo in gen] for gen in gens], histtype="step", log=log, label=labels)
+    n, _, _ = ax.hist(xdata_by_gen, bins, weights=[[data[modeNo][d] for modeNo in gen] for gen in gens], histtype="step", log=log, label=labels)
+    n = np.array(n)
 
     plt.setp(ax.get_xticklabels(), visible=False)
+    ax.set_ylim(ymin=np.min(n[n>0])/1.1, ymax=1.1*np.max(n))
     axs.append(ax)
 
   plt.setp(ax.get_xticklabels(), visible=True)
