@@ -153,17 +153,16 @@ class network:
       if o in not_parents:
         continue
       wo = abs(self.modes[o].get_wyU()[0])
-      is_parent=True
       for i,j,_ in self.K[o]:
         wi = abs(self.modes[i].get_wyU()[0])
         wj = abs(self.modes[j].get_wyU()[0])
+
         if wo < max(wi,wj):
-          is_parent=False
           break
         else:
           not_parents.append(i)
           not_parents.append(j)
-      if is_parent:
+      else:
         parents.append( o )
 
     return parents # already sorted
