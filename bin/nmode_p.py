@@ -378,7 +378,7 @@ if time_domain:
     plt.close(fig)
 
     ### by mode
-    fig, ax = nm_p.plot(t_P, yE, n_l_m=n_l_m, mode_nums=opts.mode_nums)
+    fig, ax = nm_p.plot(t_P, -np.array(yE), n_l_m=n_l_m, mode_nums=opts.mode_nums)
     ax = plt.subplot(1,1,1)
 
     ax.set_ylabel(r"$\gamma A^2$")
