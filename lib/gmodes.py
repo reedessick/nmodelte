@@ -78,7 +78,7 @@ class gmode(networks.mode):
     return self
 
   ###
-  def compute_forcing(self, Porb, eccentricity, Mprim, Mcomp, Rprim):
+  def compute_forcing(self, Porb, eccentricity, Mprim, Mcomp, Rprim, Ialm=1.0e-8):
     """
     Assumes a simple analytic model for the linear forcing coefficient, taken from Weinberg's paper.
 
@@ -96,9 +96,9 @@ class gmode(networks.mode):
       self.U = [] # no forcing for l!=2 modes with eccentricity==0
     else:
       if eccentricity == 0:
-        self.U = [ (compute_U(self, U_hat=compute_Uhat(Mprim, Mcomp, Porb)), 1) ]
+        self.U = [ (compute_U(self, Mprim, Mcomp, Rprim, Porb, Ialm=Ialm)), 1) ]
       else:
-        self.U = [ (compute_U(self, U_hat=compute_Uhat(Mprim, Mcomp, Porb)), "all") ]
+        self.U = [ (compute_U(self, Mprim, Mcomp, Rprim, Porb, Ialm=Ialm)), "all") ]
 
     return self
 
@@ -204,7 +204,7 @@ class gmode(networks.mode):
 #
 #
 ####################################################################################################
-def compute_U(mode, U_hat=1e-12):
+def compute_U(mode, Mprim, Mcomp, Rprim, Porb, Ialm=1.0e-8):
   """
   computes linear tidal forcing amplitude for this mode (an instance of networks.mode())
    only includes the dependence on this particular mode. All other dependencies are subsumed into U_hat
@@ -217,19 +217,14 @@ def compute_U(mode, U_hat=1e-12):
   """
   n, l, m, w, y = mode.get_nlmwy()
   if l == 2:
-    return U_hat*(2*np.pi/(abs(w)*86400.))**(-11./6)
+    Uhat = 1.0e-8 * (Mcomp*nm_u.Mjup / (Mcomp*nm_u.Mjup + Mprim*nm_u.Msun) ) * (Porb / 864000.)**-2 ### old result 
+    return Uhat*(2*np.pi/(abs(w)*86400.))**(-11./6)
+
+    Ylm = (15/(2*np.pi))**0.5 / 4 ### from a tabulated value of Ylm(theta=pi/2, phi=0) for l=2, m=+/-2
+    return Mcomp*nm_u.Mjup*(Rprim*nm_u.Rsun)**3 / (nm_u.G*Mprim*nm_u.Msun*(Mprim*nm_u.Msun + Mcomp*nm_u.Mjup)) * (2*np.pi/Porb)**2 * (4*np.pi/5) * Ylm * Ialm*(2*np.pi/(abs(w)*86400.))**(-11./6)
+
   else:
     sys.exit("no analytic expression exists for gmode linear forcing coefficients with l=$d" % l)
-
-##################################################
-def compute_Uhat(Mprim, Mcomp, Porb):
-  """
-  computes the linear tidal forcing coefficient for l=2 modes
-  Mprim in units of Msun
-  Mcomp in units of Mjup
-  Porb in seconds
-  """
-  return 1.0e-8 * (Mcomp*nm_u.Mjup / (Mcomp*nm_u.Mjup + Mprim*nm_u.Msun) ) * (Porb / 864000.)**-2 # coefficient for linear tidal forcing amplitude
 
 ##################################################
 def compute_w(n, l, alpha):
