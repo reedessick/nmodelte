@@ -3,6 +3,8 @@ usage="""computes relevant parameters for g-modes"""
 import numpy as np
 import nmode_utils as nm_u
 
+import mode_selection as ms
+
 import networks
 
 ####################################################################################################
@@ -220,8 +222,9 @@ def compute_U(mode, Mprim, Mcomp, Rprim, Porb, Ialm=1.0e-8):
     Uhat = 1.0e-8 * (Mcomp*nm_u.Mjup / (Mcomp*nm_u.Mjup + Mprim*nm_u.Msun) ) * (Porb / 864000.)**-2 ### old result 
     return Uhat*(2*np.pi/(abs(w)*86400.))**(-11./6)
 
+    wo = ms.compute_wo(Mprim, Rprim)
     Ylm = (15/(2*np.pi))**0.5 / 4 ### from a tabulated value of Ylm(theta=pi/2, phi=0) for l=2, m=+/-2
-    return Mcomp*nm_u.Mjup*(Rprim*nm_u.Rsun)**3 / (nm_u.G*Mprim*nm_u.Msun*(Mprim*nm_u.Msun + Mcomp*nm_u.Mjup)) * (2*np.pi/Porb)**2 * (4*np.pi/5) * Ylm * Ialm*(2*np.pi/(abs(w)*86400.))**(-11./6)
+    return Mcomp*nm_u.Mjup*(Rprim*nm_u.Rsun)**3 / (nm_u.G*Mprim*nm_u.Msun*(Mprim*nm_u.Msun + Mcomp*nm_u.Mjup)) * (2*np.pi/Porb)**2 * (4*np.pi/5) * Ylm * Ialm*(abs(w)/wo)**(11./6)
 
   else:
     sys.exit("no analytic expression exists for gmode linear forcing coefficients with l=$d" % l)
