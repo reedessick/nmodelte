@@ -225,8 +225,8 @@ def compute_U(mode, Mprim, Mcomp, Rprim, Porb, Ialm_hat=2.5e-3):
 #    return Uhat*(2*np.pi/(abs(w)*86400.))**(-11./6)
 
     wo = ms.compute_wo(Mprim, Rprim)
-    Ylm = (3*np.pi/10)**0.5 ### from a tabulated value of Ylm(theta=pi/2, phi=0) for l=2, m=+/-2
-    return Mcomp*nm_u.Mjup*(Rprim*nm_u.Rsun)**3 / (nm_u.G*Mprim*nm_u.Msun*(Mprim*nm_u.Msun + Mcomp*nm_u.Mjup)) * (2*np.pi/Porb)**2 * Ylm * Ialm_hat*(abs(w)/wo)**(11./6)
+    Wlm = (3*np.pi/10)**0.5 ### from Nevin's paper, related to Ylm(theta=pi/2, phi=0)
+    return Mcomp*nm_u.Mjup*(Rprim*nm_u.Rsun)**3 / (nm_u.G*Mprim*nm_u.Msun*(Mprim*nm_u.Msun + Mcomp*nm_u.Mjup)) * (2*np.pi/Porb)**2 * Wlm * Ialm_hat*(abs(w)/wo)**(11./6)
 
   else:
     sys.exit("no analytic expression exists for gmode linear forcing coefficients with l=$d" % l)
