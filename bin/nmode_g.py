@@ -35,6 +35,7 @@ parser.add_option("", "--eccentricity", default=0.0, type="float", help="the orb
 parser.add_option("", "--alpha", default=4e-3, type="float", help="alpha for gmode generation")
 parser.add_option("", "--c", default=2e-11, type="float", help="c for gmode generation")
 parser.add_option("", "--k-hat", default=5e4, type="float", help="k_hat for 3mode coupling coefficients")
+parser.add_option("", "--Ialm-hat", default=2.5e-3, type="float", help="Ialm_hat for linear forcing coefficients")
 
 ### generate a new network (find parents)
 parser.add_option("", "--parent-selection", default=False, type="string", help="the algorithm used to identify parent modes: Elin or detuning")
@@ -85,9 +86,9 @@ max_w = opts.parent_max_frac_Oorb*Oorb
 
 if opts.verbose: print "computing parent modes using %s" % opts.parent_selection
 if opts.parent_selection == "Elin":
-  parents = ggg.compute_parents_Elin(Oorb, bounds, N=opts.num_parents, min_w=min_w, max_w=max_w, alpha=opts.alpha, c=opts.c, wo=wo, Mprim=opts.Mprim, Mcomp=opts.Mcomp, Porb=opts.Porb, eccentricity=opts.eccentricity)
+  parents = ggg.compute_parents_Elin(Oorb, bounds, N=opts.num_parents, min_w=min_w, max_w=max_w, alpha=opts.alpha, c=opts.c, wo=wo, Mprim=opts.Mprim, Mcomp=opts.Mcomp, Porb=opts.Porb, eccentricity=opts.eccentricity, Ialm_hat=opts.Ialm_hat)
 elif opts.parent_selection == "detuning":
-  parents = ggg.compute_parents_detuning(Oorb, bounds, N=opts.num_parents, min_w=min_w, max_w=max_w, alpha=opts.alpha, c=opts.c, wo=wo, forcing=True, Mprim=opts.Mprim, Mcomp=opts.Mcomp, Porb=opts.Porb, eccentricity=opts.eccentricity)
+  parents = ggg.compute_parents_detuning(Oorb, bounds, N=opts.num_parents, min_w=min_w, max_w=max_w, alpha=opts.alpha, c=opts.c, wo=wo, forcing=True, Mprim=opts.Mprim, Mcomp=opts.Mcomp, Porb=opts.Porb, eccentricity=opts.eccentricity, Ialm_hat=opts.Ialm_hat)
 else:
   sys.exit("unknown parent selection algorithm: %s\nplease supply a parent selection algorithm from the following:\n\tEthr\n\tdetuning" % (opts.parent_selection) )
 

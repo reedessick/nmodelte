@@ -258,6 +258,7 @@ wo = ms.compute_wo(Mprim, Rprim)
 alpha = config.getfloat("general", "alpha")
 c = config.getfloat("general", "c")
 k_hat = config.getfloat("general", "k_hat")
+Ialm_hat = config.getfloat("general", "Ialm_hat")
 
 if opts.outfilename and require_outfile:
   if opts.verbose: print "reading integration data from ", opts.outfilename
@@ -355,7 +356,7 @@ for n_m, (O, mode) in enumerate(modes):
 
       for ind, npairs in enumerate(num_pairs):
         if opts.verbose: print "grabbing %d triples" % npairs
-        my_triples = my_coupling_list.to_triples(npairs, min_n=False, max_n=False, min_l=daughter_min_l, max_l=daughter_max_l, min_w=min_w, max_w=max_w, parent_forcing=parent_forcing, daughter_forcing=daughter_forcing, Mprim=Mprim, Mcomp=Mcomp, Porb=Porb, eccentricity=eccentricity)
+        my_triples = my_coupling_list.to_triples(npairs, min_n=False, max_n=False, min_l=daughter_min_l, max_l=daughter_max_l, min_w=min_w, max_w=max_w, parent_forcing=parent_forcing, daughter_forcing=daughter_forcing, Mprim=Mprim, Mcomp=Mcomp, Porb=Porb, eccentricity=eccentricity, Ialm_hat=Ialm_hat)
         ### add triples to the network
         new_systems[ind].network.add_couplings(my_triples, opts.verbose)
 
@@ -367,7 +368,7 @@ for n_m, (O, mode) in enumerate(modes):
 
       for ind, npairs in enumerate(num_pairs):
         if opts.verbose: print "grabbing %d triples" % npairs
-        my_triples = my_coupling_list.to_triples(npairs, parent_forcing=parent_forcing, daughter_forcing=daughter_forcing, Mprim=Mprim, Mcomp=Mcomp, Porb=Porb, eccentricity=eccentricity)
+        my_triples = my_coupling_list.to_triples(npairs, parent_forcing=parent_forcing, daughter_forcing=daughter_forcing, Mprim=Mprim, Mcomp=Mcomp, Porb=Porb, eccentricity=eccentricity, Ialm_hat=Ialm_hat)
         ### add triples to the network
         new_systems[ind].network.add_couplings(my_triples, opts.verbose)
 
@@ -381,5 +382,3 @@ for ind, npairs in enumerate(num_pairs):
 
   if opts.verbose: print "writing newtork to %s" % new_logfilename
   nm_u.write_log(new_logfilename, new_systems[ind])
-
-

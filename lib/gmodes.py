@@ -80,7 +80,7 @@ class gmode(networks.mode):
     return self
 
   ###
-  def compute_forcing(self, Porb, eccentricity, Mprim, Mcomp, Rprim, Ialm=1.0e-8):
+  def compute_forcing(self, Porb, eccentricity, Mprim, Mcomp, Rprim, Ialm_hat=2.5e-3):
     """
     Assumes a simple analytic model for the linear forcing coefficient, taken from Weinberg's paper.
 
@@ -98,9 +98,9 @@ class gmode(networks.mode):
       self.U = [] # no forcing for l!=2 modes with eccentricity==0
     else:
       if eccentricity == 0:
-        self.U = [ (compute_U(self, Mprim, Mcomp, Rprim, Porb, Ialm=Ialm)), 1) ]
+        self.U = [ (compute_U(self, Mprim, Mcomp, Rprim, Porb, Ialm_hat=Ialm_hat), 1) ]
       else:
-        self.U = [ (compute_U(self, Mprim, Mcomp, Rprim, Porb, Ialm=Ialm)), "all") ]
+        self.U = [ (compute_U(self, Mprim, Mcomp, Rprim, Porb, Ialm_hat=Ialm_hat), "all") ]
 
     return self
 
@@ -206,7 +206,7 @@ class gmode(networks.mode):
 #
 #
 ####################################################################################################
-def compute_U(mode, Mprim, Mcomp, Rprim, Porb, Ialm=1.0e-8):
+def compute_U(mode, Mprim, Mcomp, Rprim, Porb, Ialm_hat=2.5e-3):
   """
   computes linear tidal forcing amplitude for this mode (an instance of networks.mode())
    only includes the dependence on this particular mode. All other dependencies are subsumed into U_hat
@@ -219,12 +219,14 @@ def compute_U(mode, Mprim, Mcomp, Rprim, Porb, Ialm=1.0e-8):
   """
   n, l, m, w, y = mode.get_nlmwy()
   if l == 2:
-    Uhat = 1.0e-8 * (Mcomp*nm_u.Mjup / (Mcomp*nm_u.Mjup + Mprim*nm_u.Msun) ) * (Porb / 864000.)**-2 ### old result 
-    return Uhat*(2*np.pi/(abs(w)*86400.))**(-11./6)
+    ### DEPRECATED: old result that assumes constant Ialm_hat
+    ### maintained for sanity checking, but the new implementation appears to be consistent
+#    Uhat = 1.0e-8 * (Mcomp*nm_u.Mjup / (Mcomp*nm_u.Mjup + Mprim*nm_u.Msun) ) * (Porb / 864000.)**-2 ### old result 
+#    return Uhat*(2*np.pi/(abs(w)*86400.))**(-11./6)
 
     wo = ms.compute_wo(Mprim, Rprim)
-    Ylm = (15/(2*np.pi))**0.5 / 4 ### from a tabulated value of Ylm(theta=pi/2, phi=0) for l=2, m=+/-2
-    return Mcomp*nm_u.Mjup*(Rprim*nm_u.Rsun)**3 / (nm_u.G*Mprim*nm_u.Msun*(Mprim*nm_u.Msun + Mcomp*nm_u.Mjup)) * (2*np.pi/Porb)**2 * (4*np.pi/5) * Ylm * Ialm*(abs(w)/wo)**(11./6)
+    Ylm = (3*np.pi/10)**0.5 ### from a tabulated value of Ylm(theta=pi/2, phi=0) for l=2, m=+/-2
+    return = Mcomp*nm_u.Mjup*(Rprim*nm_u.Rsun)**3 / (nm_u.G*Mprim*nm_u.Msun*(Mprim*nm_u.Msun + Mcomp*nm_u.Mjup)) * (2*np.pi/Porb)**2 * Ylm * Ialm_hat*(abs(w)/wo)**(11./6)
 
   else:
     sys.exit("no analytic expression exists for gmode linear forcing coefficients with l=$d" % l)
@@ -252,5 +254,3 @@ def compute_c(y, wo, w, l):
 ##################################################
 def compute_cwo3a2(y, n, l):
   return y / (n**2 * (1+1./l))
-
-

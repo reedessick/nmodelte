@@ -1023,7 +1023,7 @@ class ggg_coupling_list(ms.coupling_list):
     return self
 
   ###
-  def to_triples(self, num_pairs, parent_forcing=False, daughter_forcing=False, Mprim=False, Mcomp=False, Porb=False, eccentricity="none", Rprim=1.):
+  def to_triples(self, num_pairs, parent_forcing=False, daughter_forcing=False, Mprim=False, Mcomp=False, Porb=False, eccentricity="none", Rprim=1., Ialm_hat=2.5e-3):
     """
     converts the mode list to a triples format compatible with networks.network.add_couplings()
     """
@@ -1034,7 +1034,7 @@ class ggg_coupling_list(ms.coupling_list):
       if not (Mprim and Mcomp and Porb and (eccentricity!="none")):
         sys.exit("must supply Mprim, Mcomp, Porb, eccentricity to compute forcing")
     if parent_forcing:
-      self.parent_mode.compute_forcing(Porb, eccentricity, Mprim, Mcomp, Rprim)
+      self.parent_mode.compute_forcing(Porb, eccentricity, Mprim, Mcomp, Rprim, Ialm_hat=Ialm_hat)
     else:
       self.parent_mode.U = []
 
@@ -1184,7 +1184,7 @@ not checked.
     return True
 
   ###
-  def to_triples(self, num_pairs, min_n=False, max_n=False, min_l=False, max_l=False, min_w=False, max_w=False, parent_forcing=False, daughter_forcing=False, Mprim=False, Mcomp=False, Porb=False, eccentricity="none", Rprim=1.):
+  def to_triples(self, num_pairs, min_n=False, max_n=False, min_l=False, max_l=False, min_w=False, max_w=False, parent_forcing=False, daughter_forcing=False, Mprim=False, Mcomp=False, Porb=False, eccentricity="none", Rprim=1., Ialm_hat=2.5e-3):
     """ this is where we build around local minima 
     if supplied, parent_forcing must be accompanied by Mprim, Mcomp, Porb, eccentricity
     same for daughter forcing
@@ -1197,7 +1197,7 @@ not checked.
       if not (Mprim and Mcomp and Porb and (eccentricity!="none")):
         sys.exit("must supply Mprim, Mcomp, Porb, eccentricity to compute forcing")
     if parent_forcing:
-      self.parent_mode.compute_forcing(Porb, eccentricity, Mprim, Mcomp, Rprim)
+      self.parent_mode.compute_forcing(Porb, eccentricity, Mprim, Mcomp, Rprim, Ialm_hat=Ialm_hat)
 
     no, lo, mo = self.parent_mode.get_nlm()
     cwo3a2 = self.c * self.wo**3 * self.alpha**-2
@@ -1217,7 +1217,7 @@ not checked.
       mode1 = best_coupling.dmode1
       mode2 = best_coupling.dmode2
       if daughter_forcing:
-        best_coupling.compute_forcings(Porb, eccentricity, Mprim, Mcomp, Rprim=Rprim)
+        best_coupling.compute_forcings(Porb, eccentricity, Mprim, Mcomp, Rprim=Rprim, Ialm_hat=Ialm_hat)
       else:
         best_coupling.remove_forcings()
       koab = best_coupling.k
@@ -1365,12 +1365,12 @@ class ggg_coupling_list_element(ms.coupling_list_element):
     return self
 
   ###
-  def set_forcings(self, Porb, eccentricity, Mprim, Mcomp, Rprim=1.):
+  def set_forcings(self, Porb, eccentricity, Mprim, Mcomp, Rprim=1., Ialm_hat=2.5e-3):
     """
     computes forcings for each daughter mode
     """
-    self.dmode1.compute_forcing(Porb, eccentricity, Mprim, Mcomp, Rprim)
-    self.dmode1.compute_forcing(Porb, eccentricity, Mprim, Mcomp, Rprim)
+    self.dmode1.compute_forcing(Porb, eccentricity, Mprim, Mcomp, Rprim, Ialm_hat=Ialm_hat)
+    self.dmode1.compute_forcing(Porb, eccentricity, Mprim, Mcomp, Rprim, Ialm_hat=Ialm_hat)
     return self
 
   ###
@@ -1388,7 +1388,7 @@ class ggg_coupling_list_element(ms.coupling_list_element):
 #           returns a lists of modes (gmodes.gmode()) that can be added to a networks.network()
 #
 ####################################################################################################
-def compute_parents_detuning(Oorb, bounds, N=1, min_w=0.0, max_w=1.0, alpha=4e-3, c=2e-11, wo=1e-5, Porb=False, Mprim=False, Mcomp=False, eccentricity="none", Rprim=1., forcing=False):
+def compute_parents_detuning(Oorb, bounds, N=1, min_w=0.0, max_w=1.0, alpha=4e-3, c=2e-11, wo=1e-5, Porb=False, Mprim=False, Mcomp=False, eccentricity="none", Rprim=1., forcing=False, Ialm_hat=2.5e-3):
   """ 
   generates modes on the fly and returns the first N that obey bounds and fall within the specified bandwidth
 
@@ -1417,7 +1417,7 @@ def compute_parents_detuning(Oorb, bounds, N=1, min_w=0.0, max_w=1.0, alpha=4e-3
         if len(parents) < N: # always add a mode
           tmp_mode.w *= signO*signmo
           if forcing:
-            tmp_mode = tmp_mode.compute_forcing(Porb, eccentricity, Mprim, Mcomp, Rprim)
+            tmp_mode = tmp_mode.compute_forcing(Porb, eccentricity, Mprim, Mcomp, Rprim, Ialm_hat=Ialm_hat)
           parents = ms.insert_in_place( (D, tmp_mode), parents )
           min_D = parents[-1][0]
 
@@ -1425,7 +1425,7 @@ def compute_parents_detuning(Oorb, bounds, N=1, min_w=0.0, max_w=1.0, alpha=4e-3
           parents.pop()
           tmp_mode.w *= signO*signmo
           if forcing:
-            tmp_mode = tmp_mode.compute_forcing(Porb, eccentricity, Mprim, Mcomp, Rprim)
+            tmp_mode = tmp_mode.compute_forcing(Porb, eccentricity, Mprim, Mcomp, Rprim, Ialm_hat=Ialm_hat)
           parents = ms.insert_in_place( (D, tmp_mode), parents )
           min_D = parents[-1][0]
 
@@ -1434,7 +1434,7 @@ def compute_parents_detuning(Oorb, bounds, N=1, min_w=0.0, max_w=1.0, alpha=4e-3
   return [l[1] for l in parents]
 
 ##################################################
-def compute_parents_Elin(Oorb, bounds, N=1, min_w=0.0, max_w=1.0, alpha=4e-3, c=2e-11, wo=1e-5, Porb=False, Mprim=False, Mcomp=False, eccentricity="none", Rprim=1.):
+def compute_parents_Elin(Oorb, bounds, N=1, min_w=0.0, max_w=1.0, alpha=4e-3, c=2e-11, wo=1e-5, Porb=False, Mprim=False, Mcomp=False, eccentricity="none", Rprim=1., Ialm_hat=2.5e-3):
   """ 
   generates modes on the fly and returns the first N that obey bounds and fall within the specified bandwidth
 
@@ -1458,7 +1458,7 @@ def compute_parents_Elin(Oorb, bounds, N=1, min_w=0.0, max_w=1.0, alpha=4e-3, c=
 
       for mo in bounds[lo]:
         tmp_mode = gm.gmode(no, lo, mo, alpha, c, wo)
-        tmp_mode.compute_forcing(Porb, eccentricity, Mprim, Mcomp, Rprim)
+        tmp_mode.compute_forcing(Porb, eccentricity, Mprim, Mcomp, Rprim, Ialm_hat=Ialm_hat)
         signmo = mo/abs(mo)
         D = -ms.compute_Elin(mo*absO, signmo*tmp_mode.w, tmp_mode.y, tmp_mode.U[0][0]) # we want maximum Elin, which means minimize -Elin
 

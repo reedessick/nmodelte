@@ -48,7 +48,7 @@ def compute_Elin(O, wo, yo, U):
 
 ##################################################
 def compute_wo(Mprim, Rprim):
-  """ wo = (G*(Mprim*Msun)**2/(Rprim*Rusn)**3)**0.5 """
+  """ wo = (G*(Mprim*Msun)/(Rprim*Rusn)**3)**0.5 """
   return (nm_u.G*(Mprim*nm_u.Msun)/(Rprim*nm_u.Rsun)**3)**0.5
 
 ##################################################
