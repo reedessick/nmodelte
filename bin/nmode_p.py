@@ -327,7 +327,7 @@ if time_domain:
     ### total
     ax.plot(t_P, -np.array(yE_tot), label=r'$\sum \gamma A^2$')
 
-    ax.set_ylabel(r"$\sum \gamma A^2$")
+    ax.set_ylabel(r"$2\sum \gamma A^2$")
     ax.set_xlabel(r'$t/P_{\mathrm{orb}}$')
     if not opts.lin_amp_time:
       ax.set_yscale('log')
@@ -381,7 +381,7 @@ if time_domain:
     fig, ax = nm_p.plot(t_P, -np.array(yE), n_l_m=n_l_m, mode_nums=opts.mode_nums)
     ax = plt.subplot(1,1,1)
 
-    ax.set_ylabel(r"$\gamma A^2$")
+    ax.set_ylabel(r"$2\gamma A^2$")
     ax.set_xlabel(r'$t/P_{\mathrm{orb}}$')
     if not opts.lin_amp_time:
       ax.set_yscale('log')
