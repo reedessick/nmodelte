@@ -44,14 +44,14 @@ wo = {
     },
 }
 
-raise NotImplementedError, 'need to convert wo->(Rprim/Rsun)'
-Rprim = {}
+### convert wo->(Rprim/Rsun)
+Rprim = dict((Mprim, dict((age, (nmu.G*nmu.Msun*Mprim/val**2)**(1./3)) for age, val in wo[Mprim].items())) for Mprim in wo.keys())
 
 #---
 
 ### nevin's convention: w = a*l*wo/n
 ### my convention: w = alpha*l/n
-nevin_a = {
+nevin_alpha = {
     0.5 : {
         1 : 0.6,
         3 : 0.7,
@@ -87,8 +87,8 @@ nevin_a = {
     },
 }
 
-raise NotImplementedError, 'need to convert a->alpha=a*wo'
-alpha = {}
+### convert nevin_alpha->alpha=nevin_alpha*wo
+alpha = dict((Mprim, dict((age, val*wo[Mprim][age]) for age, val in nevin_alpha[Mprim].items())) for Mprim in nevin_alpha.keys())
 
 #---
 
@@ -161,7 +161,6 @@ Ialm_hat = {
 
 ### nevin's convention: kappa = kappa_hat*T*(P/day)**2
 ### my convention : kappa = k_hat*(T/0.2)*(P/10day)**2
-
 nevin_k_hat = {
     0.5 : {
         1 : 0.03e3,
@@ -198,21 +197,6 @@ nevin_k_hat = {
     },
 }
 
-raise NotImplementedError, 'need to convert from nevin\'s convention for k_hat to mine'
-k_hat = {
-}
-
-#-------------------------------------------------
-
-'''
-masses = set()
-ages   = set()
-for d in [alpha_lookup, gamma_lookup, khat_lookup, Ialm_lookup, radius_lookup]:
-    for mass in d.keys():
-        masses.add( mass )
-        for age in d[mass]:
-            if not isinstance(age, str):
-                ages.add( age )
-masses = sorted(masses)
-ages   = sorted(ages)
-'''
+### convert from nevin's convention for k_hat to mine
+### k_hat = k_hatNevin*20
+k_hat = dict((Mprim, dict((age, val*20) for age, val in nevin_k_hat[Mprim].items())) for Mprim in nevin_k_hat.keys())
