@@ -472,7 +472,7 @@ def compute_ddt_P_E_q(t_P, q, system, Eo=1.):
     qvec = []
     for modeNo in range(N_m):
       qvec += q[modeNo][ind]
-    dqdt = nf.dqdt_no_NLT(t_p*system.Porb, qvec, system)
+    dqdt = nf.dqdt_no_NLT(t_p*system.Porb, qvec, (len(qvec), system))
     de = 0.0
     for modeNo in range(N_m):
       ro, io = q[modeNo][ind]
@@ -498,7 +498,7 @@ def compute_ddt_P_E_x(t_P, x, system, Eo=1.):
     xvec = []
     for modeNo in range(N_m):
       xvec += x[modeNo][ind]
-    dxdt = nf.dxdt_no_NLT(t_p*system.Porb, xvec, system)
+    dxdt = nf.dxdt_no_NLT(t_p*system.Porb, xvec, (len(xvec), system))
     de = 0.0
     for modeNo in range(N_m):
       ro, io = x[modeNo][ind]
@@ -1304,7 +1304,7 @@ def ddt_P_Hint_plus_Hns_no_NLT_q(t_P, q, system, Eo=1.0):
     qvec = []
     for modeNo in range(N_m):
       qvec += q[modeNo][ind]
-    dqdt = nf.dqdt_no_NLT(t_p*system.Porb, qvec, system)
+    dqdt = nf.dqdt_no_NLT(t_p*system.Porb, qvec, (len(qvec), system))
 
     # compute derivative of hamiltonian
     dh = 0.0
@@ -1350,7 +1350,7 @@ def ddt_P_Hint_plus_Hns_no_NLT_x(t_P, x, system, Eo=1.0):
     xvec = []
     for modeNo in range(N_m):
       xvec += x[modeNo][ind]
-    dxdt = nf.dxdt_no_NLT(t, xvec, system)
+    dxdt = nf.dxdt_no_NLT(t, xvec, (len(xvec), system))
 
     # compute derivative of Hamiltonian
     dh = 0.0

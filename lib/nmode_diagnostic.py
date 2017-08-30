@@ -3,7 +3,7 @@ usage="""a module for network diagnostics and visualizations"""
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-plt.rcParams.update({"text.usetex":True})
+#plt.rcParams.update({"text.usetex":True})
 
 import numpy as np
 from collections import defaultdict
